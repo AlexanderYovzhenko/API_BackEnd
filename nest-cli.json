@@ -2,13 +2,13 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "sourceRoot": "apps/api/src",
+  "monorepo": true,
+  "root": "apps/api",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/api/tsconfig.app.json"
   },
-  "monorepo": true,
-  "root": "apps/api",
   "projects": {
     "api": {
       "type": "application",
@@ -17,6 +17,60 @@
       "sourceRoot": "apps/api/src",
       "compilerOptions": {
         "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "profile": {
+      "type": "application",
+      "root": "apps/profile",
+      "entryFile": "main",
+      "sourceRoot": "apps/profile/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/profile/tsconfig.app.json"
+      }
+    },
+    "auth": {
+      "type": "application",
+      "root": "apps/auth",
+      "entryFile": "main",
+      "sourceRoot": "apps/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/auth/tsconfig.app.json"
+      }
+    },
+    "film": {
+      "type": "application",
+      "root": "apps/film",
+      "entryFile": "main",
+      "sourceRoot": "apps/film/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/film/tsconfig.app.json"
+      }
+    },
+    "actor": {
+      "type": "application",
+      "root": "apps/actor",
+      "entryFile": "main",
+      "sourceRoot": "apps/actor/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/actor/tsconfig.app.json"
+      }
+    },
+    "comment": {
+      "type": "application",
+      "root": "apps/comment",
+      "entryFile": "main",
+      "sourceRoot": "apps/comment/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/comment/tsconfig.app.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
     }
   }
