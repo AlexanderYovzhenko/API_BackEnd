@@ -1,0 +1,176 @@
+version: '3'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    hostname: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: unless-stopped
+    expose:
+      - 5432
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - backend
+
+  postgres_admin:
+    container_name: postgres_admin
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - '15432:80'
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - backend
+
+  api:
+    container_name: api
+    build:
+      context: ./
+      dockerfile: ./apps/api/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+    expose:
+      - 4000
+    ports:
+      - '4000:4000'
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev api # overrides CMD from dockerfile
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - backend
+
+  profile:
+    container_name: profile
+    build:
+      context: ./
+      dockerfile: ./apps/profile/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev profile # overrides CMD from dockerfile
+    env_file:
+      - ./apps/profile/.env
+    networks:
+      - backend
+
+  auth:
+    container_name: auth
+    build:
+      context: ./
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+      - profile
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth # overrides CMD from dockerfile
+    env_file:
+      - ./apps/auth/.env
+    networks:
+      - backend
+
+  film:
+    container_name: film
+    build:
+      context: ./
+      dockerfile: ./apps/film/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev film # overrides CMD from dockerfile
+    env_file:
+      - ./apps/film/.env
+    networks:
+      - backend
+
+  actor:
+    container_name: actor
+    build:
+      context: ./
+      dockerfile: ./apps/actor/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+      - film
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev actor # overrides CMD from dockerfile
+    env_file:
+      - ./apps/actor/.env
+    networks:
+      - backend
+
+  comment:
+    container_name: comment
+    build:
+      context: ./
+      dockerfile: ./apps/comment/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+      - film
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev comment # overrides CMD from dockerfile
+    env_file:
+      - ./apps/comment/.env
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  rabbit_data:
+    driver: local
+  
