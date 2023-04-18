@@ -5,6 +5,8 @@
   "monorepo": true,
   "root": "apps/api",
   "compilerOptions": {
+    "deleteOutDir": true,
+    "watchAssets": true,
     "webpack": true,
     "tsConfigPath": "apps/api/tsconfig.app.json"
   },
