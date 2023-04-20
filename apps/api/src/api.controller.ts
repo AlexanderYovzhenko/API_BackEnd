@@ -21,10 +21,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateFilmDto } from './dto/create-film.dto';
-import { PaginationQueryDto } from './dto/pagination-query.dto';
+import { CreateFilmDto } from './dto/film-dto/create-film.dto';
+import { PaginationQueryDto } from './dto/film-dto/pagination-query.dto';
 import { firstValueFrom } from 'rxjs';
-import { UpdateFilmNameDto } from './dto/update-film-name.dto';
+import { UpdateFilmNameDto } from './dto/film-dto/update-film-name.dto';
 import validator from 'validator';
 
 @ApiTags('Endpoints')

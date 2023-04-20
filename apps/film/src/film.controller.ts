@@ -43,7 +43,7 @@ export class FilmController {
   @MessagePattern({ cmd: 'add_film' })
   async addFilm(
     @Ctx() context: RmqContext,
-    @Payload() film: Record<string, number>,
+    @Payload() film: Record<string | number, string[]>,
   ) {
     this.sharedService.acknowledgeMessage(context);
 

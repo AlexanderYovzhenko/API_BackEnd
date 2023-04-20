@@ -1,4 +1,17 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsToMany,
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Trailer } from './trailer.entity';
+import { Language } from './language.entity';
+import { FilmLanguageAudio } from './film_language_audio.entity';
+import { FilmLanguageSubtitle } from './film_language_subtitle.entity';
+import { Genre } from './genre.entity';
+import { FilmGenre } from './film_genre.entity';
 
 interface FilmCreationAttrs {
   film_id: string;
@@ -56,4 +69,20 @@ export class Film extends Model<Film, FilmCreationAttrs> {
 
   @Column({ type: DataType.STRING, allowNull: false })
   duration: string;
+
+  @HasMany(() => Trailer, {
+    foreignKey: 'film_id',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  trailers: Trailer[];
+
+  @BelongsToMany(() => Language, () => FilmLanguageAudio)
+  languagesAudio: Language[];
+
+  @BelongsToMany(() => Language, () => FilmLanguageSubtitle)
+  languagesSubtitle: Language[];
+
+  @BelongsToMany(() => Genre, () => FilmGenre)
+  genres: Genre[];
 }

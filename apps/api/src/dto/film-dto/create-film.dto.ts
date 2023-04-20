@@ -57,4 +57,32 @@ export class CreateFilmDto {
   @IsNotEmpty()
   @IsString({ message: 'duration: should be string' })
   readonly duration: string;
+
+  @ApiProperty({
+    example: ['url//:dflsdjf//'],
+    description: 'trailers',
+  })
+  @IsNotEmpty()
+  readonly trailers: string[];
+
+  @ApiProperty({
+    example: ['рус', 'eng'],
+    description: 'languages',
+  })
+  @IsNotEmpty()
+  readonly languagesAudio: string[];
+
+  @ApiProperty({
+    example: ['рус', 'eng'],
+    description: 'languages',
+  })
+  @IsNotEmpty()
+  readonly languagesSubtitle: string[];
+
+  @ApiProperty({
+    example: ['драма', 'комедия', 'биография'],
+    description: 'genres',
+  })
+  @IsNotEmpty()
+  readonly genres: string[];
 }

@@ -2,10 +2,9 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginationQueryDto {
-  @ApiProperty({ example: 'comedy, art', description: 'genres' })
+  @ApiProperty({ example: ['comedy', 'art'], description: 'genres' })
   @IsNotEmpty()
-  @IsString({ message: 'genre: should be string' })
-  readonly genre: string;
+  readonly genres: string[];
 
   @ApiProperty({ example: 'USA', description: 'country' })
   @IsNotEmpty()
