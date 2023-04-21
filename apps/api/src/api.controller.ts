@@ -112,7 +112,7 @@ export class ApiController {
     );
   }
 
-  @ApiOperation({ summary: 'update film' })
+  @ApiOperation({ summary: 'update film name' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @HttpCode(HttpStatus.OK)
@@ -220,7 +220,7 @@ export class ApiController {
     return genres;
   }
 
-  @ApiOperation({ summary: 'update genre' })
+  @ApiOperation({ summary: 'update genre name' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @HttpCode(HttpStatus.OK)
