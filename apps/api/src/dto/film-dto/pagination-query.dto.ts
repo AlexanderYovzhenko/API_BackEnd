@@ -1,33 +1,33 @@
-import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginationQueryDto {
-  @ApiProperty({ example: ['comedy', 'art'], description: 'genres' })
-  @IsNotEmpty()
-  readonly genres: string[];
+  @ApiProperty({
+    example: ['комедия', 'драма'],
+    description: 'genres',
+    required: false,
+  })
+  readonly genres?: string[];
 
-  @ApiProperty({ example: 'USA', description: 'country' })
-  @IsNotEmpty()
-  @IsString({ message: 'country: should be string' })
-  readonly country: string;
+  @ApiProperty({ example: 'США', description: 'country', required: false })
+  readonly country?: string;
 
-  @ApiProperty({ example: 2020, description: 'year' })
-  @IsNotEmpty()
-  @IsString({ message: 'year: should be string' })
-  readonly year: string;
+  @ApiProperty({ example: 2020, description: 'year', required: false })
+  readonly year?: string;
 
-  @ApiProperty({ example: 8.3, description: 'rating' })
-  @IsNotEmpty()
-  @IsString({ message: 'rating: should be string' })
-  readonly rating: string;
+  @ApiProperty({ example: 5.3, description: 'rating', required: false })
+  readonly rating?: string;
 
-  @ApiProperty({ example: 'Эрик Толедано', description: 'film maker' })
-  @IsNotEmpty()
-  @IsString({ message: 'film_maker: should be string' })
-  readonly film_maker: string;
+  @ApiProperty({
+    example: 'Эрик Толедано',
+    description: 'film maker',
+    required: false,
+  })
+  readonly film_maker?: string;
 
-  @ApiProperty({ example: 'Сирил Менди', description: 'actor' })
-  @IsNotEmpty()
-  @IsString({ message: 'actor: should be string' })
-  readonly actor: string;
+  @ApiProperty({
+    example: 'Сирил Менди',
+    description: 'actor',
+    required: false,
+  })
+  readonly actor?: string;
 }

@@ -70,6 +70,9 @@ export class Film extends Model<Film, FilmCreationAttrs> {
   @Column({ type: DataType.STRING, allowNull: false })
   duration: string;
 
+  @Column({ type: DataType.TEXT, allowNull: false })
+  img: string;
+
   @HasMany(() => Trailer, {
     foreignKey: 'film_id',
     onUpdate: 'CASCADE',

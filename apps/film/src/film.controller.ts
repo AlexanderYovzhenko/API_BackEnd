@@ -33,7 +33,15 @@ export class FilmController {
   @MessagePattern({ cmd: 'get_filtered_films' })
   async getFilteredFilms(
     @Ctx() context: RmqContext,
-    @Payload() query: Record<string, number>,
+    @Payload()
+    query: {
+      genres?: string[];
+      country?: string;
+      year?: string;
+      rating?: string;
+      film_maker?: string;
+      actor?: string;
+    },
   ) {
     this.sharedService.acknowledgeMessage(context);
 

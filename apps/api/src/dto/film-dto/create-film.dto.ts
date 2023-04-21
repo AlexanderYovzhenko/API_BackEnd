@@ -23,7 +23,7 @@ export class CreateFilmDto {
   @IsNumber({}, { message: 'year: should be number' })
   readonly year: number;
 
-  @ApiProperty({ example: 'USA', description: 'country which made film' })
+  @ApiProperty({ example: 'США', description: 'country which made film' })
   @IsNotEmpty()
   @IsString({ message: 'country: should be string' })
   readonly country: string;
@@ -57,6 +57,11 @@ export class CreateFilmDto {
   @IsNotEmpty()
   @IsString({ message: 'duration: should be string' })
   readonly duration: string;
+
+  @ApiProperty({ example: 'img//', description: 'img url' })
+  @IsNotEmpty()
+  @IsString({ message: 'img: should be string' })
+  readonly img: string;
 
   @ApiProperty({
     example: ['url//:dflsdjf//'],
