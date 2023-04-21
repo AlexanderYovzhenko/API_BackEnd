@@ -47,10 +47,10 @@ export class FilmService {
   async getAllFilms() {
     const films = await this.filmRepository.findAll({
       include: [
-        { model: Trailer, attributes: ['trailer'] },
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          attributes: ['genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
           through: {
             attributes: [],
           },
@@ -58,7 +58,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -66,7 +66,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -98,11 +98,11 @@ export class FilmService {
         assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
       },
       include: [
-        { model: Trailer, attributes: ['trailer'] },
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
           where: { genre_ru: genres || { [Op.notLike]: '' } },
-          attributes: ['genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
           through: {
             attributes: [],
           },
@@ -110,7 +110,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -118,7 +118,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
