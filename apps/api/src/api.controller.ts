@@ -26,13 +26,13 @@ import { PaginationQueryDto } from './dto/film-dto/pagination-query.dto';
 import { firstValueFrom } from 'rxjs';
 import { UpdateFilmNameDto } from './dto/film-dto/update-film-name.dto';
 import validator from 'validator';
+import { UpdateGenreNameDto } from './dto/genre-dto/update-genre-name.dto';
 
 @ApiTags('Endpoints')
 @ApiBearerAuth()
 @Controller()
 export class ApiController {
   constructor(
-    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     @Inject('FILM_SERVICE') private readonly filmService: ClientProxy,
     private readonly apiService: ApiService,
   ) {}
@@ -40,7 +40,7 @@ export class ApiController {
   @ApiOperation({ summary: 'check server' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get()
-  getHello(): string {
+  checkServer(): string {
     return this.apiService.checkServer();
   }
 
@@ -130,7 +130,7 @@ export class ApiController {
     const updateFilm = await firstValueFrom(
       this.filmService.send(
         {
-          cmd: 'update_name_film',
+          cmd: 'update_film_name',
         },
         {
           film_id,
@@ -173,6 +173,73 @@ export class ApiController {
     }
 
     return deleteFilm;
+  }
+
+  @ApiOperation({ summary: 'get genre by id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @Get('genres/:genre_id')
+  async getGenre(@Param('genre_id') genre_id: number) {
+    const genre = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'get_genre',
+        },
+
+        genre_id,
+      ),
+    );
+
+    if (!genre) {
+      throw new NotFoundException('Genre not found');
+    }
+
+    return genre;
+  }
+
+  @ApiOperation({ summary: 'get all genres' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('genres')
+  async getAllGenres() {
+    const genres = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'get_all_genres',
+        },
+
+        {},
+      ),
+    );
+
+    return genres;
+  }
+
+  @ApiOperation({ summary: 'update genre' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @HttpCode(HttpStatus.OK)
+  @Patch('genres/:genre_id')
+  async updateGenreName(
+    @Param('genre_id') genre_id: number,
+    @Body() genreNames: UpdateGenreNameDto,
+  ) {
+    const updateGenre = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'update_genre_name',
+        },
+        {
+          genre_id,
+          ...genreNames,
+        },
+      ),
+    );
+
+    if (!updateGenre) {
+      throw new NotFoundException('Genre not found');
+    }
+
+    return updateGenre;
   }
 
   private checkUUID(uuid: string) {

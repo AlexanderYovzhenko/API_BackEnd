@@ -58,7 +58,7 @@ export class FilmController {
     return await this.filmService.addFilm(film);
   }
 
-  @MessagePattern({ cmd: 'update_name_film' })
+  @MessagePattern({ cmd: 'update_film_name' })
   async updateFilm(
     @Ctx() context: RmqContext,
     @Payload()
@@ -78,5 +78,34 @@ export class FilmController {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.deleteFilm(film_id);
+  }
+
+  @MessagePattern({ cmd: 'get_genre' })
+  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: number) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getGenre(genre_id);
+  }
+
+  @MessagePattern({ cmd: 'get_all_genres' })
+  async getAllGenres(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getAllGenres();
+  }
+
+  @MessagePattern({ cmd: 'update_genre_name' })
+  async updateGenre(
+    @Ctx() context: RmqContext,
+    @Payload()
+    data: { genre_id: number; genre_ru: string; genre_en: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.updateGenre(
+      data.genre_id,
+      data.genre_ru,
+      data.genre_en,
+    );
   }
 }

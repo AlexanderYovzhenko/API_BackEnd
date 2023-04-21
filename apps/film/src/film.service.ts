@@ -219,4 +219,39 @@ export class FilmService {
 
     return checkFilm;
   }
+
+  async getGenre(genre_id: number) {
+    const genre = await this.genreRepository.findOne({
+      where: { genre_id },
+      include: {
+        through: {
+          attributes: [],
+        },
+        all: true,
+      },
+    });
+
+    if (!genre) {
+      return null;
+    }
+
+    return genre;
+  }
+
+  async getAllGenres() {
+    const genres = await this.genreRepository.findAll();
+
+    return genres;
+  }
+
+  async updateGenre(genre_id: number, genre_ru: string, genre_en: string) {
+    await this.genreRepository.update(
+      { genre_ru, genre_en },
+      { where: { genre_id } },
+    );
+
+    const updateFilm = await this.getGenre(genre_id);
+
+    return updateFilm;
+  }
 }
