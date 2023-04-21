@@ -82,7 +82,7 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_genre' })
-  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: number) {
+  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: string) {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getGenre(genre_id);
@@ -99,7 +99,7 @@ export class FilmController {
   async updateGenre(
     @Ctx() context: RmqContext,
     @Payload()
-    data: { genre_id: number; genre_ru: string; genre_en: string },
+    data: { genre_id: string; genre_ru: string; genre_en: string },
   ) {
     this.sharedService.acknowledgeMessage(context);
 

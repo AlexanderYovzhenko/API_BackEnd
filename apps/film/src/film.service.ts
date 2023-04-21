@@ -133,14 +133,6 @@ export class FilmService {
   async addFilm(film: Record<string | number, string[]>) {
     const film_id: string = this.generateUUID();
 
-    await this.languageRepository.findOrCreate({
-      where: { language: 'рус' },
-    });
-
-    await this.languageRepository.findOrCreate({
-      where: { language: 'eng' },
-    });
-
     const newFilm = await this.filmRepository.create({ film_id, ...film });
 
     const { trailers, languagesAudio, languagesSubtitle, genres } = film;
@@ -154,24 +146,38 @@ export class FilmService {
     });
 
     languagesAudio.forEach(async (language: string) => {
-      const checkLanguage = await this.languageRepository.findOne({
+      const checkLanguage = await this.languageRepository.findOrCreate({
         where: { language },
+        defaults: {
+          language_id: this.generateUUID(),
+          language,
+        },
       });
 
+      const { language_id } = checkLanguage[0];
+
       await this.languageAudioRepository.create({
+        film_language_audio_id: this.generateUUID(),
         film_id: newFilm.film_id,
-        language_id: checkLanguage.language_id,
+        language_id,
       });
     });
 
     languagesSubtitle.forEach(async (language: string) => {
-      const checkLanguage = await this.languageRepository.findOne({
+      const checkLanguage = await this.languageRepository.findOrCreate({
         where: { language },
+        defaults: {
+          language_id: this.generateUUID(),
+          language,
+        },
       });
 
+      const { language_id } = checkLanguage[0];
+
       await this.languageSubtitleRepository.create({
+        film_language_subtitle_id: this.generateUUID(),
         film_id: newFilm.film_id,
-        language_id: checkLanguage.language_id,
+        language_id,
       });
     });
 
@@ -181,6 +187,7 @@ export class FilmService {
           genre_ru,
         },
         defaults: {
+          genre_id: this.generateUUID(),
           genre_ru,
           genre_en: '',
         },
@@ -189,6 +196,7 @@ export class FilmService {
       const { genre_id } = genre[0];
 
       await this.filmGenreRepository.create({
+        film_genre_id: this.generateUUID(),
         film_id: newFilm.film_id,
         genre_id: genre_id,
       });
@@ -223,7 +231,7 @@ export class FilmService {
     return checkFilm;
   }
 
-  async getGenre(genre_id: number) {
+  async getGenre(genre_id: string) {
     const genre = await this.genreRepository.findOne({
       where: { genre_id },
       include: {
@@ -247,7 +255,7 @@ export class FilmService {
     return genres;
   }
 
-  async updateGenre(genre_id: number, genre_ru: string, genre_en: string) {
+  async updateGenre(genre_id: string, genre_ru: string, genre_en: string) {
     await this.genreRepository.update(
       { genre_ru, genre_en },
       { where: { genre_id } },

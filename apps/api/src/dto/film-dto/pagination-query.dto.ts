@@ -17,7 +17,7 @@ export class PaginationQueryDto {
   @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
 
-  @ApiProperty({ example: 50000, description: 'assessments', required: false })
+  @ApiProperty({ example: 30000, description: 'assessments', required: false })
   readonly assessments?: string;
 
   @ApiProperty({

@@ -11,12 +11,11 @@ import { Language } from './language.entity';
 @Table({ tableName: 'film_language_subtitle', timestamps: false })
 export class FilmLanguageSubtitle extends Model<FilmLanguageSubtitle> {
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  film_language_subtitle_id: number;
+  film_language_subtitle_id: string;
 
   @ForeignKey(() => Film)
   @Column({ type: DataType.STRING })
@@ -24,5 +23,5 @@ export class FilmLanguageSubtitle extends Model<FilmLanguageSubtitle> {
 
   @ForeignKey(() => Language)
   @Column({ type: DataType.INTEGER })
-  language_id: number;
+  language_id: string;
 }

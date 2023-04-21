@@ -179,7 +179,13 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @Get('genres/:genre_id')
-  async getGenre(@Param('genre_id') genre_id: number) {
+  async getGenre(@Param('genre_id') genre_id: string) {
+    const isUUID = this.checkUUID(genre_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('genre_id is not UUID');
+    }
+
     const genre = await firstValueFrom(
       this.filmService.send(
         {
@@ -220,9 +226,15 @@ export class ApiController {
   @HttpCode(HttpStatus.OK)
   @Patch('genres/:genre_id')
   async updateGenreName(
-    @Param('genre_id') genre_id: number,
+    @Param('genre_id') genre_id: string,
     @Body() genreNames: UpdateGenreNameDto,
   ) {
+    const isUUID = this.checkUUID(genre_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('genre_id is not UUID');
+    }
+
     const updateGenre = await firstValueFrom(
       this.filmService.send(
         {
