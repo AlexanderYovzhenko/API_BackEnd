@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Film } from './film.entity';
+import { Film } from '../film/film.entity';
 import { Language } from './language.entity';
 
 @Table({ tableName: 'film_language_audio', timestamps: false })
@@ -22,6 +22,6 @@ export class FilmLanguageAudio extends Model<FilmLanguageAudio> {
   film_id: string;
 
   @ForeignKey(() => Language)
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.STRING })
   language_id: string;
 }

@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Film } from './film.entity';
+import { Film } from '../film/film.entity';
 import { FilmLanguageAudio } from './film_language_audio.entity';
 import { FilmLanguageSubtitle } from './film_language_subtitle.entity';
 

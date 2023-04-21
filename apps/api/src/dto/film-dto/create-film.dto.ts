@@ -43,11 +43,6 @@ export class CreateFilmDto {
   @IsNumber({}, { message: 'reviews: should be number' })
   readonly reviews: number;
 
-  @ApiProperty({ example: 'full hd, 4k', description: 'quality' })
-  @IsNotEmpty()
-  @IsString({ message: 'quality: should be string' })
-  readonly quality: string;
-
   @ApiProperty({ example: 16, description: 'age limit' })
   @IsNotEmpty()
   @IsNumber({}, { message: 'age_limit: should be number' })
@@ -62,6 +57,13 @@ export class CreateFilmDto {
   @IsNotEmpty()
   @IsString({ message: 'img: should be string' })
   readonly img: string;
+
+  @ApiProperty({
+    example: ['4K', 'FullHD', 'HD', '1080', '720', '5.1'],
+    description: 'qualities',
+  })
+  @IsNotEmpty()
+  readonly qualities: string[];
 
   @ApiProperty({
     example: ['url//:dflsdjf//'],

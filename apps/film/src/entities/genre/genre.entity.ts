@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Film } from './film.entity';
+import { Film } from '../film/film.entity';
 import { FilmGenre } from './film_genre.entity';
 
 interface GenreCreationAttrs {

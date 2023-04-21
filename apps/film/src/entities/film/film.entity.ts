@@ -6,12 +6,14 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Trailer } from './trailer.entity';
-import { Language } from './language.entity';
-import { FilmLanguageAudio } from './film_language_audio.entity';
-import { FilmLanguageSubtitle } from './film_language_subtitle.entity';
-import { Genre } from './genre.entity';
-import { FilmGenre } from './film_genre.entity';
+import { Trailer } from '../trailer/trailer.entity';
+import { Language } from '../language/language.entity';
+import { FilmLanguageAudio } from '../language/film_language_audio.entity';
+import { FilmLanguageSubtitle } from '../language/film_language_subtitle.entity';
+import { Genre } from '../genre/genre.entity';
+import { FilmGenre } from '../genre/film_genre.entity';
+import { Quality } from '../quality/quality.entity';
+import { FilmQuality } from '../quality/film_quality.entity';
 
 interface FilmCreationAttrs {
   film_id: string;
@@ -61,9 +63,6 @@ export class Film extends Model<Film, FilmCreationAttrs> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   reviews: number;
 
-  @Column({ type: DataType.STRING, allowNull: false })
-  quality: string;
-
   @Column({ type: DataType.INTEGER, allowNull: false })
   age_limit: number;
 
@@ -79,6 +78,9 @@ export class Film extends Model<Film, FilmCreationAttrs> {
     onDelete: 'CASCADE',
   })
   trailers: Trailer[];
+
+  @BelongsToMany(() => Quality, () => FilmQuality)
+  qualities: Quality[];
 
   @BelongsToMany(() => Language, () => FilmLanguageAudio)
   languagesAudio: Language[];
