@@ -14,8 +14,11 @@ export class PaginationQueryDto {
   @ApiProperty({ example: 2020, description: 'year', required: false })
   readonly year?: string;
 
-  @ApiProperty({ example: 5.3, description: 'rating', required: false })
+  @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
+
+  @ApiProperty({ example: 50000, description: 'assessments', required: false })
+  readonly assessments?: string;
 
   @ApiProperty({
     example: 'Эрик Толедано',

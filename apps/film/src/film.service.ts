@@ -83,16 +83,19 @@ export class FilmService {
     country?: string;
     year?: string;
     rating?: string;
+    assessments?: string;
     film_maker?: string;
     actor?: string;
   }) {
-    const { genres, country, year, rating, film_maker, actor } = query;
+    const { genres, country, year, rating, assessments, film_maker, actor } =
+      query;
 
     const filteredFilms = await this.filmRepository.findAll({
       where: {
         country: country || { [Op.notLike]: '' },
         year: year || { [Op.ne]: 0 },
         rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 },
+        assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
       },
       include: [
         { model: Trailer, attributes: ['trailer'] },
