@@ -47,13 +47,13 @@
         "tsConfigPath": "apps/film/tsconfig.app.json"
       }
     },
-    "actor": {
+    "person": {
       "type": "application",
-      "root": "apps/actor",
+      "root": "apps/person",
       "entryFile": "main",
-      "sourceRoot": "apps/actor/src",
+      "sourceRoot": "apps/person/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/actor/tsconfig.app.json"
+        "tsConfigPath": "apps/person/tsconfig.app.json"
       }
     },
     "comment": {
