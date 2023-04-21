@@ -15,10 +15,10 @@ Application on NestJS(Postgres, Sequelize, RabbitMQ, Docker) for films with regi
 </br>
 
 ## Documentation for endpoints
-<h3>Docs <a href="http://localhost:4000/api/docs" target="blank">localhost:4000/api/docs</a> - detailed documentation</h3>
 <h3>Home <a href="http://localhost:4000/" target="blank">localhost:4000</a> - home page, check if the server is running</h3>
-<h3>Home <a href="http://localhost:15672/" target="blank">localhost:15672</a> - rabbitMQ manager</h3>
-<h3>Home <a href="http://localhost:15432/" target="blank">localhost:15432</a> - pgAdmin</h3>
+<h3>Docs <a href="http://localhost:4000/api/docs" target="blank">localhost:4000/api/docs</a> - detailed documentation</h3>
+<h3>RabbitMQ <a href="http://localhost:15672/" target="blank">localhost:15672</a> - rabbitMQ manager</h3>
+<h3>PgAdmin <a href="http://localhost:15432/" target="blank">localhost:15432</a> - Postgres Admin</h3>
 
 </br>
 

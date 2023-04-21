@@ -8,6 +8,7 @@ import { AllExceptionsFilter, SharedModule } from '@app/shared';
   imports: [
     SharedModule,
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
+    SharedModule.registerRmq('FILM_SERVICE', process.env.RABBITMQ_FILM_QUEUE),
   ],
   controllers: [ApiController],
   providers: [

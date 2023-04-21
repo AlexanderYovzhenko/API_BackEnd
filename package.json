@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api/test/jest-e2e.json",
+    "test:e2e": "jest --config ./jest-e2e.json",
     "parser": "node libs/shared/src/utils/parser/index.cjs"
   },
   "dependencies": {
@@ -52,6 +52,7 @@
     "@types/node": "18.11.18",
     "@types/sequelize": "^4.28.14",
     "@types/supertest": "^2.0.11",
+    "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "cherio": "^1.0.0-rc.2",
