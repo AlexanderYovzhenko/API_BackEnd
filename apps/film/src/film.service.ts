@@ -8,8 +8,10 @@ import {
   FilmGenre,
   FilmLanguageAudio,
   FilmLanguageSubtitle,
+  FilmQuality,
   Genre,
   Language,
+  Quality,
   Trailer,
 } from './entities';
 
@@ -18,6 +20,9 @@ export class FilmService {
   constructor(
     @InjectModel(Film) private filmRepository: Repository<Film>,
     @InjectModel(Trailer) private trailerRepository: Repository<Trailer>,
+    @InjectModel(Quality) private qualityRepository: Repository<Quality>,
+    @InjectModel(FilmQuality)
+    private filmQualityRepository: Repository<FilmQuality>,
     @InjectModel(Language) private languageRepository: Repository<Language>,
     @InjectModel(FilmLanguageAudio)
     private languageAudioRepository: Repository<FilmLanguageAudio>,
@@ -51,6 +56,13 @@ export class FilmService {
         {
           model: Genre,
           attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
           through: {
             attributes: [],
           },
@@ -108,6 +120,13 @@ export class FilmService {
           },
         },
         {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
           model: Language,
           as: 'languagesAudio',
           attributes: ['language_id', 'language'],
@@ -133,15 +152,34 @@ export class FilmService {
   async addFilm(film: Record<string | number, string[]>) {
     const film_id: string = this.generateUUID();
 
-    const newFilm = await this.filmRepository.create({ film_id, ...film });
+    await this.filmRepository.create({ film_id, ...film });
 
-    const { trailers, languagesAudio, languagesSubtitle, genres } = film;
+    const { qualities, trailers, languagesAudio, languagesSubtitle, genres } =
+      film;
+
+    qualities.forEach(async (quality: string) => {
+      const checkQuality = await this.qualityRepository.findOrCreate({
+        where: { quality },
+        defaults: {
+          quality_id: this.generateUUID(),
+          quality,
+        },
+      });
+
+      const { quality_id } = checkQuality[0];
+
+      await this.filmQualityRepository.create({
+        film_quality_id: this.generateUUID(),
+        film_id,
+        quality_id,
+      });
+    });
 
     trailers.forEach(async (trailer: string) => {
       await this.trailerRepository.create({
         trailer_id: this.generateUUID(),
         trailer,
-        film_id: newFilm.film_id,
+        film_id,
       });
     });
 
@@ -158,7 +196,7 @@ export class FilmService {
 
       await this.languageAudioRepository.create({
         film_language_audio_id: this.generateUUID(),
-        film_id: newFilm.film_id,
+        film_id,
         language_id,
       });
     });
@@ -176,7 +214,7 @@ export class FilmService {
 
       await this.languageSubtitleRepository.create({
         film_language_subtitle_id: this.generateUUID(),
-        film_id: newFilm.film_id,
+        film_id,
         language_id,
       });
     });
@@ -197,7 +235,7 @@ export class FilmService {
 
       await this.filmGenreRepository.create({
         film_genre_id: this.generateUUID(),
-        film_id: newFilm.film_id,
+        film_id,
         genre_id: genre_id,
       });
     });

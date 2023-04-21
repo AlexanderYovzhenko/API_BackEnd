@@ -11,6 +11,8 @@ import {
   Genre,
   Language,
   Trailer,
+  Quality,
+  FilmQuality,
 } from './entities';
 
 @Module({
@@ -19,6 +21,8 @@ import {
     PostgresDBModule,
     SequelizeModule.forFeature([
       Film,
+      Quality,
+      FilmQuality,
       Trailer,
       Language,
       FilmLanguageAudio,
