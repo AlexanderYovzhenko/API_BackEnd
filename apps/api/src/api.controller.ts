@@ -27,6 +27,7 @@ import { firstValueFrom } from 'rxjs';
 import { UpdateFilmNameDto } from './dto/film-dto/update-film-name.dto';
 import validator from 'validator';
 import { UpdateGenreNameDto } from './dto/genre-dto/update-genre-name.dto';
+import { CreatePersonsFilmDto } from './dto/film-dto/create-persons.dto';
 
 @ApiTags('Endpoints')
 @ApiBearerAuth()
@@ -34,6 +35,7 @@ import { UpdateGenreNameDto } from './dto/genre-dto/update-genre-name.dto';
 export class ApiController {
   constructor(
     @Inject('FILM_SERVICE') private readonly filmService: ClientProxy,
+    @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
     private readonly apiService: ApiService,
   ) {}
 
@@ -50,6 +52,7 @@ export class ApiController {
   @Get('films/:film_id')
   async getFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
+
     if (!isUUID) {
       throw new BadRequestException('film_id is not UUID');
     }
@@ -82,6 +85,18 @@ export class ApiController {
       {},
     );
   }
+
+  // @ApiOperation({ summary: 'get films by id' })
+  // @ApiResponse({ status: HttpStatus.OK })
+  // @Get('films/person')
+  // async getFilmsByID() {
+  //   return this.filmService.send(
+  //     {
+  //       cmd: 'get_films_by_id',
+  //     },
+  //     {},
+  //   );
+  // }
 
   @ApiOperation({ summary: 'get filtered films' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -252,6 +267,70 @@ export class ApiController {
     }
 
     return updateGenre;
+  }
+
+  @ApiOperation({ summary: 'get person by id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @Get('persons/:person_id')
+  async getPerson(@Param('person_id') person_id: string) {
+    const isUUID = this.checkUUID(person_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('person_id is not UUID');
+    }
+
+    const person = await firstValueFrom(
+      this.personService.send(
+        {
+          cmd: 'get_person',
+        },
+
+        person_id,
+      ),
+    );
+
+    if (!person) {
+      throw new NotFoundException('Person not found');
+    }
+
+    return person;
+  }
+
+  @ApiOperation({ summary: 'get persons from film' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('persons/film/:film_id')
+  async getPersonsFromFilm(@Param('film_id') film_id: string) {
+    const isUUID = this.checkUUID(film_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('film_id is not UUID');
+    }
+
+    const persons = await firstValueFrom(
+      this.personService.send(
+        {
+          cmd: 'get_persons_from_film',
+        },
+
+        film_id,
+      ),
+    );
+
+    return persons;
+  }
+
+  @ApiOperation({ summary: 'created persons from film' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('persons')
+  async addPersonsFromFilm(@Body() persons: CreatePersonsFilmDto) {
+    return this.personService.send(
+      {
+        cmd: 'add_person',
+      },
+
+      persons,
+    );
   }
 
   private checkUUID(uuid: string) {
