@@ -21,16 +21,16 @@ export class PaginationQueryDto {
   readonly assessments?: string;
 
   @ApiProperty({
-    example: 'Эрик Толедано',
+    example: ['Эрик', 'Толедано'],
     description: 'film maker',
     required: false,
   })
-  readonly film_maker?: string;
+  readonly film_maker?: string[];
 
   @ApiProperty({
-    example: 'Сирил Менди',
+    example: ['Сирил', 'Менди'],
     description: 'actor',
     required: false,
   })
-  readonly actor?: string;
+  readonly actor?: string[];
 }

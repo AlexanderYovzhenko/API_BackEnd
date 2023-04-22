@@ -30,6 +30,10 @@ import {
       Genre,
       FilmGenre,
     ]),
+    SharedModule.registerRmq(
+      'PERSON_SERVICE',
+      process.env.RABBITMQ_PERSON_QUEUE,
+    ),
   ],
   controllers: [FilmController],
   providers: [

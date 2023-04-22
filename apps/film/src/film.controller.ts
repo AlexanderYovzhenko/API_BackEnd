@@ -30,6 +30,16 @@ export class FilmController {
     return await this.filmService.getAllFilms();
   }
 
+  // @MessagePattern({ cmd: 'get_films_by_id' })
+  // async getFilmsByID(
+  //   @Ctx() context: RmqContext,
+  //   @Payload() films: [{ film_id: string }],
+  // ) {
+  //   this.sharedService.acknowledgeMessage(context);
+
+  //   return await this.filmService.getFilmsByID(films);
+  // }
+
   @MessagePattern({ cmd: 'get_filtered_films' })
   async getFilteredFilms(
     @Ctx() context: RmqContext,
@@ -40,8 +50,8 @@ export class FilmController {
       year?: string;
       rating?: string;
       assessments?: string;
-      film_maker?: string;
-      actor?: string;
+      film_maker?: string[];
+      actor?: string[];
     },
   ) {
     this.sharedService.acknowledgeMessage(context);
