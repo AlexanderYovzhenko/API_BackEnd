@@ -351,7 +351,7 @@ export class ApiController {
 
   @ApiOperation({ summary: 'get persons who fits' })
   @ApiResponse({ status: HttpStatus.OK })
-  @Get('fits/persons')
+  @Get('filter/persons')
   async getPersonsWhoFits(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
       this.personService.send(
