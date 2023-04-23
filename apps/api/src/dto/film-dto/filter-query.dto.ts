@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PaginationQueryDto {
+export class FilterQueryDto {
   @ApiProperty({
     example: ['комедия', 'драма'],
     description: 'genres',

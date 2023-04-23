@@ -1,3 +1,7 @@
+import { ClientProxy } from '@nestjs/microservices';
+import validator from 'validator';
+import { firstValueFrom } from 'rxjs';
+import { ApiService } from './api.service';
 import {
   BadRequestException,
   Body,
@@ -13,21 +17,21 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiService } from './api.service';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ClientProxy } from '@nestjs/microservices';
-import { CreateFilmDto } from './dto/film-dto/create-film.dto';
-import { PaginationQueryDto } from './dto/film-dto/pagination-query.dto';
-import { firstValueFrom } from 'rxjs';
-import { UpdateFilmNameDto } from './dto/film-dto/update-film-name.dto';
-import validator from 'validator';
-import { UpdateGenreNameDto } from './dto/genre-dto/update-genre-name.dto';
-import { CreatePersonsFilmDto } from './dto/film-dto/create-persons.dto';
+import {
+  CreateFilmDto,
+  CreatePersonsFilmDto,
+  FilmsIdQueryDto,
+  FilterQueryDto,
+  PersonQueryDto,
+  UpdateFilmNameDto,
+  UpdateGenreNameDto,
+} from './dto';
 
 @ApiTags('Endpoints')
 @ApiBearerAuth()
@@ -86,24 +90,49 @@ export class ApiController {
     );
   }
 
-  // @ApiOperation({ summary: 'get films by id' })
-  // @ApiResponse({ status: HttpStatus.OK })
-  // @Get('films/person')
-  // async getFilmsByID() {
-  //   return this.filmService.send(
-  //     {
-  //       cmd: 'get_films_by_id',
-  //     },
-  //     {},
-  //   );
-  // }
+  @ApiOperation({ summary: 'get films by id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('id/films')
+  async getFilmsById(@Query() filmsId: FilmsIdQueryDto) {
+    const { films } = filmsId;
+
+    if (!films) {
+      return [];
+    }
+
+    if (typeof films === 'string') {
+      const isUUID = this.checkUUID(films);
+
+      if (!isUUID) {
+        throw new BadRequestException('film_id is not UUID');
+      }
+    }
+
+    if (Array.isArray(films)) {
+      filmsId.films.forEach((film_id) => {
+        const isUUID = this.checkUUID(film_id);
+
+        if (!isUUID) {
+          throw new BadRequestException('film_id is not UUID');
+        }
+      });
+    }
+
+    return this.filmService.send(
+      {
+        cmd: 'get_films_by_id',
+      },
+
+      filmsId,
+    );
+  }
 
   @ApiOperation({ summary: 'get filtered films' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('filter/films')
   async getFilteredFilms(
     @Query()
-    query: PaginationQueryDto,
+    query: FilterQueryDto,
   ) {
     return this.filmService.send(
       {
@@ -299,7 +328,7 @@ export class ApiController {
 
   @ApiOperation({ summary: 'get persons from film' })
   @ApiResponse({ status: HttpStatus.OK })
-  @Get('persons/film/:film_id')
+  @Get('persons/films/:film_id')
   async getPersonsFromFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
 
@@ -314,6 +343,23 @@ export class ApiController {
         },
 
         film_id,
+      ),
+    );
+
+    return persons;
+  }
+
+  @ApiOperation({ summary: 'get persons who fits' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('fits/persons')
+  async getPersonsWhoFits(@Query() person: PersonQueryDto) {
+    const persons = await firstValueFrom(
+      this.personService.send(
+        {
+          cmd: 'get_persons_who_fits',
+        },
+
+        person,
       ),
     );
 
