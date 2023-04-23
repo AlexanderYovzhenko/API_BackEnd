@@ -6,7 +6,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { FilmRole } from './film_role.entity';
+import { FilmRole } from '../film-role/film_role.entity';
 import { PersonFilmRole } from './person_film_role.entity';
 import { FilmPerson } from './film_person.entity';
 

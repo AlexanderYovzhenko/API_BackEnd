@@ -5,8 +5,8 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Person } from './person.entity';
-import { PersonFilmRole } from './person_film_role.entity';
+import { Person } from '../person/person.entity';
+import { PersonFilmRole } from '../person/person_film_role.entity';
 
 interface FilmRoleCreationAttrs {
   film_role_id: string;

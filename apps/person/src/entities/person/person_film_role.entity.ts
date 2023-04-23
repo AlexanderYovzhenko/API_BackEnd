@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { FilmRole } from './film_role.entity';
+import { FilmRole } from '../film-role/film_role.entity';
 import { Person } from './person.entity';
 
 @Table({ tableName: 'person_film_role', timestamps: false })
