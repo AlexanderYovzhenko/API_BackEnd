@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Film } from './film.entity';
+import { Film } from '../film/film.entity';
 
 interface TrailerCreationAttrs {
   trailer_id: string;

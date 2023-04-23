@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Film } from './film.entity';
+import { Film } from '../film/film.entity';
 import { FilmGenre } from './film_genre.entity';
 
 interface GenreCreationAttrs {
@@ -17,12 +17,11 @@ interface GenreCreationAttrs {
 @Table({ tableName: 'genre', timestamps: false })
 export class Genre extends Model<Genre, GenreCreationAttrs> {
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  readonly genre_id: number;
+  readonly genre_id: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   genre_ru: string;

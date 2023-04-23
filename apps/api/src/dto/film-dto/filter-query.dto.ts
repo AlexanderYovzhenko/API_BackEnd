@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PaginationQueryDto {
+export class FilterQueryDto {
   @ApiProperty({
     example: ['комедия', 'драма'],
     description: 'genres',
@@ -14,20 +14,23 @@ export class PaginationQueryDto {
   @ApiProperty({ example: 2020, description: 'year', required: false })
   readonly year?: string;
 
-  @ApiProperty({ example: 5.3, description: 'rating', required: false })
+  @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
 
+  @ApiProperty({ example: 30000, description: 'assessments', required: false })
+  readonly assessments?: string;
+
   @ApiProperty({
-    example: 'Эрик Толедано',
+    example: ['Эрик', 'Толедано'],
     description: 'film maker',
     required: false,
   })
-  readonly film_maker?: string;
+  readonly film_maker?: string[];
 
   @ApiProperty({
-    example: 'Сирил Менди',
+    example: ['Сирил', 'Менди'],
     description: 'actor',
     required: false,
   })
-  readonly actor?: string;
+  readonly actor?: string[];
 }

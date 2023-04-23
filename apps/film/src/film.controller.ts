@@ -7,6 +7,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
 
 @Controller()
 export class FilmController {
@@ -30,18 +31,21 @@ export class FilmController {
     return await this.filmService.getAllFilms();
   }
 
+  @MessagePattern({ cmd: 'get_films_by_id' })
+  async getFilmsById(
+    @Ctx() context: RmqContext,
+    @Payload() filmsId: { films: string[] },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getFilmsById(filmsId);
+  }
+
   @MessagePattern({ cmd: 'get_filtered_films' })
   async getFilteredFilms(
     @Ctx() context: RmqContext,
     @Payload()
-    query: {
-      genres?: string[];
-      country?: string;
-      year?: string;
-      rating?: string;
-      film_maker?: string;
-      actor?: string;
-    },
+    query: IQueryParamsFilter,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
@@ -81,7 +85,7 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_genre' })
-  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: number) {
+  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: string) {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getGenre(genre_id);
@@ -98,7 +102,7 @@ export class FilmController {
   async updateGenre(
     @Ctx() context: RmqContext,
     @Payload()
-    data: { genre_id: number; genre_ru: string; genre_en: string },
+    data: { genre_id: string; genre_ru: string; genre_en: string },
   ) {
     this.sharedService.acknowledgeMessage(context);
 

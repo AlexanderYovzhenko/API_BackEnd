@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Repository } from 'sequelize-typescript';
 import { Op } from 'sequelize';
@@ -8,16 +8,24 @@ import {
   FilmGenre,
   FilmLanguageAudio,
   FilmLanguageSubtitle,
+  FilmQuality,
   Genre,
   Language,
+  Quality,
   Trailer,
 } from './entities';
+import { firstValueFrom } from 'rxjs';
+import { ClientProxy } from '@nestjs/microservices';
+import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
 
 @Injectable()
 export class FilmService {
   constructor(
     @InjectModel(Film) private filmRepository: Repository<Film>,
     @InjectModel(Trailer) private trailerRepository: Repository<Trailer>,
+    @InjectModel(Quality) private qualityRepository: Repository<Quality>,
+    @InjectModel(FilmQuality)
+    private filmQualityRepository: Repository<FilmQuality>,
     @InjectModel(Language) private languageRepository: Repository<Language>,
     @InjectModel(FilmLanguageAudio)
     private languageAudioRepository: Repository<FilmLanguageAudio>,
@@ -25,6 +33,7 @@ export class FilmService {
     private languageSubtitleRepository: Repository<FilmLanguageSubtitle>,
     @InjectModel(Genre) private genreRepository: Repository<Genre>,
     @InjectModel(FilmGenre) private filmGenreRepository: Repository<FilmGenre>,
+    @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
   ) {}
 
   generateUUID(): string {
@@ -47,10 +56,17 @@ export class FilmService {
   async getAllFilms() {
     const films = await this.filmRepository.findAll({
       include: [
-        { model: Trailer, attributes: ['trailer'] },
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          attributes: ['genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
           through: {
             attributes: [],
           },
@@ -58,7 +74,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -66,7 +82,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -78,28 +94,23 @@ export class FilmService {
     return films;
   }
 
-  async getFilteredFilms(query: {
-    genres?: string[];
-    country?: string;
-    year?: string;
-    rating?: string;
-    film_maker?: string;
-    actor?: string;
-  }) {
-    const { genres, country, year, rating, film_maker, actor } = query;
+  async getFilmsById(filmsId: { films: string[] }) {
+    const { films } = filmsId;
 
-    const filteredFilms = await this.filmRepository.findAll({
-      where: {
-        country: country || { [Op.notLike]: '' },
-        year: year || { [Op.ne]: 0 },
-        rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 },
-      },
+    const filmsById = await this.filmRepository.findAll({
+      where: { film_id: films },
       include: [
-        { model: Trailer, attributes: ['trailer'] },
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          where: { genre_ru: genres || { [Op.notLike]: '' } },
-          attributes: ['genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
           through: {
             attributes: [],
           },
@@ -107,7 +118,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -115,7 +126,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language'],
+          attributes: ['language_id', 'language'],
           through: {
             attributes: [],
           },
@@ -124,51 +135,175 @@ export class FilmService {
       ],
     });
 
-    return filteredFilms;
+    return filmsById;
+  }
+
+  async getFilteredFilms(query: IQueryParamsFilter) {
+    const { genres, country, year, rating, assessments, film_maker, actor } =
+      query;
+
+    const filteredFilms = await this.filmRepository.findAll({
+      where: {
+        country: country || { [Op.notLike]: '' },
+        year: year || { [Op.ne]: 0 },
+        rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 },
+        assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
+      },
+      include: [
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Genre,
+          where: { genre_ru: genres || { [Op.notLike]: '' } },
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+    });
+
+    const filmsFilmMaker = film_maker
+      ? await firstValueFrom(
+          this.personService.send(
+            {
+              cmd: 'get_films_by_person',
+            },
+            {
+              first_name: film_maker[0],
+              last_name: film_maker[1],
+              film_role: 'режиссёр',
+            },
+          ),
+        )
+      : null;
+
+    const filmsIdFilmMaker = filmsFilmMaker
+      ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
+      : [];
+
+    const filmsActor = actor
+      ? await firstValueFrom(
+          this.personService.send(
+            {
+              cmd: 'get_films_by_person',
+            },
+            {
+              first_name: actor[0],
+              last_name: actor[1],
+              film_role: 'актёр',
+            },
+          ),
+        )
+      : null;
+
+    const filmsIdActor = filmsActor
+      ? filmsActor.films.map((film: { film_id: string }) => film.film_id)
+      : [];
+
+    let result = filteredFilms;
+
+    if (film_maker) {
+      result = result.filter((film) => filmsIdFilmMaker.includes(film.film_id));
+    }
+
+    if (actor) {
+      result = result.filter((film) => filmsIdActor.includes(film.film_id));
+    }
+
+    return result;
   }
 
   async addFilm(film: Record<string | number, string[]>) {
     const film_id: string = this.generateUUID();
 
-    await this.languageRepository.findOrCreate({
-      where: { language: 'рус' },
+    await this.filmRepository.create({ film_id, ...film });
+
+    const { qualities, trailers, languagesAudio, languagesSubtitle, genres } =
+      film;
+
+    qualities.forEach(async (quality: string) => {
+      const checkQuality = await this.qualityRepository.findOrCreate({
+        where: { quality },
+        defaults: {
+          quality_id: this.generateUUID(),
+          quality,
+        },
+      });
+
+      const { quality_id } = checkQuality[0];
+
+      await this.filmQualityRepository.create({
+        film_quality_id: this.generateUUID(),
+        film_id,
+        quality_id,
+      });
     });
-
-    await this.languageRepository.findOrCreate({
-      where: { language: 'eng' },
-    });
-
-    const newFilm = await this.filmRepository.create({ film_id, ...film });
-
-    const { trailers, languagesAudio, languagesSubtitle, genres } = film;
 
     trailers.forEach(async (trailer: string) => {
       await this.trailerRepository.create({
         trailer_id: this.generateUUID(),
         trailer,
-        film_id: newFilm.film_id,
+        film_id,
       });
     });
 
     languagesAudio.forEach(async (language: string) => {
-      const checkLanguage = await this.languageRepository.findOne({
+      const checkLanguage = await this.languageRepository.findOrCreate({
         where: { language },
+        defaults: {
+          language_id: this.generateUUID(),
+          language,
+        },
       });
 
+      const { language_id } = checkLanguage[0];
+
       await this.languageAudioRepository.create({
-        film_id: newFilm.film_id,
-        language_id: checkLanguage.language_id,
+        film_language_audio_id: this.generateUUID(),
+        film_id,
+        language_id,
       });
     });
 
     languagesSubtitle.forEach(async (language: string) => {
-      const checkLanguage = await this.languageRepository.findOne({
+      const checkLanguage = await this.languageRepository.findOrCreate({
         where: { language },
+        defaults: {
+          language_id: this.generateUUID(),
+          language,
+        },
       });
 
+      const { language_id } = checkLanguage[0];
+
       await this.languageSubtitleRepository.create({
-        film_id: newFilm.film_id,
-        language_id: checkLanguage.language_id,
+        film_language_subtitle_id: this.generateUUID(),
+        film_id,
+        language_id,
       });
     });
 
@@ -178,6 +313,7 @@ export class FilmService {
           genre_ru,
         },
         defaults: {
+          genre_id: this.generateUUID(),
           genre_ru,
           genre_en: '',
         },
@@ -186,7 +322,8 @@ export class FilmService {
       const { genre_id } = genre[0];
 
       await this.filmGenreRepository.create({
-        film_id: newFilm.film_id,
+        film_genre_id: this.generateUUID(),
+        film_id,
         genre_id: genre_id,
       });
     });
@@ -220,7 +357,7 @@ export class FilmService {
     return checkFilm;
   }
 
-  async getGenre(genre_id: number) {
+  async getGenre(genre_id: string) {
     const genre = await this.genreRepository.findOne({
       where: { genre_id },
       include: {
@@ -244,7 +381,7 @@ export class FilmService {
     return genres;
   }
 
-  async updateGenre(genre_id: number, genre_ru: string, genre_en: string) {
+  async updateGenre(genre_id: string, genre_ru: string, genre_en: string) {
     await this.genreRepository.update(
       { genre_ru, genre_en },
       { where: { genre_id } },

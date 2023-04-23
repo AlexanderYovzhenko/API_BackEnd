@@ -126,11 +126,11 @@ services:
     networks:
       - backend
 
-  actor:
-    container_name: actor
+  person:
+    container_name: person
     build:
       context: ./
-      dockerfile: ./apps/actor/Dockerfile
+      dockerfile: ./apps/person/Dockerfile
       target: development
     restart: unless-stopped
     depends_on:
@@ -140,9 +140,9 @@ services:
     volumes:
       - .:/usr/src/app # any change to base folder should be reflected
       - /usr/src/app/node_modules
-    command: npm run start:dev actor # overrides CMD from dockerfile
+    command: npm run start:dev person # overrides CMD from dockerfile
     env_file:
-      - ./apps/actor/.env
+      - ./apps/person/.env
     networks:
       - backend
 

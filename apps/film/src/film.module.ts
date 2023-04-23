@@ -11,6 +11,8 @@ import {
   Genre,
   Language,
   Trailer,
+  Quality,
+  FilmQuality,
 } from './entities';
 
 @Module({
@@ -19,6 +21,8 @@ import {
     PostgresDBModule,
     SequelizeModule.forFeature([
       Film,
+      Quality,
+      FilmQuality,
       Trailer,
       Language,
       FilmLanguageAudio,
@@ -26,6 +30,10 @@ import {
       Genre,
       FilmGenre,
     ]),
+    SharedModule.registerRmq(
+      'PERSON_SERVICE',
+      process.env.RABBITMQ_PERSON_QUEUE,
+    ),
   ],
   controllers: [FilmController],
   providers: [
