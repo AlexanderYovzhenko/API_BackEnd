@@ -4,7 +4,10 @@ import { Repository } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { v4 as uuid } from 'uuid';
 import { FilmPerson, FilmRole, Person, PersonFilmRole } from './entities';
-import { ICreatePerson } from './interface/interfaces';
+import {
+  ICreatePerson,
+  IShortPerson,
+} from './interface/person.service.interfaces';
 
 @Injectable()
 export class PersonService {
@@ -64,25 +67,57 @@ export class PersonService {
       ],
     });
 
-    // return personsFromFilm;
+    // добавляем количество фильмов у персонажа, если делать через where нет количества фильмов
     return personsFromFilm.filter((person) =>
       person.films.map((film) => film.film_id).includes(film_id),
     );
   }
 
-  async getFilmsByPerson(actor: {
-    first_name_ru: string;
-    last_name_ru: string;
-    film_role: string;
-  }) {
-    const { first_name_ru, last_name_ru, film_role } = actor;
+  async getPersonsWhoFits(person: IShortPerson) {
+    const { first_name, last_name, film_role } = person;
 
-    const person = await this.personRepository.findOne({
-      where: { first_name_ru, last_name_ru },
+    const personsFits = await this.personRepository.findAll({
+      where: {
+        [Op.or]: [
+          { first_name_ru: { [Op.substring]: first_name } },
+          { last_name_ru: { [Op.substring]: last_name } },
+          { first_name_en: { [Op.substring]: first_name } },
+          { last_name_en: { [Op.substring]: last_name } },
+        ],
+      },
       include: [
         {
           model: FilmRole,
           where: { film_role },
+          attributes: ['film_role_id', 'film_role'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: FilmPerson,
+          attributes: ['film_id'],
+        },
+      ],
+    });
+
+    return personsFits;
+  }
+
+  async getFilmsByPerson(person: IShortPerson) {
+    const { first_name, last_name, film_role } = person;
+
+    const filmsPerson = await this.personRepository.findOne({
+      where: {
+        [Op.or]: [
+          { first_name_ru: first_name, last_name_ru: last_name },
+          { first_name_en: first_name, last_name_en: last_name },
+        ],
+      },
+      include: [
+        {
+          model: FilmRole,
+          where: { film_role: film_role.toLocaleLowerCase() },
           attributes: [],
           through: {
             attributes: [],
@@ -94,9 +129,8 @@ export class PersonService {
         },
       ],
     });
-    // console.log(person.films);
 
-    return person;
+    return filmsPerson;
   }
 
   async addPersonsFromFilm(persons: ICreatePerson[], film_id: string) {
@@ -161,6 +195,8 @@ export class PersonService {
       });
     });
 
-    return film_id;
+    return {
+      film_id,
+    };
   }
 }

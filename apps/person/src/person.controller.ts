@@ -7,7 +7,10 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { ICreatePerson } from './interface/interfaces';
+import {
+  ICreatePerson,
+  IShortPerson,
+} from './interface/person.service.interfaces';
 
 @Controller()
 export class PersonController {
@@ -34,15 +37,26 @@ export class PersonController {
     return await this.personService.getPersonsFromFilm(film_id);
   }
 
+  @MessagePattern({ cmd: 'get_persons_who_fits' })
+  async getPersonsWhoFits(
+    @Ctx() context: RmqContext,
+    @Payload()
+    person: IShortPerson,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.personService.getPersonsWhoFits(person);
+  }
+
   @MessagePattern({ cmd: 'get_films_by_person' })
   async getFilmsByPerson(
     @Ctx() context: RmqContext,
     @Payload()
-    actor: { first_name_ru: string; last_name_ru: string; film_role: string },
+    person: IShortPerson,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.personService.getFilmsByPerson(actor);
+    return await this.personService.getFilmsByPerson(person);
   }
 
   @MessagePattern({ cmd: 'add_person' })

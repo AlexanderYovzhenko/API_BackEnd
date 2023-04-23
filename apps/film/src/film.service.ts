@@ -8,7 +8,6 @@ import {
   FilmGenre,
   FilmLanguageAudio,
   FilmLanguageSubtitle,
-  // FilmPerson,
   FilmQuality,
   Genre,
   Language,
@@ -17,13 +16,12 @@ import {
 } from './entities';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
+import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
 
 @Injectable()
 export class FilmService {
   constructor(
     @InjectModel(Film) private filmRepository: Repository<Film>,
-    // @InjectModel(FilmPerson)
-    // private filmPersonRepository: Repository<FilmPerson>,
     @InjectModel(Trailer) private trailerRepository: Repository<Trailer>,
     @InjectModel(Quality) private qualityRepository: Repository<Quality>,
     @InjectModel(FilmQuality)
@@ -96,65 +94,53 @@ export class FilmService {
     return films;
   }
 
-  // async getFilmsByID(films: [{ film_id: string }]) {
-  //   const filmsID = films.map((film) => film.film_id);
+  async getFilmsById(filmsId: { films: string[] }) {
+    const { films } = filmsId;
 
-  //   const filmsByID = await this.filmRepository.findAll({
-  //     where: { film_id: filmsID },
-  //   });
+    const filmsById = await this.filmRepository.findAll({
+      where: { film_id: films },
+      include: [
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Genre,
+          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+    });
 
-  //   return filmsByID;
-  // }
+    return filmsById;
+  }
 
-  async getFilteredFilms(query: {
-    genres?: string[];
-    country?: string;
-    year?: string;
-    rating?: string;
-    assessments?: string;
-    film_maker?: string[];
-    actor?: string[];
-  }) {
+  async getFilteredFilms(query: IQueryParamsFilter) {
     const { genres, country, year, rating, assessments, film_maker, actor } =
       query;
-
-    const filmsFilmMaker = film_maker
-      ? await firstValueFrom(
-          this.personService.send(
-            {
-              cmd: 'get_films_by_person',
-            },
-            {
-              first_name_ru: film_maker[0],
-              last_name_ru: film_maker[1],
-              film_role: 'режисёр',
-            },
-          ),
-        )
-      : null;
-
-    const filmsIdFilmMaker = filmsFilmMaker
-      ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
-      : null;
-
-    const filmsActor = actor
-      ? await firstValueFrom(
-          this.personService.send(
-            {
-              cmd: 'get_films_by_person',
-            },
-            {
-              first_name_ru: actor[0],
-              last_name_ru: actor[1],
-              film_role: 'звукорежисёр',
-            },
-          ),
-        )
-      : null;
-
-    const filmsIdActor = filmsActor
-      ? filmsActor.films.map((film: { film_id: string }) => film.film_id)
-      : null;
 
     const filteredFilms = await this.filmRepository.findAll({
       where: {
@@ -200,13 +186,51 @@ export class FilmService {
       ],
     });
 
+    const filmsFilmMaker = film_maker
+      ? await firstValueFrom(
+          this.personService.send(
+            {
+              cmd: 'get_films_by_person',
+            },
+            {
+              first_name: film_maker[0],
+              last_name: film_maker[1],
+              film_role: 'режиссёр',
+            },
+          ),
+        )
+      : null;
+
+    const filmsIdFilmMaker = filmsFilmMaker
+      ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
+      : [];
+
+    const filmsActor = actor
+      ? await firstValueFrom(
+          this.personService.send(
+            {
+              cmd: 'get_films_by_person',
+            },
+            {
+              first_name: actor[0],
+              last_name: actor[1],
+              film_role: 'актёр',
+            },
+          ),
+        )
+      : null;
+
+    const filmsIdActor = filmsActor
+      ? filmsActor.films.map((film: { film_id: string }) => film.film_id)
+      : [];
+
     let result = filteredFilms;
 
-    if (filmsIdFilmMaker) {
+    if (film_maker) {
       result = result.filter((film) => filmsIdFilmMaker.includes(film.film_id));
     }
 
-    if (filmsIdActor) {
+    if (actor) {
       result = result.filter((film) => filmsIdActor.includes(film.film_id));
     }
 
