@@ -7,3 +7,9 @@ export interface ICreatePerson {
   description: string;
   img: string;
 }
+
+export interface IShortPerson {
+  first_name_ru: string;
+  last_name_ru: string;
+  film_role: string;
+}

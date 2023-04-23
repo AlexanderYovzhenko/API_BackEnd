@@ -7,6 +7,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
 
 @Controller()
 export class FilmController {
@@ -30,29 +31,21 @@ export class FilmController {
     return await this.filmService.getAllFilms();
   }
 
-  // @MessagePattern({ cmd: 'get_films_by_id' })
-  // async getFilmsByID(
-  //   @Ctx() context: RmqContext,
-  //   @Payload() films: [{ film_id: string }],
-  // ) {
-  //   this.sharedService.acknowledgeMessage(context);
+  @MessagePattern({ cmd: 'get_films_by_id' })
+  async getFilmsById(
+    @Ctx() context: RmqContext,
+    @Payload() filmsId: { films: string[] },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
 
-  //   return await this.filmService.getFilmsByID(films);
-  // }
+    return await this.filmService.getFilmsById(filmsId);
+  }
 
   @MessagePattern({ cmd: 'get_filtered_films' })
   async getFilteredFilms(
     @Ctx() context: RmqContext,
     @Payload()
-    query: {
-      genres?: string[];
-      country?: string;
-      year?: string;
-      rating?: string;
-      assessments?: string;
-      film_maker?: string[];
-      actor?: string[];
-    },
+    query: IQueryParamsFilter,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
