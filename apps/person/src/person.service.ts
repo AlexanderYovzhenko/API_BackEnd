@@ -30,7 +30,7 @@ export class PersonService {
       include: [
         {
           model: FilmRole,
-          attributes: ['film_role_id', 'film_role'],
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -54,7 +54,7 @@ export class PersonService {
       include: [
         {
           model: FilmRole,
-          attributes: ['film_role_id', 'film_role'],
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -88,8 +88,8 @@ export class PersonService {
       include: [
         {
           model: FilmRole,
-          where: { film_role },
-          attributes: ['film_role_id', 'film_role'],
+          where: { [Op.or]: [{ film_role }, { slug: film_role }] },
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -137,6 +137,7 @@ export class PersonService {
     persons.forEach(async (person) => {
       const {
         film_role,
+        film_role_slug,
         first_name_ru,
         last_name_ru,
         first_name_en,
@@ -165,6 +166,7 @@ export class PersonService {
         defaults: {
           film_role_id: this.generateUUID(),
           film_role: film_role.toLocaleLowerCase(),
+          slug: film_role_slug.toLocaleLowerCase(),
         },
       });
 

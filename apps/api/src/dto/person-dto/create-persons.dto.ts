@@ -12,7 +12,8 @@ export class CreatePersonsFilmDto {
   @ApiProperty({
     example: [
       {
-        film_role: 'Актёр',
+        film_role: 'актёр',
+        film_role_slug: 'actor',
         first_name_ru: 'Оливье',
         last_name_ru: 'Накаш',
         first_name_en: 'Olivier',
