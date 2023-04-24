@@ -190,7 +190,13 @@ export class FilmService {
         { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          where: { genre_ru: genres || { [Op.notLike]: '' } },
+          where: {
+            [Op.or]: [
+              { genre_ru: genres || { [Op.notLike]: '' } },
+              { genre_en: genres || { [Op.notLike]: '' } },
+              { slug: genres || { [Op.notLike]: '' } },
+            ],
+          },
           attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
