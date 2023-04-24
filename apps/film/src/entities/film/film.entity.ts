@@ -27,7 +27,7 @@ interface FilmCreationAttrs {
   reviews: number;
   quality: string;
   age_limit: number;
-  duration: string;
+  duration: number;
 }
 
 @Table({ tableName: 'film', timestamps: false })
@@ -66,8 +66,8 @@ export class Film extends Model<Film, FilmCreationAttrs> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   age_limit: number;
 
-  @Column({ type: DataType.STRING, allowNull: false })
-  duration: string;
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  duration: number;
 
   @Column({ type: DataType.TEXT, allowNull: false })
   img: string;

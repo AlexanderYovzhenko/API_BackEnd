@@ -48,10 +48,10 @@ export class CreateFilmDto {
   @IsNumber({}, { message: 'age_limit: should be number' })
   readonly age_limit: number;
 
-  @ApiProperty({ example: '195 minutes', description: 'duration of the film' })
+  @ApiProperty({ example: 195, description: 'duration of the film' })
   @IsNotEmpty()
-  @IsString({ message: 'duration: should be string' })
-  readonly duration: string;
+  @IsNumber({}, { message: 'duration: should be number' })
+  readonly duration: number;
 
   @ApiProperty({
     example:
