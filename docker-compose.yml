@@ -178,7 +178,7 @@ services:
     volumes:
       - .:/usr/src/app # any change to base folder should be reflected
       - /usr/src/app/node_modules
-    command: npm run start:dev comment # overrides CMD from dockerfile
+    command: npm run start:dev users # overrides CMD from dockerfile
     env_file:
       - ./apps/users/.env
     networks:
