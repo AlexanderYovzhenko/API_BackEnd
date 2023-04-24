@@ -10,8 +10,14 @@ export class UpdateGenreNameDto {
   @ApiProperty({
     example: 'western',
     description: 'name genre EN',
-    required: false,
   })
   @IsString({ message: 'genre_en: should be string' })
   readonly genre_en: string;
+
+  @ApiProperty({
+    example: 'western',
+    description: 'slug genre',
+  })
+  @IsString({ message: 'slug: should be string' })
+  readonly slug: string;
 }

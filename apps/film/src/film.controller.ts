@@ -7,7 +7,11 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
+import {
+  ICreateFilm,
+  IQueryParamsFilter,
+  IUpdateGenre,
+} from './interfaces/film.service.interfaces';
 
 @Controller()
 export class FilmController {
@@ -53,10 +57,7 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'add_film' })
-  async addFilm(
-    @Ctx() context: RmqContext,
-    @Payload() film: Record<string | number, string[]>,
-  ) {
+  async addFilm(@Ctx() context: RmqContext, @Payload() film: ICreateFilm) {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.addFilm(film);
@@ -102,14 +103,10 @@ export class FilmController {
   async updateGenre(
     @Ctx() context: RmqContext,
     @Payload()
-    data: { genre_id: string; genre_ru: string; genre_en: string },
+    data: IUpdateGenre,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.updateGenre(
-      data.genre_id,
-      data.genre_ru,
-      data.genre_en,
-    );
+    return await this.filmService.updateGenre(data);
   }
 }

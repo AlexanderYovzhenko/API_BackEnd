@@ -11,7 +11,6 @@ export class UpdateFilmNameDto {
   @ApiProperty({
     example: 'Green mile',
     description: 'name EN',
-    required: false,
   })
   @IsString({ message: 'name_en: should be string' })
   @Length(0, 64, { message: 'Name should be no more than 64' })

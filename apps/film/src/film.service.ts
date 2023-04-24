@@ -16,7 +16,11 @@ import {
 } from './entities';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
+import {
+  ICreateFilm,
+  IQueryParamsFilter,
+  IUpdateGenre,
+} from './interfaces/film.service.interfaces';
 
 @Injectable()
 export class FilmService {
@@ -43,7 +47,40 @@ export class FilmService {
   async getFilm(film_id: string) {
     const film = await this.filmRepository.findOne({
       where: { film_id },
-      include: { all: true },
+      include: [
+        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Genre,
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
     });
 
     if (!film) {
@@ -59,7 +96,7 @@ export class FilmService {
         { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -103,7 +140,7 @@ export class FilmService {
         { model: Trailer, attributes: ['trailer_id', 'trailer'] },
         {
           model: Genre,
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -154,7 +191,7 @@ export class FilmService {
         {
           model: Genre,
           where: { genre_ru: genres || { [Op.notLike]: '' } },
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -237,7 +274,7 @@ export class FilmService {
     return result;
   }
 
-  async addFilm(film: Record<string | number, string[]>) {
+  async addFilm(film: ICreateFilm) {
     const film_id: string = this.generateUUID();
 
     await this.filmRepository.create({ film_id, ...film });
@@ -307,7 +344,9 @@ export class FilmService {
       });
     });
 
-    genres.forEach(async (genre_ru: string) => {
+    genres.forEach(async (genreData) => {
+      const { genre_ru, genre_en, slug } = genreData;
+
       const genre = await this.genreRepository.findOrCreate({
         where: {
           genre_ru,
@@ -315,7 +354,8 @@ export class FilmService {
         defaults: {
           genre_id: this.generateUUID(),
           genre_ru,
-          genre_en: '',
+          genre_en,
+          slug,
         },
       });
 
@@ -324,7 +364,7 @@ export class FilmService {
       await this.filmGenreRepository.create({
         film_genre_id: this.generateUUID(),
         film_id,
-        genre_id: genre_id,
+        genre_id,
       });
     });
 
@@ -381,9 +421,11 @@ export class FilmService {
     return genres;
   }
 
-  async updateGenre(genre_id: string, genre_ru: string, genre_en: string) {
+  async updateGenre(data: IUpdateGenre) {
+    const { genre_id, genre_ru, genre_en, slug } = data;
+
     await this.genreRepository.update(
-      { genre_ru, genre_en },
+      { genre_ru, genre_en, slug },
       { where: { genre_id } },
     );
 

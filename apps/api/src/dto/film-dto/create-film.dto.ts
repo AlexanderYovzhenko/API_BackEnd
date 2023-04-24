@@ -91,7 +91,10 @@ export class CreateFilmDto {
   readonly languagesSubtitle: string[];
 
   @ApiProperty({
-    example: ['драма', 'комедия', 'биография'],
+    example: [
+      { genre_ru: 'драма', genre_en: 'drama', slug: 'drama' },
+      { genre_ru: 'комедия', genre_en: 'comedy', slug: 'comedia' },
+    ],
     description: 'genres',
   })
   @IsNotEmpty()
