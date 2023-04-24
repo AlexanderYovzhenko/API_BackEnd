@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from './users.model';
+import { User } from './entities/users.entity';
 
 import { CreateUserDto } from '../dto/createUserDto';
 //import { ClientProxy } from '@nestjs/microservices';

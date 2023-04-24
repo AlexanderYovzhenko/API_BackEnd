@@ -31,6 +31,7 @@ import {
   PersonQueryDto,
   UpdateFilmNameDto,
   UpdateGenreNameDto,
+  CreateUserDto,
 } from './dto';
 
 @ApiTags('Endpoints')
@@ -40,6 +41,7 @@ export class ApiController {
   constructor(
     @Inject('FILM_SERVICE') private readonly filmService: ClientProxy,
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
+    @Inject('USERS_SERVICE') private readonly usersService: ClientProxy,
     private readonly apiService: ApiService,
   ) {}
 
@@ -381,5 +383,50 @@ export class ApiController {
 
   private checkUUID(uuid: string) {
     return validator.isUUID(uuid);
+  }
+
+  @ApiOperation({ summary: 'get all users' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('users')
+  async getUsers() {
+    const users = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get all users',
+        },
+        {},
+      ),
+    );
+
+    return users;
+  }
+
+  @ApiOperation({ summary: 'get user by email' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('users/:email')
+  async getUser(@Param('user_email') user_email: string) {
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get user by email',
+        },
+
+        user_email,
+      ),
+    );
+
+    return user;
+  }
+
+  @ApiOperation({ summary: 'create new user' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('users')
+  async createUser(@Body() user: CreateUserDto) {
+    return this.usersService.send(
+      {
+        cmd: 'create user',
+      },
+      user,
+    );
   }
 }

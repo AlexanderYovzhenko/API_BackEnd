@@ -13,6 +13,7 @@ import { AllExceptionsFilter, SharedModule } from '@app/shared';
       'PERSON_SERVICE',
       process.env.RABBITMQ_PERSON_QUEUE,
     ),
+    SharedModule.registerRmq('USERS_SERVICE', process.env.RABBITMQ_USERS_QUEUE),
   ],
   controllers: [ApiController],
   providers: [
