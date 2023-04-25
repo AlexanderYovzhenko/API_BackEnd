@@ -326,6 +326,22 @@ export class ApiController {
     return person;
   }
 
+  @ApiOperation({ summary: 'get all persons' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('persons')
+  async getAllPersons() {
+    const persons = await firstValueFrom(
+      this.personService.send(
+        {
+          cmd: 'get_all_persons',
+        },
+        {},
+      ),
+    );
+
+    return persons;
+  }
+
   @ApiOperation({ summary: 'get persons from film' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('persons/films/:film_id')

@@ -27,6 +27,13 @@ export class PersonController {
     return await this.personService.getPerson(person_id);
   }
 
+  @MessagePattern({ cmd: 'get_all_persons' })
+  async getAllPersons(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.personService.getAllPersons();
+  }
+
   @MessagePattern({ cmd: 'get_persons_from_film' })
   async getPersonsFromFilm(
     @Ctx() context: RmqContext,

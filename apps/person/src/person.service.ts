@@ -49,6 +49,26 @@ export class PersonService {
     return person;
   }
 
+  async getAllPersons() {
+    const persons = await this.personRepository.findAll({
+      include: [
+        {
+          model: FilmRole,
+          attributes: ['film_role_id', 'film_role', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: FilmPerson,
+          attributes: ['film_id'],
+        },
+      ],
+    });
+
+    return persons;
+  }
+
   async getPersonsFromFilm(film_id: string) {
     const personsFromFilm = await this.personRepository.findAll({
       include: [
