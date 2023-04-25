@@ -11,6 +11,7 @@ interface TrailerCreationAttrs {
   trailer_id: string;
   trailer: string;
   img?: string;
+  date?: string;
   film_id: string;
 }
 
@@ -28,6 +29,9 @@ export class Trailer extends Model<Trailer, TrailerCreationAttrs> {
 
   @Column({ type: DataType.TEXT, allowNull: true })
   img: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  date: string;
 
   @BelongsTo(() => Film, { foreignKey: 'film_id' })
   film: Film;

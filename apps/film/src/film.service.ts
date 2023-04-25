@@ -48,7 +48,10 @@ export class FilmService {
     const film = await this.filmRepository.findOne({
       where: { film_id },
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer', 'img'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
           attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
@@ -93,7 +96,10 @@ export class FilmService {
   async getAllFilms() {
     const films = await this.filmRepository.findAll({
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer', 'img'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
           attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
@@ -137,7 +143,10 @@ export class FilmService {
     const filmsById = await this.filmRepository.findAll({
       where: { film_id: films },
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer', 'img'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
           attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
@@ -187,7 +196,10 @@ export class FilmService {
         assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
       },
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer', 'img'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
           where: {
@@ -311,6 +323,7 @@ export class FilmService {
         trailer_id: this.generateUUID(),
         trailer: trailer.trailer,
         img: trailer.img || '',
+        date: trailer.date || '',
         film_id,
       });
     });

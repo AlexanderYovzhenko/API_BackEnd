@@ -21,7 +21,7 @@ export interface ICreateFilm {
   duration: number;
   img: string;
   qualities: string[];
-  trailers: [{ trailer: string; img: string }];
+  trailers: [{ trailer: string; img: string; date: string }];
   languagesAudio: string[];
   languagesSubtitle: string[];
   genres: [{ genre_ru: string; genre_en: string; slug: string }];
