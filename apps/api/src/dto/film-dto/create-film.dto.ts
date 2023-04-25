@@ -84,14 +84,14 @@ export class CreateFilmDto {
 
   @ApiProperty({
     example: ['русский', 'английский'],
-    description: 'languages',
+    description: 'languages audio',
   })
   @IsNotEmpty()
   readonly languagesAudio: string[];
 
   @ApiProperty({
     example: ['русский', 'английский'],
-    description: 'languages',
+    description: 'languages subtitle',
   })
   @IsNotEmpty()
   readonly languagesSubtitle: string[];

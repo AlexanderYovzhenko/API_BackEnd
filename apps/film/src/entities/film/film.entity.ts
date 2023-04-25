@@ -25,7 +25,6 @@ interface FilmCreationAttrs {
   rating: number;
   assessments: number;
   reviews: number;
-  quality: string;
   age_limit: number;
   duration: number;
 }

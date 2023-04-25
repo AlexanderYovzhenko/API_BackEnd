@@ -321,7 +321,7 @@ export class FilmService {
     trailers.forEach(async (trailer) => {
       await this.trailerRepository.create({
         trailer_id: this.generateUUID(),
-        trailer: trailer.trailer,
+        trailer: trailer.trailer || '',
         img: trailer.img || '',
         date: trailer.date || '',
         film_id,
