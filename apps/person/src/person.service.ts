@@ -162,7 +162,6 @@ export class PersonService {
         last_name_ru,
         first_name_en,
         last_name_en,
-        description,
         img,
       } = person;
 
@@ -174,7 +173,6 @@ export class PersonService {
           last_name_ru,
           first_name_en,
           last_name_en,
-          description,
           img,
         },
       });
