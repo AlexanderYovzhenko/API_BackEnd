@@ -27,6 +27,7 @@ import {
   CreateFilmDto,
   CreatePersonsFilmDto,
   FilmsIdQueryDto,
+  FilmsNameQueryDto,
   FilterQueryDto,
   LimitQueryDto,
   PersonQueryDto,
@@ -87,9 +88,8 @@ export class ApiController {
       {
         cmd: 'get_all_films',
       },
-      {
-        ...queryLimit,
-      },
+
+      queryLimit,
     );
   }
 
@@ -127,6 +127,19 @@ export class ApiController {
       },
 
       filmsId,
+    );
+  }
+
+  @ApiOperation({ summary: 'get films by name' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('name/films')
+  async getFilmsByName(@Query() queryName: FilmsNameQueryDto) {
+    return this.filmService.send(
+      {
+        cmd: 'get_films_by_name',
+      },
+
+      queryName,
     );
   }
 
@@ -260,9 +273,7 @@ export class ApiController {
           cmd: 'get_all_genres',
         },
 
-        {
-          ...queryLimit,
-        },
+        queryLimit,
       ),
     );
 
@@ -340,9 +351,8 @@ export class ApiController {
         {
           cmd: 'get_all_persons',
         },
-        {
-          ...queryLimit,
-        },
+
+        queryLimit,
       ),
     );
 

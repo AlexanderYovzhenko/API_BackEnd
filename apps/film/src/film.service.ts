@@ -187,6 +187,58 @@ export class FilmService {
     return filmsById;
   }
 
+  async getFilmsByName(queryName: { name: string }) {
+    const { name } = queryName;
+
+    const filmsByName = await this.filmRepository.findAll({
+      where: {
+        [Op.or]: [
+          { name_ru: { [Op.substring]: name } },
+          { name_en: { [Op.substring]: name } },
+        ],
+      },
+      include: [
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
+        {
+          model: Genre,
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+    });
+
+    return filmsByName;
+  }
+
   async getFilteredFilms(query: IQueryParamsFilter) {
     const { genres, country, year, rating, assessments, film_maker, actor } =
       query;

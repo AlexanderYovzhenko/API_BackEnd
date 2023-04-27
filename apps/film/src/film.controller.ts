@@ -48,6 +48,16 @@ export class FilmController {
     return await this.filmService.getFilmsById(filmsId);
   }
 
+  @MessagePattern({ cmd: 'get_films_by_name' })
+  async getFilmsByName(
+    @Ctx() context: RmqContext,
+    @Payload() queryName: { name: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getFilmsByName(queryName);
+  }
+
   @MessagePattern({ cmd: 'get_filtered_films' })
   async getFilteredFilms(
     @Ctx() context: RmqContext,
