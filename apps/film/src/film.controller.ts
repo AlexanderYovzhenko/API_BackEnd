@@ -29,10 +29,13 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_all_films' })
-  async getAllFilms(@Ctx() context: RmqContext) {
+  async getAllFilms(
+    @Ctx() context: RmqContext,
+    @Payload() queryLimit: { limit: string },
+  ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.getAllFilms();
+    return await this.filmService.getAllFilms(queryLimit);
   }
 
   @MessagePattern({ cmd: 'get_films_by_id' })
@@ -93,10 +96,13 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_all_genres' })
-  async getAllGenres(@Ctx() context: RmqContext) {
+  async getAllGenres(
+    @Ctx() context: RmqContext,
+    @Payload() queryLimit: { limit: string },
+  ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.getAllGenres();
+    return await this.filmService.getAllGenres(queryLimit);
   }
 
   @MessagePattern({ cmd: 'update_genre_name' })

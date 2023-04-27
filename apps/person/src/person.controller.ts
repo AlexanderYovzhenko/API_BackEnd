@@ -28,10 +28,13 @@ export class PersonController {
   }
 
   @MessagePattern({ cmd: 'get_all_persons' })
-  async getAllPersons(@Ctx() context: RmqContext) {
+  async getAllPersons(
+    @Ctx() context: RmqContext,
+    @Payload() queryLimit: { limit: string },
+  ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.personService.getAllPersons();
+    return await this.personService.getAllPersons(queryLimit);
   }
 
   @MessagePattern({ cmd: 'get_persons_from_film' })

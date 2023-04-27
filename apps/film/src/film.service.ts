@@ -93,7 +93,9 @@ export class FilmService {
     return film;
   }
 
-  async getAllFilms() {
+  async getAllFilms(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
     const films = await this.filmRepository.findAll({
       include: [
         {
@@ -132,6 +134,7 @@ export class FilmService {
         },
         { all: true },
       ],
+      limit: limit ? +limit : 100,
     });
 
     return films;
@@ -435,8 +438,12 @@ export class FilmService {
     return genre;
   }
 
-  async getAllGenres() {
-    const genres = await this.genreRepository.findAll();
+  async getAllGenres(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
+    const genres = await this.genreRepository.findAll({
+      limit: limit ? +limit : 100,
+    });
 
     return genres;
   }

@@ -28,6 +28,7 @@ import {
   CreatePersonsFilmDto,
   FilmsIdQueryDto,
   FilterQueryDto,
+  LimitQueryDto,
   PersonQueryDto,
   UpdateFilmNameDto,
   UpdateGenreNameDto,
@@ -81,12 +82,14 @@ export class ApiController {
   @ApiOperation({ summary: 'get all films' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('films')
-  async getAllFilms() {
+  async getAllFilms(@Query() queryLimit: LimitQueryDto) {
     return this.filmService.send(
       {
         cmd: 'get_all_films',
       },
-      {},
+      {
+        ...queryLimit,
+      },
     );
   }
 
@@ -250,14 +253,16 @@ export class ApiController {
   @ApiOperation({ summary: 'get all genres' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('genres')
-  async getAllGenres() {
+  async getAllGenres(@Query() queryLimit: LimitQueryDto) {
     const genres = await firstValueFrom(
       this.filmService.send(
         {
           cmd: 'get_all_genres',
         },
 
-        {},
+        {
+          ...queryLimit,
+        },
       ),
     );
 
@@ -329,13 +334,15 @@ export class ApiController {
   @ApiOperation({ summary: 'get all persons' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('persons')
-  async getAllPersons() {
+  async getAllPersons(@Query() queryLimit: LimitQueryDto) {
     const persons = await firstValueFrom(
       this.personService.send(
         {
           cmd: 'get_all_persons',
         },
-        {},
+        {
+          ...queryLimit,
+        },
       ),
     );
 

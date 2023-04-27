@@ -49,7 +49,9 @@ export class PersonService {
     return person;
   }
 
-  async getAllPersons() {
+  async getAllPersons(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
     const persons = await this.personRepository.findAll({
       include: [
         {
@@ -64,6 +66,7 @@ export class PersonService {
           attributes: ['film_id'],
         },
       ],
+      limit: limit ? +limit : 100,
     });
 
     return persons;
