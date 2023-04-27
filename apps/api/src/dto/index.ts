@@ -7,3 +7,4 @@ export * from './genre-dto/update-genre-name.dto';
 export * from './person-dto/create-persons.dto';
 export * from './person-dto/person-query.dto';
 export * from './limit-dto/limit-query.dto';
+export * from './user-dto/create-user-dto';
