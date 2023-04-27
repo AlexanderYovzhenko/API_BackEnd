@@ -165,6 +165,7 @@ services:
       - ./apps/comment/.env
     networks:
       - backend
+      
   users:
     container_name: users
     build:
