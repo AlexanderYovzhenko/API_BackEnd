@@ -17,18 +17,18 @@ export class FilterQueryDto {
   @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
 
-  @ApiProperty({ example: 30000, description: 'assessments', required: false })
+  @ApiProperty({ example: 3000, description: 'assessments', required: false })
   readonly assessments?: string;
 
   @ApiProperty({
-    example: ['Эрик', 'Толедано'],
-    description: 'film maker',
+    example: ['Мелисса', 'Сейджмиллер'],
+    description: 'filmmaker',
     required: false,
   })
   readonly film_maker?: string[];
 
   @ApiProperty({
-    example: ['Сирил', 'Менди'],
+    example: ['Магдалено', 'Роблес'],
     description: 'actor',
     required: false,
   })

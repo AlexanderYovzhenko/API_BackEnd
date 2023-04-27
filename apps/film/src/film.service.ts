@@ -250,7 +250,7 @@ export class FilmService {
             {
               first_name: film_maker[0],
               last_name: film_maker[1],
-              film_role: 'режиссёр',
+              film_role: 'режиссер',
             },
           ),
         )
