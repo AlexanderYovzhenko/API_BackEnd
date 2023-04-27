@@ -30,7 +30,7 @@ export class PersonService {
       include: [
         {
           model: FilmRole,
-          attributes: ['film_role_id', 'film_role'],
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -49,12 +49,35 @@ export class PersonService {
     return person;
   }
 
+  async getAllPersons(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
+    const persons = await this.personRepository.findAll({
+      include: [
+        {
+          model: FilmRole,
+          attributes: ['film_role_id', 'film_role', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: FilmPerson,
+          attributes: ['film_id'],
+        },
+      ],
+      limit: limit ? +limit : 100,
+    });
+
+    return persons;
+  }
+
   async getPersonsFromFilm(film_id: string) {
     const personsFromFilm = await this.personRepository.findAll({
       include: [
         {
           model: FilmRole,
-          attributes: ['film_role_id', 'film_role'],
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -88,8 +111,8 @@ export class PersonService {
       include: [
         {
           model: FilmRole,
-          where: { film_role },
-          attributes: ['film_role_id', 'film_role'],
+          where: { [Op.or]: [{ film_role }, { slug: film_role }] },
+          attributes: ['film_role_id', 'film_role', 'slug'],
           through: {
             attributes: [],
           },
@@ -137,11 +160,11 @@ export class PersonService {
     persons.forEach(async (person) => {
       const {
         film_role,
+        film_role_slug,
         first_name_ru,
         last_name_ru,
         first_name_en,
         last_name_en,
-        description,
         img,
       } = person;
 
@@ -153,7 +176,6 @@ export class PersonService {
           last_name_ru,
           first_name_en,
           last_name_en,
-          description,
           img,
         },
       });
@@ -165,6 +187,7 @@ export class PersonService {
         defaults: {
           film_role_id: this.generateUUID(),
           film_role: film_role.toLocaleLowerCase(),
+          slug: film_role_slug.toLocaleLowerCase(),
         },
       });
 

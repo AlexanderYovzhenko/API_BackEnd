@@ -10,6 +10,8 @@ import { Film } from '../film/film.entity';
 interface TrailerCreationAttrs {
   trailer_id: string;
   trailer: string;
+  img?: string;
+  date?: string;
   film_id: string;
 }
 
@@ -22,8 +24,14 @@ export class Trailer extends Model<Trailer, TrailerCreationAttrs> {
   })
   readonly trailer_id: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   trailer: string;
+
+  @Column({ type: DataType.TEXT, allowNull: true })
+  img: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  date: string;
 
   @BelongsTo(() => Film, { foreignKey: 'film_id' })
   film: Film;

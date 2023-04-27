@@ -16,7 +16,11 @@ import {
 } from './entities';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
+import {
+  ICreateFilm,
+  IQueryParamsFilter,
+  IUpdateGenre,
+} from './interfaces/film.service.interfaces';
 
 @Injectable()
 export class FilmService {
@@ -43,23 +47,14 @@ export class FilmService {
   async getFilm(film_id: string) {
     const film = await this.filmRepository.findOne({
       where: { film_id },
-      include: { all: true },
-    });
-
-    if (!film) {
-      return null;
-    }
-
-    return film;
-  }
-
-  async getAllFilms() {
-    const films = await this.filmRepository.findAll({
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -91,6 +86,57 @@ export class FilmService {
       ],
     });
 
+    if (!film) {
+      return null;
+    }
+
+    return film;
+  }
+
+  async getAllFilms(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
+    const films = await this.filmRepository.findAll({
+      include: [
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
+        {
+          model: Genre,
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+      limit: limit ? +limit : 100,
+    });
+
     return films;
   }
 
@@ -100,10 +146,13 @@ export class FilmService {
     const filmsById = await this.filmRepository.findAll({
       where: { film_id: films },
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -138,6 +187,58 @@ export class FilmService {
     return filmsById;
   }
 
+  async getFilmsByName(queryName: { name: string }) {
+    const { name } = queryName;
+
+    const filmsByName = await this.filmRepository.findAll({
+      where: {
+        [Op.or]: [
+          { name_ru: { [Op.substring]: name } },
+          { name_en: { [Op.substring]: name } },
+        ],
+      },
+      include: [
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
+        {
+          model: Genre,
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Quality,
+          attributes: ['quality_id', 'quality'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesAudio',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Language,
+          as: 'languagesSubtitle',
+          attributes: ['language_id', 'language'],
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+    });
+
+    return filmsByName;
+  }
+
   async getFilteredFilms(query: IQueryParamsFilter) {
     const { genres, country, year, rating, assessments, film_maker, actor } =
       query;
@@ -150,11 +251,20 @@ export class FilmService {
         assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
       },
       include: [
-        { model: Trailer, attributes: ['trailer_id', 'trailer'] },
+        {
+          model: Trailer,
+          attributes: ['trailer_id', 'trailer', 'img', 'date'],
+        },
         {
           model: Genre,
-          where: { genre_ru: genres || { [Op.notLike]: '' } },
-          attributes: ['genre_id', 'genre_ru', 'genre_en'],
+          where: {
+            [Op.or]: [
+              { genre_ru: genres || { [Op.notLike]: '' } },
+              { genre_en: genres || { [Op.notLike]: '' } },
+              { slug: genres || { [Op.notLike]: '' } },
+            ],
+          },
+          attributes: ['genre_id', 'genre_ru', 'genre_en', 'slug'],
           through: {
             attributes: [],
           },
@@ -195,7 +305,7 @@ export class FilmService {
             {
               first_name: film_maker[0],
               last_name: film_maker[1],
-              film_role: 'режиссёр',
+              film_role: 'режиссер',
             },
           ),
         )
@@ -237,7 +347,7 @@ export class FilmService {
     return result;
   }
 
-  async addFilm(film: Record<string | number, string[]>) {
+  async addFilm(film: ICreateFilm) {
     const film_id: string = this.generateUUID();
 
     await this.filmRepository.create({ film_id, ...film });
@@ -263,10 +373,12 @@ export class FilmService {
       });
     });
 
-    trailers.forEach(async (trailer: string) => {
+    trailers.forEach(async (trailer) => {
       await this.trailerRepository.create({
         trailer_id: this.generateUUID(),
-        trailer,
+        trailer: trailer.trailer || '',
+        img: trailer.img || '',
+        date: trailer.date || '',
         film_id,
       });
     });
@@ -307,7 +419,9 @@ export class FilmService {
       });
     });
 
-    genres.forEach(async (genre_ru: string) => {
+    genres.forEach(async (genreData) => {
+      const { genre_ru, genre_en, slug } = genreData;
+
       const genre = await this.genreRepository.findOrCreate({
         where: {
           genre_ru,
@@ -315,7 +429,8 @@ export class FilmService {
         defaults: {
           genre_id: this.generateUUID(),
           genre_ru,
-          genre_en: '',
+          genre_en,
+          slug,
         },
       });
 
@@ -324,7 +439,7 @@ export class FilmService {
       await this.filmGenreRepository.create({
         film_genre_id: this.generateUUID(),
         film_id,
-        genre_id: genre_id,
+        genre_id,
       });
     });
 
@@ -375,15 +490,21 @@ export class FilmService {
     return genre;
   }
 
-  async getAllGenres() {
-    const genres = await this.genreRepository.findAll();
+  async getAllGenres(queryLimit: { limit: string }) {
+    const { limit } = queryLimit;
+
+    const genres = await this.genreRepository.findAll({
+      limit: limit ? +limit : 100,
+    });
 
     return genres;
   }
 
-  async updateGenre(genre_id: string, genre_ru: string, genre_en: string) {
+  async updateGenre(data: IUpdateGenre) {
+    const { genre_id, genre_ru, genre_en, slug } = data;
+
     await this.genreRepository.update(
-      { genre_ru, genre_en },
+      { genre_ru, genre_en, slug },
       { where: { genre_id } },
     );
 

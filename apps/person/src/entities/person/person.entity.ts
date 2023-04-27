@@ -16,7 +16,6 @@ interface PersonCreationAttrs {
   last_name_ru: string;
   first_name_en: string;
   last_name_en: string;
-  description: string;
   img: string;
 }
 
@@ -40,9 +39,6 @@ export class Person extends Model<Person, PersonCreationAttrs> {
 
   @Column({ type: DataType.STRING, allowNull: false })
   last_name_en: string;
-
-  @Column({ type: DataType.TEXT, allowNull: true })
-  description: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
   img: string;
