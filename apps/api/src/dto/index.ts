@@ -6,3 +6,5 @@ export * from './genre-dto/update-genre-name.dto';
 export * from './person-dto/create-persons.dto';
 export * from './person-dto/person-query.dto';
 export * from './user-dto/create-user-dto';
+export * from './roles-dto/create-role-dto';
+export * from './roles-dto/create-user-role-dto';

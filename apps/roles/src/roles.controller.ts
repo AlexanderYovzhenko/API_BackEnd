@@ -18,13 +18,23 @@ export class RolesController {
   ) {}
 
   @MessagePattern({ cmd: 'create_role' })
-  create(
+  async createRole(
     @Ctx() context: RmqContext,
     @Payload() role: Record<string | number, string[]>,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
     return this.roleService.createRole(role);
+  }
+
+  @MessagePattern({ cmd: 'create_user_role' })
+  async createUserRole(
+    @Ctx() context: RmqContext,
+    @Payload() data: Record<string | number, string[]>,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.roleService.createUserRole(data);
   }
 
   @MessagePattern({ cmd: 'get_role_by_value' })

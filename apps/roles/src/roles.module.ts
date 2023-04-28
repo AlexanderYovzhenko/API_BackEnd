@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { RolesController } from './roles.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Role, UsersRoles } from './entities/';
+import { Role, UsersRoles } from './roles-entities';
 import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
 @Module({
   providers: [

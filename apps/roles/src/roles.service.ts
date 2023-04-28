@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Role, UsersRoles } from './entities';
+import { Role, UsersRoles } from './roles-entities';
 
 @Injectable()
 export class RolesService {
@@ -13,6 +13,12 @@ export class RolesService {
     const newRole = await this.roleRepository.create(role);
     return newRole;
   }
+
+  async createUserRole(data) {
+    const newUserRole = await this.usersRolesRepository.create(data);
+    return newUserRole;
+  }
+
   async getRoles() {
     const roles = await this.roleRepository.findAll();
     return roles;
