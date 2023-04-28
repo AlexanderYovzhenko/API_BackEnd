@@ -34,6 +34,8 @@ import {
   UpdateFilmNameDto,
   UpdateGenreNameDto,
   CreateUserDto,
+  CreateRoleDto,
+  CreateUserRoleDto,
 } from './dto';
 
 @ApiTags('Endpoints')
@@ -44,6 +46,7 @@ export class ApiController {
     @Inject('FILM_SERVICE') private readonly filmService: ClientProxy,
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
     @Inject('USERS_SERVICE') private readonly usersService: ClientProxy,
+    @Inject('ROLES_SERVICE') private readonly rolesService: ClientProxy,
     private readonly apiService: ApiService,
   ) {}
 
@@ -460,6 +463,41 @@ export class ApiController {
         cmd: 'create user',
       },
       user,
+    );
+  }
+  @ApiOperation({ summary: 'get roles' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('roles')
+  async getRoles() {
+    return this.rolesService.send(
+      {
+        cmd: 'get_all_roles',
+      },
+      {},
+    );
+  }
+
+  @ApiOperation({ summary: 'create role' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('roles')
+  async addRole(@Body() role: CreateRoleDto) {
+    return this.rolesService.send(
+      {
+        cmd: 'create_role',
+      },
+      role,
+    );
+  }
+
+  @ApiOperation({ summary: 'create user role' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('user_role')
+  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
+    return this.rolesService.send(
+      {
+        cmd: 'create_user_role',
+      },
+      userRole,
     );
   }
 }

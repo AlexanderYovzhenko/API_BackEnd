@@ -184,6 +184,24 @@ services:
       - ./apps/users/.env
     networks:
       - backend
+  roles:
+    container_name: roles
+    build:
+      context: ./
+      dockerfile: ./apps/roles/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - postgres
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev roles # overrides CMD from dockerfile
+    env_file:
+      - ./apps/roles/.env
+    networks:
+      - backend
 
 networks:
   backend:
