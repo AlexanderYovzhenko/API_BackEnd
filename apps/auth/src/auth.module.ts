@@ -2,15 +2,10 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { SequelizeModule } from '@nestjs/sequelize';
-import {
-  PostgresDBModule,
-  SharedModule,
-  SharedService,
-  User,
-} from '@app/shared';
+import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
 
 @Module({
-  imports: [SharedModule, PostgresDBModule, SequelizeModule.forFeature([User])],
+  imports: [SharedModule, PostgresDBModule, SequelizeModule.forFeature([])],
   controllers: [AuthController],
   providers: [
     AuthService,

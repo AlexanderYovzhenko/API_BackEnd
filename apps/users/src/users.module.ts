@@ -3,12 +3,9 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 
-import {
-  PostgresDBModule,
-  SharedModule,
-  SharedService,
-  User,
-} from '@app/shared';
+import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
+import { User } from './entities/users.entity';
+
 @Module({
   controllers: [UsersController],
   providers: [
@@ -18,12 +15,7 @@ import {
       useClass: SharedService,
     },
   ],
-  imports: [
-    SharedModule,
-    PostgresDBModule,
-    SequelizeModule.forFeature([User]),
-    SharedModule.registerRmq('USERS_SERVICE', process.env.RABBITMQ_USERS_QUEUE),
-  ],
+  imports: [SharedModule, PostgresDBModule, SequelizeModule.forFeature([User])],
   exports: [UsersService],
 })
 export class UsersModule {}

@@ -7,7 +7,11 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { IQueryParamsFilter } from './interfaces/film.service.interfaces';
+import {
+  ICreateFilm,
+  IQueryParamsFilter,
+  IUpdateGenre,
+} from './interfaces/film.service.interfaces';
 
 @Controller()
 export class FilmController {
@@ -25,10 +29,13 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_all_films' })
-  async getAllFilms(@Ctx() context: RmqContext) {
+  async getAllFilms(
+    @Ctx() context: RmqContext,
+    @Payload() queryLimit: { limit: string },
+  ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.getAllFilms();
+    return await this.filmService.getAllFilms(queryLimit);
   }
 
   @MessagePattern({ cmd: 'get_films_by_id' })
@@ -39,6 +46,16 @@ export class FilmController {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getFilmsById(filmsId);
+  }
+
+  @MessagePattern({ cmd: 'get_films_by_name' })
+  async getFilmsByName(
+    @Ctx() context: RmqContext,
+    @Payload() queryName: { name: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getFilmsByName(queryName);
   }
 
   @MessagePattern({ cmd: 'get_filtered_films' })
@@ -53,10 +70,7 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'add_film' })
-  async addFilm(
-    @Ctx() context: RmqContext,
-    @Payload() film: Record<string | number, string[]>,
-  ) {
+  async addFilm(@Ctx() context: RmqContext, @Payload() film: ICreateFilm) {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.addFilm(film);
@@ -92,24 +106,23 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'get_all_genres' })
-  async getAllGenres(@Ctx() context: RmqContext) {
+  async getAllGenres(
+    @Ctx() context: RmqContext,
+    @Payload() queryLimit: { limit: string },
+  ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.getAllGenres();
+    return await this.filmService.getAllGenres(queryLimit);
   }
 
   @MessagePattern({ cmd: 'update_genre_name' })
   async updateGenre(
     @Ctx() context: RmqContext,
     @Payload()
-    data: { genre_id: string; genre_ru: string; genre_en: string },
+    data: IUpdateGenre,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.updateGenre(
-      data.genre_id,
-      data.genre_ru,
-      data.genre_en,
-    );
+    return await this.filmService.updateGenre(data);
   }
 }
