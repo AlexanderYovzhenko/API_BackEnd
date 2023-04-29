@@ -8,18 +8,9 @@ export * from './services/shared.service';
 // guards
 
 // entities
-export * from './entities/user.entity';
 
 // interfaces - shared
 export * from './interfaces/shared.service.interface';
-
-// interfaces - repository
-
-// base repository
-
-// repositories
-
-// interceptors
 
 // logger
 export * from './utils/logger/logger-winston.config';
