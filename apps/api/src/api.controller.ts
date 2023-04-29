@@ -88,8 +88,8 @@ export class ApiController {
     return film;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'get all films' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('films')
@@ -169,8 +169,8 @@ export class ApiController {
     );
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'created film' })
   @ApiResponse({ status: HttpStatus.CREATED })
   @Post('films')
@@ -184,8 +184,8 @@ export class ApiController {
     );
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'update film name' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
@@ -220,8 +220,8 @@ export class ApiController {
     return updateFilm;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'delete film' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
@@ -279,8 +279,8 @@ export class ApiController {
     return genre;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'get all genres' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('genres')
@@ -298,8 +298,8 @@ export class ApiController {
     return genres;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'update genre name' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
@@ -419,8 +419,8 @@ export class ApiController {
     return persons;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'created persons from film' })
   @ApiResponse({ status: HttpStatus.CREATED })
   @Post('persons')
@@ -438,8 +438,8 @@ export class ApiController {
     return validator.isUUID(uuid);
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'get all users' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('users')
@@ -456,8 +456,8 @@ export class ApiController {
     return users;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'get user by email' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('users/:email')
@@ -486,6 +486,7 @@ export class ApiController {
       user,
     );
   }
+
   @ApiOperation({ summary: 'get roles' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('roles')

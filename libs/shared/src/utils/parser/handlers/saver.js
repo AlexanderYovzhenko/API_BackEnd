@@ -32,7 +32,7 @@ async function savePerson(dataPersons) {
   console.info(dataPersons);
 
   try {
-    const resFilms = await fetch(urlFilms, {
+    const resFilms = await fetch(urlFilms + '?' + new URLSearchParams({ limit: 1000 }), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -53,132 +53,133 @@ async function savePerson(dataPersons) {
             {  
               film_role: ROLES[0],
               film_role_slug: slugify(ROLES[0]),
-              ...dataPersons[await randomInteger(1, 7, checkPerson, 1)] 
+              ...dataPersons[await randomInteger(1, 5, checkPerson, 1)] 
             },
             {  
               film_role: ROLES[1],
               film_role_slug: slugify(ROLES[1]),
-              ...dataPersons[await randomInteger(1, 10, checkPerson, 2)] 
+              ...dataPersons[await randomInteger(6, 10, checkPerson, 2)] 
             },
             {  
               film_role: ROLES[1],
               film_role_slug: slugify(ROLES[1]),
-              ...dataPersons[await randomInteger(1, 10, checkPerson, 2)] 
+              ...dataPersons[await randomInteger(6, 10, checkPerson, 2)] 
             },
             {  
               film_role: ROLES[2],
               film_role_slug: slugify(ROLES[2]),
-              ...dataPersons[await randomInteger(1, 15, checkPerson, 3)] 
+              ...dataPersons[await randomInteger(10, 15, checkPerson, 3)] 
             },
             {  
               film_role: ROLES[2],
               film_role_slug: slugify(ROLES[2]),
-              ...dataPersons[await randomInteger(1, 15, checkPerson, 3)] 
+              ...dataPersons[await randomInteger(11, 15, checkPerson, 3)] 
             },
             {  
               film_role: ROLES[2],
               film_role_slug: slugify(ROLES[2]),
-              ...dataPersons[await randomInteger(1, 15, checkPerson, 3)] 
+              ...dataPersons[await randomInteger(11, 15, checkPerson, 3)] 
             },
             {  
               film_role: ROLES[3],
               film_role_slug: slugify(ROLES[3]),
-              ...dataPersons[await randomInteger(15, 20, checkPerson, 1)] 
+              ...dataPersons[await randomInteger(16, 20, checkPerson, 1)] 
             },
             {  
               film_role: ROLES[4],
               film_role_slug: slugify(ROLES[4]),
-              ...dataPersons[await randomInteger(20, 30, checkPerson, 1)] 
+              ...dataPersons[await randomInteger(21, 25, checkPerson, 1)] 
             },
             {  
               film_role: ROLES[5],
               film_role_slug: slugify(ROLES[5]),
-              ...dataPersons[await randomInteger(20, 30, checkPerson, 2)] 
+              ...dataPersons[await randomInteger(21, 29, checkPerson, 2)] 
             },
             {  
               film_role: ROLES[5],
               film_role_slug: slugify(ROLES[5]),
-              ...dataPersons[await randomInteger(20, 30, checkPerson, 2)] 
+              ...dataPersons[await randomInteger(26, 29, checkPerson, 2)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[6],
               film_role_slug: slugify(ROLES[6]),
-              ...dataPersons[await randomInteger(30, 49, checkPerson, 10)] 
+              ...dataPersons[await randomInteger(30, 45, checkPerson, 10)] 
             },
             {  
               film_role: ROLES[7],
               film_role_slug: slugify(ROLES[7]),
-              ...dataPersons[await randomInteger(39, 49, checkPerson, 5)] 
+              ...dataPersons[await randomInteger(41, 49, checkPerson, 5)] 
             },
             {  
               film_role: ROLES[7],
               film_role_slug: slugify(ROLES[7]),
-              ...dataPersons[await randomInteger(39, 49, checkPerson, 5)] 
+              ...dataPersons[await randomInteger(41, 49, checkPerson, 5)] 
             },
             {  
               film_role: ROLES[7],
               film_role_slug: slugify(ROLES[7]),
-              ...dataPersons[await randomInteger(39, 49, checkPerson, 5)] 
+              ...dataPersons[await randomInteger(41, 49, checkPerson, 5)] 
             },
             {  
               film_role: ROLES[7],
               film_role_slug: slugify(ROLES[7]),
-              ...dataPersons[await randomInteger(39, 49, checkPerson, 5)] 
+              ...dataPersons[await randomInteger(41, 49, checkPerson, 5)] 
             },
             {  
               film_role: ROLES[7],
               film_role_slug: slugify(ROLES[7]),
-              ...dataPersons[await randomInteger(39, 49, checkPerson, 5)] 
+              ...dataPersons[await randomInteger(41, 49, checkPerson, 5)] 
             },
           ] 
         }),
       });
   
+      console.info(index);
       console.info(resPerson.status);
     }
 

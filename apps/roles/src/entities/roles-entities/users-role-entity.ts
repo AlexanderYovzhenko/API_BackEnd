@@ -5,13 +5,13 @@ import {
   DataType,
   ForeignKey,
 } from 'sequelize-typescript';
+import { Role } from './role-entity';
+import { User } from 'apps/users/src/entities/users.entity';
 
 interface RoleCreationAttr {
   value: string;
   description: string;
 }
-import { User } from '../../../users/src/entities/users.entity';
-import { Role } from './role-entity';
 
 @Table({ tableName: 'users_roles' })
 export class UsersRoles extends Model<Role, RoleCreationAttr> {
