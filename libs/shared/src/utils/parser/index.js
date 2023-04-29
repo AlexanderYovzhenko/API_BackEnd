@@ -55,5 +55,5 @@ function timeout(interval) {
   return new Promise(resolve => setTimeout(resolve, interval));
 }
 
-film();
-person();
+// film(); // parse film
+person(); // parse person
