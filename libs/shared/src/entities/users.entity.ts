@@ -4,6 +4,7 @@ interface UserCreationAttr {
   email: string;
   password: string;
 }
+
 @Table({ tableName: 'users' })
 export class User extends Model<User, UserCreationAttr> {
   @Column({
