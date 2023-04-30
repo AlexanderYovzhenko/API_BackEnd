@@ -6,7 +6,7 @@ import {
   ForeignKey,
 } from 'sequelize-typescript';
 import { Role } from './role-entity';
-import { User } from 'apps/users/src/entities/users.entity';
+import { User } from '@app/shared';
 
 interface RoleCreationAttr {
   value: string;

@@ -3,8 +3,12 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 
-import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
-import { User } from './entities/users.entity';
+import {
+  PostgresDBModule,
+  SharedModule,
+  SharedService,
+  User,
+} from '@app/shared';
 
 @Module({
   controllers: [UsersController],

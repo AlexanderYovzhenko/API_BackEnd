@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from './entities/users.entity';
 import { CreateUserDto } from '../dto/createUserDto';
 //import { ClientProxy } from '@nestjs/microservices';
 import { UserInterface } from './interfaces/user.interface';
+import { User } from '@app/shared';
 
 @Injectable()
 export class UsersService {
