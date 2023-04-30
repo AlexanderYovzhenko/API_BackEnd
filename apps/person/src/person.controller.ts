@@ -10,7 +10,7 @@ import {
 import {
   ICreatePerson,
   IShortPerson,
-} from './interface/person.service.interfaces';
+} from './interface/person-service.interfaces';
 
 @Controller()
 export class PersonController {

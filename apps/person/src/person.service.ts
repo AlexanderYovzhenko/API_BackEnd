@@ -7,7 +7,7 @@ import { FilmPerson, FilmRole, Person, PersonFilmRole } from './entities';
 import {
   ICreatePerson,
   IShortPerson,
-} from './interface/person.service.interfaces';
+} from './interface/person-service.interfaces';
 
 @Injectable()
 export class PersonService {
