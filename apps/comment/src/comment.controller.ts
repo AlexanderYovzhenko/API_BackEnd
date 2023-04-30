@@ -1,12 +1,25 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { CommentService } from './comment.service';
+import { SharedService } from '@app/shared';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 
 @Controller()
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(
+    @Inject('SharedServiceInterface')
+    private readonly sharedService: SharedService,
+    private readonly commentService: CommentService,
+  ) {}
 
-  @Get()
-  getHello(): string {
-    return this.commentService.getHello();
+  @MessagePattern({ cmd: 'get_person' })
+  async getPerson(@Ctx() context: RmqContext, @Payload() person_id: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.commentService.getHello();
   }
 }
