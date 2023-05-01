@@ -35,6 +35,7 @@ async function bootstrap() {
 
   await app.listen(PORT, '0.0.0.0', () => {
     console.info(`Server is running on port ${PORT}`);
+    console.info(`Docs - http://localhost:4000/api/docs`);
   });
 }
 
