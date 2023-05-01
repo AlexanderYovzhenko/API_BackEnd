@@ -1,10 +1,20 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { SubComment } from '../sub-comment/sub_comment.entity';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { User } from '@app/shared';
 
 interface CommentCreationAttrs {
   comment_id: string;
-  title?: string;
+  title?: string | null;
   text: string;
+  film_id?: string | null;
+  parent_id?: string | null;
+  user_id: number;
 }
 
 @Table({ tableName: 'comment' })
@@ -22,16 +32,16 @@ export class Comment extends Model<Comment, CommentCreationAttrs> {
   @Column({ type: DataType.TEXT, allowNull: false })
   text: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: true })
   film_id: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
-  user_id: string;
+  @BelongsTo(() => User, { foreignKey: 'user_id' })
+  user: User;
 
-  @HasMany(() => SubComment, {
-    foreignKey: 'comment_id',
+  @HasMany(() => Comment, {
+    foreignKey: 'parent_id',
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  sub_comments: SubComment[];
+  sub_comments: Comment[];
 }

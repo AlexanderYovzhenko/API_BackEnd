@@ -1,15 +1,20 @@
 import { Module } from '@nestjs/common';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
-import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
+import {
+  PostgresDBModule,
+  SharedModule,
+  SharedService,
+  User,
+} from '@app/shared';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Comment, SubComment } from './entities';
+import { Comment } from './entities';
 
 @Module({
   imports: [
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([Comment, SubComment]),
+    SequelizeModule.forFeature([Comment, User]),
   ],
   controllers: [CommentController],
   providers: [

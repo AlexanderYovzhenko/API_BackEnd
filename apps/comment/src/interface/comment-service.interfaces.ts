@@ -1,15 +1,12 @@
-// export interface ICreatePerson {
-//   film_role: string;
-//   film_role_slug: string;
-//   first_name_ru: string;
-//   last_name_ru: string;
-//   first_name_en: string;
-//   last_name_en: string;
-//   img: string;
-// }
+export interface ICreateComment {
+  title?: string | null;
+  text: string;
+  film_id?: string | null;
+  parent_id?: string | null;
+  user_id: number;
+}
 
-// export interface IShortPerson {
-//   first_name: string;
-//   last_name: string;
-//   film_role: string;
-// }
+export interface IUpdateComment {
+  title?: string;
+  text: string;
+}
