@@ -13,3 +13,4 @@ export * from './roles-dto/create-role-dto';
 export * from './roles-dto/create-user-role-dto';
 export * from './comment-dto/create-comment.dto';
 export * from './comment-dto/update-comment.dto';
+export * from './country-dto/countries-name-query.dto';

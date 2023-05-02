@@ -45,6 +45,8 @@ export class FilmService {
     return uuid();
   }
 
+  // FILMS  -------------------------------------------------------------
+
   async getFilm(film_id: string) {
     const film = await this.filmRepository.findOne({
       where: { film_id },
@@ -498,6 +500,32 @@ export class FilmService {
 
     return checkFilm;
   }
+
+  // COUNTRIES  -------------------------------------------------------------
+
+  async getAllCountries() {
+    const countries = await this.filmRepository.findAll({
+      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
+    });
+
+    return countries;
+  }
+
+  async getCountriesByName(queryCountry: { country: string }) {
+    const { country } = queryCountry;
+
+    const countries = await this.filmRepository.findAll({
+      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
+
+      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+        [Op.substring]: country.toLowerCase(),
+      }),
+    });
+
+    return countries;
+  }
+
+  // GENRES  -------------------------------------------------------------
 
   async getGenre(genre_id: string) {
     const genre = await this.genreRepository.findOne({
