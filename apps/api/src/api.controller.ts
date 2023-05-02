@@ -441,12 +441,12 @@ export class ApiController {
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons who fits' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
-  @Get('filter/persons')
-  async getPersonsWhoFits(@Query() person: PersonQueryDto) {
+  @Get('name/persons')
+  async getPersonsByName(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
       this.personService.send(
         {
-          cmd: 'get_persons_who_fits',
+          cmd: 'get_persons_by_name',
         },
 
         person,

@@ -4,8 +4,9 @@ export interface IQueryParamsFilter {
   year?: string;
   rating?: string;
   assessments?: string;
-  film_maker?: string[];
-  actor?: string[];
+  rezhisser?: string[];
+  aktyor?: string[];
+  limit?: string;
 }
 
 export interface ICreateFilm {
