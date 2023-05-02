@@ -40,6 +40,7 @@ import {
   CreateCommentDto,
   UpdateCommentDto,
   CreatePersonDto,
+  CountriesNameQueryDto,
 } from './dto';
 import { RolesGuard } from './guards/roles_guard';
 import { Roles } from './guards/roles_auth_decorator';
@@ -274,6 +275,45 @@ export class ApiController {
     return deleteFilm;
   }
 
+  // COUNTRIES ENDPOINTS -------------------------------------------------------------
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  @ApiTags('Country')
+  @ApiOperation({ summary: 'get all countries' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('countries')
+  async getAllCountries() {
+    const countries = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'get_all_countries',
+        },
+        {},
+      ),
+    );
+
+    return countries;
+  }
+
+  @ApiTags('Country')
+  @ApiOperation({ summary: 'get country by name' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('name/countries')
+  async getCountriesByName(@Query() queryCountry: CountriesNameQueryDto) {
+    const countries = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'get_countries_by_name',
+        },
+
+        queryCountry,
+      ),
+    );
+
+    return countries;
+  }
+
   // GENRES ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Genre')
@@ -441,12 +481,12 @@ export class ApiController {
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons who fits' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
-  @Get('filter/persons')
-  async getPersonsWhoFits(@Query() person: PersonQueryDto) {
+  @Get('name/persons')
+  async getPersonsByName(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
       this.personService.send(
         {
-          cmd: 'get_persons_who_fits',
+          cmd: 'get_persons_by_name',
         },
 
         person,

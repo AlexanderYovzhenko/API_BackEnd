@@ -47,15 +47,15 @@ export class PersonController {
     return await this.personService.getPersonsFromFilm(film_id);
   }
 
-  @MessagePattern({ cmd: 'get_persons_who_fits' })
-  async getPersonsWhoFits(
+  @MessagePattern({ cmd: 'get_persons_by_name' })
+  async getPersonsByName(
     @Ctx() context: RmqContext,
     @Payload()
     person: IShortPerson,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.personService.getPersonsWhoFits(person);
+    return await this.personService.getPersonsByName(person);
   }
 
   @MessagePattern({ cmd: 'get_films_by_person' })

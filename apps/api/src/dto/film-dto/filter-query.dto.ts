@@ -22,15 +22,22 @@ export class FilterQueryDto {
 
   @ApiProperty({
     example: ['Мелисса', 'Сейджмиллер'],
-    description: 'filmmaker',
+    description: 'rezhisser',
     required: false,
   })
-  readonly film_maker?: string[];
+  readonly rezhisser?: string[];
 
   @ApiProperty({
-    example: ['Магдалено', 'Роблес'],
-    description: 'actor',
+    example: ['Илэйн', 'МакЛорин'],
+    description: 'aktyor',
     required: false,
   })
-  readonly actor?: string[];
+  readonly aktyor?: string[];
+
+  @ApiProperty({
+    example: 20,
+    description: 'limit amount items',
+    required: false,
+  })
+  readonly limit?: string;
 }
