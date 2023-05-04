@@ -43,7 +43,6 @@ import {
   UpdateCommentDto,
   CreatePersonDto,
   CountriesNameQueryDto,
-
 } from './dto';
 import { RolesGuard } from './guards/roles_guard';
 import { Roles } from './guards/roles_auth_decorator';
@@ -618,7 +617,6 @@ export class ApiController {
     );
   }
 
-
   @ApiOperation({ summary: 'create profile' })
   @ApiResponse({ status: HttpStatus.CREATED })
   @Post('profile')
@@ -717,6 +715,15 @@ export class ApiController {
         {
           user_id,
           ...profileInfo,
+        },
+      ),
+    );
+    if (!updatedProfile) {
+      throw new NotFoundException('Film not found');
+    }
+
+    return updatedProfile;
+  }
 
   // COMMENT ENDPOINTS -------------------------------------------------------------
 
@@ -818,13 +825,11 @@ export class ApiController {
         },
       ),
     );
-
-
-    if (!updatedProfile) {
-      throw new NotFoundException('Film not found');
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
     }
 
-    return updatedProfile;
+    return comment;
   }
   @ApiOperation({ summary: 'login' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -844,20 +849,19 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK })
   @Post('signup')
   async signUp(@Body() data: CreateUserDto) {
-    const hashedPassword = this.authService.send(
+    const hashedPassword = await this.authService.send(
       {
         cmd: 'signup',
       },
       data,
     );
 
-    return this.createUser({ ...data, hashedPassword });
-
-    if (!comment) {
-      throw new NotFoundException('Comment not found');
-    }
-
-    return comment;
+    return this.usersService.send(
+      {
+        cmd: 'create user',
+      },
+      { ...data, password: hashedPassword },
+    );
   }
 
   @ApiTags('Comment')
@@ -888,6 +892,5 @@ export class ApiController {
     }
 
     return comment;
-
   }
 }
