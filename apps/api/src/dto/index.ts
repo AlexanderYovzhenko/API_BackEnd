@@ -10,3 +10,5 @@ export * from './limit-dto/limit-query.dto';
 export * from './user-dto/create-user-dto';
 export * from './roles-dto/create-role-dto';
 export * from './roles-dto/create-user-role-dto';
+export * from './profile-dto/create-profile-dto';
+export * from './profile-dto/update-profile-dto';
