@@ -719,7 +719,7 @@ export class ApiController {
       ),
     );
     if (!updatedProfile) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('Profile not found');
     }
 
     return updatedProfile;
