@@ -30,6 +30,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     SharedModule.registerRmq(
       'PROFILE_SERVICE',
       process.env.RABBITMQ_PROFILE_QUEUE,
+      'COMMENT_SERVICE',
+      process.env.RABBITMQ_COMMENT_QUEUE,
     ),
   ],
   controllers: [ApiController],

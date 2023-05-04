@@ -7,7 +7,8 @@ import { FilmPerson, FilmRole, Person, PersonFilmRole } from './entities';
 import {
   ICreatePerson,
   IShortPerson,
-} from './interface/person.service.interfaces';
+} from './interface/person-service.interfaces';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class PersonService {
@@ -96,16 +97,38 @@ export class PersonService {
     );
   }
 
-  async getPersonsWhoFits(person: IShortPerson) {
+  async getPersonsByName(person: IShortPerson) {
     const { first_name, last_name, film_role } = person;
+    const first_name_lower = first_name ? first_name.toLowerCase() : '';
+    const last_name_lower = last_name ? last_name.toLowerCase() : '';
 
     const personsFits = await this.personRepository.findAll({
       where: {
         [Op.or]: [
-          { first_name_ru: { [Op.substring]: first_name } },
-          { last_name_ru: { [Op.substring]: last_name } },
-          { first_name_en: { [Op.substring]: first_name } },
-          { last_name_en: { [Op.substring]: last_name } },
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('first_name_ru')),
+            {
+              [Op.substring]: first_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('last_name_ru')),
+            {
+              [Op.substring]: last_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('first_name_en')),
+            {
+              [Op.substring]: first_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('last_name_en')),
+            {
+              [Op.substring]: last_name_lower,
+            },
+          ),
         ],
       },
       include: [
@@ -129,18 +152,42 @@ export class PersonService {
 
   async getFilmsByPerson(person: IShortPerson) {
     const { first_name, last_name, film_role } = person;
+    const first_name_lower = first_name ? first_name.toLowerCase() : '';
+    const last_name_lower = last_name ? last_name.toLowerCase() : '';
 
     const filmsPerson = await this.personRepository.findOne({
       where: {
         [Op.or]: [
-          { first_name_ru: first_name, last_name_ru: last_name },
-          { first_name_en: first_name, last_name_en: last_name },
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('first_name_ru')),
+            {
+              [Op.substring]: first_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('last_name_ru')),
+            {
+              [Op.substring]: last_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('first_name_en')),
+            {
+              [Op.substring]: first_name_lower,
+            },
+          ),
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('last_name_en')),
+            {
+              [Op.substring]: last_name_lower,
+            },
+          ),
         ],
       },
       include: [
         {
           model: FilmRole,
-          where: { film_role: film_role.toLocaleLowerCase() },
+          where: { film_role: film_role.toLowerCase() },
           attributes: [],
           through: {
             attributes: [],
@@ -186,8 +233,8 @@ export class PersonService {
         where: { film_role: film_role.toLowerCase() },
         defaults: {
           film_role_id: this.generateUUID(),
-          film_role: film_role.toLocaleLowerCase(),
-          slug: film_role_slug.toLocaleLowerCase(),
+          film_role: film_role.toLowerCase(),
+          slug: film_role_slug.toLowerCase(),
         },
       });
 

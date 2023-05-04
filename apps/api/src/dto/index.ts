@@ -5,6 +5,7 @@ export * from './film-dto/update-film-name.dto';
 export * from './film-dto/films-name-query.dto';
 export * from './genre-dto/update-genre-name.dto';
 export * from './person-dto/create-persons.dto';
+export * from './person-dto/create-person.dto';
 export * from './person-dto/person-query.dto';
 export * from './limit-dto/limit-query.dto';
 export * from './user-dto/create-user-dto';
@@ -12,3 +13,7 @@ export * from './roles-dto/create-role-dto';
 export * from './roles-dto/create-user-role-dto';
 export * from './profile-dto/create-profile-dto';
 export * from './profile-dto/update-profile-dto';
+export * from './comment-dto/create-comment.dto';
+export * from './comment-dto/update-comment.dto';
+export * from './country-dto/countries-name-query.dto';
+

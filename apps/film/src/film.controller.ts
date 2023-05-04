@@ -98,6 +98,23 @@ export class FilmController {
     return await this.filmService.deleteFilm(film_id);
   }
 
+  @MessagePattern({ cmd: 'get_all_countries' })
+  async getAllCountries(@Ctx() context: RmqContext) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getAllCountries();
+  }
+
+  @MessagePattern({ cmd: 'get_countries_by_name' })
+  async getCountriesByName(
+    @Ctx() context: RmqContext,
+    @Payload() queryCountry: { country: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.filmService.getCountriesByName(queryCountry);
+  }
+
   @MessagePattern({ cmd: 'get_genre' })
   async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: string) {
     this.sharedService.acknowledgeMessage(context);

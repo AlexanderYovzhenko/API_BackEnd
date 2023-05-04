@@ -21,6 +21,7 @@ import {
   IQueryParamsFilter,
   IUpdateGenre,
 } from './interfaces/film.service.interfaces';
+import sequelize from 'sequelize';
 
 @Injectable()
 export class FilmService {
@@ -43,6 +44,8 @@ export class FilmService {
   generateUUID(): string {
     return uuid();
   }
+
+  // FILMS  -------------------------------------------------------------
 
   async getFilm(film_id: string) {
     const film = await this.filmRepository.findOne({
@@ -189,12 +192,18 @@ export class FilmService {
 
   async getFilmsByName(queryName: { name: string }) {
     const { name } = queryName;
+    const lowerName = name.toLowerCase();
 
     const filmsByName = await this.filmRepository.findAll({
       where: {
         [Op.or]: [
-          { name_ru: { [Op.substring]: name } },
-          { name_en: { [Op.substring]: name } },
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('name_ru')), {
+            [Op.substring]: lowerName,
+          }),
+
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('name_en')), {
+            [Op.substring]: lowerName,
+          }),
         ],
       },
       include: [
@@ -240,15 +249,33 @@ export class FilmService {
   }
 
   async getFilteredFilms(query: IQueryParamsFilter) {
-    const { genres, country, year, rating, assessments, film_maker, actor } =
-      query;
+    const {
+      genres,
+      country,
+      year,
+      rating,
+      assessments,
+      rezhisser,
+      aktyor,
+      limit,
+    } = query;
 
     const filteredFilms = await this.filmRepository.findAll({
       where: {
-        country: country || { [Op.notLike]: '' },
-        year: year || { [Op.ne]: 0 },
-        rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 },
-        assessments: assessments ? { [Op.gte]: +assessments } : { [Op.gte]: 0 },
+        [Op.and]: [
+          country
+            ? sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+                [Op.substring]: country.toLowerCase(),
+              })
+            : { country: { [Op.notLike]: '' } },
+          { year: year || { [Op.ne]: 0 } },
+          { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
+          {
+            assessments: assessments
+              ? { [Op.gte]: +assessments }
+              : { [Op.gte]: 0 },
+          },
+        ],
       },
       include: [
         {
@@ -296,15 +323,15 @@ export class FilmService {
       ],
     });
 
-    const filmsFilmMaker = film_maker
+    const filmsFilmMaker = rezhisser
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: film_maker[0],
-              last_name: film_maker[1],
+              first_name: rezhisser[0],
+              last_name: rezhisser[1],
               film_role: 'режиссер',
             },
           ),
@@ -315,15 +342,15 @@ export class FilmService {
       ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
       : [];
 
-    const filmsActor = actor
+    const filmsActor = aktyor
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: actor[0],
-              last_name: actor[1],
+              first_name: aktyor[0],
+              last_name: aktyor[1],
               film_role: 'актёр',
             },
           ),
@@ -336,15 +363,17 @@ export class FilmService {
 
     let result = filteredFilms;
 
-    if (film_maker) {
+    if (rezhisser) {
       result = result.filter((film) => filmsIdFilmMaker.includes(film.film_id));
     }
 
-    if (actor) {
+    if (aktyor) {
       result = result.filter((film) => filmsIdActor.includes(film.film_id));
     }
 
-    return result;
+    const limitFilm = limit ? +limit : 100;
+
+    return result.slice(0, limitFilm);
   }
 
   async addFilm(film: ICreateFilm) {
@@ -471,6 +500,32 @@ export class FilmService {
 
     return checkFilm;
   }
+
+  // COUNTRIES  -------------------------------------------------------------
+
+  async getAllCountries() {
+    const countries = await this.filmRepository.findAll({
+      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
+    });
+
+    return countries;
+  }
+
+  async getCountriesByName(queryCountry: { country: string }) {
+    const { country } = queryCountry;
+
+    const countries = await this.filmRepository.findAll({
+      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
+
+      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+        [Op.substring]: country.toLowerCase(),
+      }),
+    });
+
+    return countries;
+  }
+
+  // GENRES  -------------------------------------------------------------
 
   async getGenre(genre_id: string) {
     const genre = await this.genreRepository.findOne({
