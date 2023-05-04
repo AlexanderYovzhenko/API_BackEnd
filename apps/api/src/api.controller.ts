@@ -53,6 +53,7 @@ export class ApiController {
     @Inject('USERS_SERVICE') private readonly usersService: ClientProxy,
     @Inject('ROLES_SERVICE') private readonly rolesService: ClientProxy,
     @Inject('PROFILE_SERVICE') private readonly profileService: ClientProxy,
+    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     private readonly apiService: ApiService,
   ) {}
 
@@ -633,5 +634,32 @@ export class ApiController {
     }
 
     return updatedProfile;
+  }
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('login')
+  async logIn(@Body() data: CreateUserDto) {
+    const token = this.authService.send(
+      {
+        cmd: 'login',
+      },
+      data,
+    );
+
+    return token;
+  }
+
+  @ApiOperation({ summary: 'signup' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('signup')
+  async signUp(@Body() data: CreateUserDto) {
+    const hashedPassword = this.authService.send(
+      {
+        cmd: 'signup',
+      },
+      data,
+    );
+
+    return this.createUser({ ...data, hashedPassword });
   }
 }
