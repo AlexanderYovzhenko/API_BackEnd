@@ -91,7 +91,12 @@ export class FilmService {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -141,7 +146,12 @@ export class FilmService {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
       limit: limit ? +limit : 100,
     });
@@ -189,7 +199,12 @@ export class FilmService {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -247,7 +262,12 @@ export class FilmService {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -325,7 +345,12 @@ export class FilmService {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
