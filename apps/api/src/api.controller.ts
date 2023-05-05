@@ -625,6 +625,9 @@ export class ApiController {
     );
   }
 
+  // PROFILE ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Profile')
   @ApiOperation({ summary: 'create profile' })
   @ApiResponse({ status: HttpStatus.CREATED })
   @Post('profile')
@@ -637,6 +640,7 @@ export class ApiController {
     );
   }
 
+  @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('profile')
@@ -648,6 +652,8 @@ export class ApiController {
       {},
     );
   }
+
+  @ApiTags('Profile')
   @ApiOperation({ summary: 'get profile by user id' })
   @ApiResponse({ status: HttpStatus.OK })
   @Get('profile/:user_id')
@@ -671,6 +677,7 @@ export class ApiController {
     return profile;
   }
 
+  @ApiTags('Profile')
   @ApiOperation({ summary: 'delete profile' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
@@ -700,6 +707,7 @@ export class ApiController {
     return deletedProfile;
   }
 
+  @ApiTags('Profile')
   @ApiOperation({ summary: 'update profile info' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
@@ -731,6 +739,43 @@ export class ApiController {
     }
 
     return updatedProfile;
+  }
+
+  // AUTH ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('login')
+  async logIn(@Body() data: CreateUserDto) {
+    const token = this.authService.send(
+      {
+        cmd: 'login',
+      },
+      data,
+    );
+
+    return token;
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'signup' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('signup')
+  async signUp(@Body() data: CreateUserDto) {
+    const hashedPassword = await this.authService.send(
+      {
+        cmd: 'signup',
+      },
+      data,
+    );
+
+    return this.usersService.send(
+      {
+        cmd: 'create user',
+      },
+      { ...data, password: hashedPassword },
+    );
   }
 
   // COMMENT ENDPOINTS -------------------------------------------------------------
@@ -838,38 +883,6 @@ export class ApiController {
     }
 
     return comment;
-  }
-  @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('login')
-  async logIn(@Body() data: CreateUserDto) {
-    const token = this.authService.send(
-      {
-        cmd: 'login',
-      },
-      data,
-    );
-
-    return token;
-  }
-
-  @ApiOperation({ summary: 'signup' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('signup')
-  async signUp(@Body() data: CreateUserDto) {
-    const hashedPassword = await this.authService.send(
-      {
-        cmd: 'signup',
-      },
-      data,
-    );
-
-    return this.usersService.send(
-      {
-        cmd: 'create user',
-      },
-      { ...data, password: hashedPassword },
-    );
   }
 
   @ApiTags('Comment')
