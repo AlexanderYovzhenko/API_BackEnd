@@ -17,7 +17,7 @@ export class PersonQueryDto {
   readonly last_name?: string;
 
   @ApiProperty({
-    example: 'rezhisser',
+    example: 'filmmaker',
     description: 'film role or slug the person',
   })
   @IsNotEmpty()

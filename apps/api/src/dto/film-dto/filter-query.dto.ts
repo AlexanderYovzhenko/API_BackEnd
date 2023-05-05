@@ -35,14 +35,14 @@ export class FilterQueryDto {
     description: 'rezhisser',
     required: false,
   })
-  readonly rezhisser?: string[];
+  readonly filmmaker?: string[];
 
   @ApiProperty({
     example: ['Келли', 'Хилл'],
     description: 'aktyor',
     required: false,
   })
-  readonly aktyor?: string[];
+  readonly actor?: string[];
 
   @ApiProperty({
     example: 20,

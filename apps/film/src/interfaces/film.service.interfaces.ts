@@ -6,8 +6,8 @@ export interface IQueryParamsFilter {
   year_max?: string;
   rating?: string;
   assessments?: string;
-  rezhisser?: string[];
-  aktyor?: string[];
+  filmmaker?: string[];
+  actor?: string[];
   limit?: string;
 }
 

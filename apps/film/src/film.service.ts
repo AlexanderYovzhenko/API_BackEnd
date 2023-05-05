@@ -283,8 +283,8 @@ export class FilmService {
       year_max,
       rating,
       assessments,
-      rezhisser,
-      aktyor,
+      filmmaker,
+      actor,
       limit,
     } = query;
 
@@ -402,15 +402,15 @@ export class FilmService {
       ],
     });
 
-    const filmsFilmMaker = rezhisser
+    const filmsFilmMaker = filmmaker
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: rezhisser[0],
-              last_name: rezhisser[1],
+              first_name: filmmaker[0],
+              last_name: filmmaker[1],
               film_role: 'режиссер',
             },
           ),
@@ -421,15 +421,15 @@ export class FilmService {
       ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
       : [];
 
-    const filmsActor = aktyor
+    const filmsActor = actor
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: aktyor[0],
-              last_name: aktyor[1],
+              first_name: actor[0],
+              last_name: actor[1],
               film_role: 'актёр',
             },
           ),
@@ -442,11 +442,11 @@ export class FilmService {
 
     let result = filteredFilms;
 
-    if (rezhisser) {
+    if (filmmaker) {
       result = result.filter((film) => filmsIdFilmMaker.includes(film.film_id));
     }
 
-    if (aktyor) {
+    if (actor) {
       result = result.filter((film) => filmsIdActor.includes(film.film_id));
     }
 
