@@ -8,8 +8,12 @@ export class FilterQueryDto {
   })
   readonly genres?: string[];
 
-  @ApiProperty({ example: 'США', description: 'country', required: false })
-  readonly country?: string;
+  @ApiProperty({
+    example: ['США', 'Россия'],
+    description: 'countries',
+    required: false,
+  })
+  readonly countries?: string[];
 
   @ApiProperty({ example: 2020, description: 'year', required: false })
   readonly year?: string;

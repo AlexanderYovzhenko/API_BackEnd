@@ -277,7 +277,7 @@ export class FilmService {
   async getFilteredFilms(query: IQueryParamsFilter) {
     const {
       genres,
-      country,
+      countries,
       year,
       rating,
       assessments,
@@ -286,23 +286,26 @@ export class FilmService {
       limit,
     } = query;
 
+    const countriesType: string[] | string = Array.isArray(countries)
+      ? countries.map((country) => country.toLowerCase())
+      : typeof countries === 'string'
+      ? countries.toLowerCase()
+      : null;
+
+    console.log(countriesType);
+
     const filteredFilms = await this.filmRepository.findAll({
-      // where: {
-      //   [Op.and]: [
-      //     country
-      //       ? sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
-      //           [Op.substring]: country.toLowerCase(),
-      //         })
-      //       : { country: { [Op.notLike]: '' } },
-      //     { year: year || { [Op.ne]: 0 } },
-      //     { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
-      //     {
-      //       assessments: assessments
-      //         ? { [Op.gte]: +assessments }
-      //         : { [Op.gte]: 0 },
-      //     },
-      //   ],
-      // },
+      where: {
+        [Op.and]: [
+          { year: year || { [Op.ne]: 0 } },
+          { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
+          {
+            assessments: assessments
+              ? { [Op.gte]: +assessments }
+              : { [Op.gte]: 0 },
+          },
+        ],
+      },
       include: [
         {
           model: Trailer,
@@ -341,6 +344,31 @@ export class FilmService {
           model: Language,
           as: 'languagesSubtitle',
           attributes: ['language_id', 'language', 'slug'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Country,
+          attributes: ['country_id', 'country', 'slug'],
+          where: {
+            [Op.or]: [
+              countries
+                ? sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('country')),
+                    {
+                      [Op.in]:
+                        typeof countries === 'string'
+                          ? [countriesType]
+                          : countriesType,
+                    },
+                  )
+                : { country: { [Op.notLike]: '' } },
+              {
+                slug: countries ? countriesType : { [Op.notLike]: '' },
+              },
+            ],
+          },
           through: {
             attributes: [],
           },

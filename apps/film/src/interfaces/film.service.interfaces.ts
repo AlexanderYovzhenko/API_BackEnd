@@ -1,6 +1,6 @@
 export interface IQueryParamsFilter {
   genres?: string[];
-  country?: string;
+  countries?: string[] | string;
   year?: string;
   rating?: string;
   assessments?: string;
