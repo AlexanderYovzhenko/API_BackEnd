@@ -195,13 +195,21 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('films')
   async addFilm(@Body() film: CreateFilmDto) {
-    return this.filmService.send(
-      {
-        cmd: 'add_film',
-      },
+    const newFilm = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'add_film',
+        },
 
-      film,
+        film,
+      ),
     );
+
+    if (!newFilm) {
+      throw new BadRequestException('Film is already exists');
+    }
+
+    return newFilm;
   }
 
   // @Roles('ADMIN')

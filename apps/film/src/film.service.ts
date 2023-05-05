@@ -4,7 +4,9 @@ import { Repository } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { v4 as uuid } from 'uuid';
 import {
+  Country,
   Film,
+  FilmCountry,
   FilmGenre,
   FilmLanguageAudio,
   FilmLanguageSubtitle,
@@ -22,6 +24,7 @@ import {
   IUpdateGenre,
 } from './interfaces/film.service.interfaces';
 import sequelize from 'sequelize';
+import { slugify } from 'transliteration';
 
 @Injectable()
 export class FilmService {
@@ -38,6 +41,9 @@ export class FilmService {
     private languageSubtitleRepository: Repository<FilmLanguageSubtitle>,
     @InjectModel(Genre) private genreRepository: Repository<Genre>,
     @InjectModel(FilmGenre) private filmGenreRepository: Repository<FilmGenre>,
+    @InjectModel(Country) private countryRepository: Repository<Country>,
+    @InjectModel(FilmCountry)
+    private filmCountryRepository: Repository<FilmCountry>,
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
   ) {}
 
@@ -261,22 +267,22 @@ export class FilmService {
     } = query;
 
     const filteredFilms = await this.filmRepository.findAll({
-      where: {
-        [Op.and]: [
-          country
-            ? sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
-                [Op.substring]: country.toLowerCase(),
-              })
-            : { country: { [Op.notLike]: '' } },
-          { year: year || { [Op.ne]: 0 } },
-          { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
-          {
-            assessments: assessments
-              ? { [Op.gte]: +assessments }
-              : { [Op.gte]: 0 },
-          },
-        ],
-      },
+      // where: {
+      //   [Op.and]: [
+      //     country
+      //       ? sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+      //           [Op.substring]: country.toLowerCase(),
+      //         })
+      //       : { country: { [Op.notLike]: '' } },
+      //     { year: year || { [Op.ne]: 0 } },
+      //     { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
+      //     {
+      //       assessments: assessments
+      //         ? { [Op.gte]: +assessments }
+      //         : { [Op.gte]: 0 },
+      //     },
+      //   ],
+      // },
       include: [
         {
           model: Trailer,
@@ -377,12 +383,47 @@ export class FilmService {
   }
 
   async addFilm(film: ICreateFilm) {
+    const checkFilm = await this.filmRepository.findOne({
+      where: { name_ru: film.name_ru, year: film.year },
+    });
+
+    if (checkFilm) {
+      console.log(!!checkFilm);
+
+      return null;
+    }
+
     const film_id: string = this.generateUUID();
 
     await this.filmRepository.create({ film_id, ...film });
 
-    const { qualities, trailers, languagesAudio, languagesSubtitle, genres } =
-      film;
+    const {
+      country,
+      qualities,
+      trailers,
+      languagesAudio,
+      languagesSubtitle,
+      genres,
+    } = film;
+
+    const checkCountry = await this.countryRepository.findOrCreate({
+      where: {
+        country,
+      },
+      defaults: {
+        country_id: this.generateUUID(),
+        country,
+        slug: slugify(country),
+      },
+    });
+
+    const { country_id } = checkCountry[0];
+
+    await this.filmCountryRepository.create({
+      film_country_id: this.generateUUID(),
+      film_id,
+      country_id,
+    });
 
     qualities.forEach(async (quality: string) => {
       const checkQuality = await this.qualityRepository.findOrCreate({
@@ -418,6 +459,7 @@ export class FilmService {
         defaults: {
           language_id: this.generateUUID(),
           language,
+          slug: slugify(language),
         },
       });
 
@@ -436,6 +478,7 @@ export class FilmService {
         defaults: {
           language_id: this.generateUUID(),
           language,
+          slug: slugify(language),
         },
       });
 
@@ -451,7 +494,7 @@ export class FilmService {
     genres.forEach(async (genreData) => {
       const { genre_ru, genre_en, slug } = genreData;
 
-      const genre = await this.genreRepository.findOrCreate({
+      const checkGenre = await this.genreRepository.findOrCreate({
         where: {
           genre_ru,
         },
@@ -463,7 +506,7 @@ export class FilmService {
         },
       });
 
-      const { genre_id } = genre[0];
+      const { genre_id } = checkGenre[0];
 
       await this.filmGenreRepository.create({
         film_genre_id: this.generateUUID(),

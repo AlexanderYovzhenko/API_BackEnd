@@ -13,6 +13,8 @@ import {
   Trailer,
   Quality,
   FilmQuality,
+  Country,
+  FilmCountry,
 } from './entities';
 
 @Module({
@@ -29,6 +31,8 @@ import {
       FilmLanguageSubtitle,
       Genre,
       FilmGenre,
+      Country,
+      FilmCountry,
     ]),
     SharedModule.registerRmq(
       'PERSON_SERVICE',

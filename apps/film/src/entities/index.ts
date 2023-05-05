@@ -7,3 +7,5 @@ export * from './trailer/trailer.entity';
 export * from './language/language.entity';
 export * from './language/film_language_audio.entity';
 export * from './language/film_language_subtitle.entity';
+export * from './country/country.entity';
+export * from './country/film_country.entity';
