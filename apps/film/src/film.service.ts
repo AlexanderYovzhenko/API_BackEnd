@@ -572,9 +572,7 @@ export class FilmService {
   // COUNTRIES  -------------------------------------------------------------
 
   async getAllCountries() {
-    const countries = await this.filmRepository.findAll({
-      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
-    });
+    const countries = await this.countryRepository.findAll();
 
     return countries;
   }
@@ -582,12 +580,17 @@ export class FilmService {
   async getCountriesByName(queryCountry: { country: string }) {
     const { country } = queryCountry;
 
-    const countries = await this.filmRepository.findAll({
-      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
-
-      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
-        [Op.substring]: country.toLowerCase(),
-      }),
+    const countries = await this.countryRepository.findAll({
+      where: {
+        [Op.or]: [
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+            [Op.substring]: country.toLowerCase(),
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('slug')), {
+            [Op.substring]: country.toLowerCase(),
+          }),
+        ],
+      },
     });
 
     return countries;
