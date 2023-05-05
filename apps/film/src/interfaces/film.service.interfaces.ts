@@ -32,5 +32,4 @@ export interface IUpdateGenre {
   genre_id: string;
   genre_ru: string;
   genre_en: string;
-  slug: string;
 }

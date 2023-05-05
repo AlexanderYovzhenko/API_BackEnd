@@ -599,10 +599,10 @@ export class FilmService {
   }
 
   async updateGenre(data: IUpdateGenre) {
-    const { genre_id, genre_ru, genre_en, slug } = data;
+    const { genre_id, genre_ru, genre_en } = data;
 
     await this.genreRepository.update(
-      { genre_ru, genre_en, slug },
+      { genre_ru, genre_en },
       { where: { genre_id } },
     );
 
