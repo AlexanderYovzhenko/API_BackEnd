@@ -3,7 +3,7 @@ export interface ICreateComment {
   text: string;
   film_id?: string | null;
   parent_id?: string | null;
-  user_id: number;
+  user_id: string;
 }
 
 export interface IUpdateComment {

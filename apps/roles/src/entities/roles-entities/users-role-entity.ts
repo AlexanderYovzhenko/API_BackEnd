@@ -25,10 +25,10 @@ export class UsersRoles extends Model<Role, RoleCreationAttr> {
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING,
     allowNull: false,
   })
-  user_id: number;
+  user_id: string;
 
   @ForeignKey(() => Role)
   @Column({
