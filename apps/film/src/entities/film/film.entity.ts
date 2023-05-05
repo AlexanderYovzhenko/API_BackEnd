@@ -14,6 +14,8 @@ import { Genre } from '../genre/genre.entity';
 import { FilmGenre } from '../genre/film_genre.entity';
 import { Quality } from '../quality/quality.entity';
 import { FilmQuality } from '../quality/film_quality.entity';
+import { Country } from '../country/country.entity';
+import { FilmCountry } from '../country/film_country.entity';
 
 interface FilmCreationAttrs {
   film_id: string;
@@ -21,7 +23,6 @@ interface FilmCreationAttrs {
   name_en?: string;
   description: string;
   year: number;
-  country: string;
   rating: number;
   assessments: number;
   reviews: number;
@@ -49,9 +50,6 @@ export class Film extends Model<Film, FilmCreationAttrs> {
 
   @Column({ type: DataType.INTEGER, allowNull: false })
   year: number;
-
-  @Column({ type: DataType.STRING, allowNull: false })
-  country: string;
 
   @Column({ type: DataType.FLOAT, allowNull: false })
   rating: number;
@@ -89,4 +87,7 @@ export class Film extends Model<Film, FilmCreationAttrs> {
 
   @BelongsToMany(() => Genre, () => FilmGenre)
   genres: Genre[];
+
+  @BelongsToMany(() => Country, () => FilmCountry)
+  countries: Country[];
 }

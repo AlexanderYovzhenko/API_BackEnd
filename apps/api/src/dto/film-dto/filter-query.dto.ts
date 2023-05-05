@@ -8,11 +8,21 @@ export class FilterQueryDto {
   })
   readonly genres?: string[];
 
-  @ApiProperty({ example: 'США', description: 'country', required: false })
-  readonly country?: string;
+  @ApiProperty({
+    example: ['США', 'Россия', 'Япония'],
+    description: 'countries',
+    required: false,
+  })
+  readonly countries?: string[];
 
-  @ApiProperty({ example: 2020, description: 'year', required: false })
+  @ApiProperty({ example: 2000, description: 'year', required: false })
   readonly year?: string;
+
+  @ApiProperty({ example: 1998, description: 'min year', required: false })
+  readonly year_min?: string;
+
+  @ApiProperty({ example: 2002, description: 'max year', required: false })
+  readonly year_max?: string;
 
   @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
@@ -21,18 +31,18 @@ export class FilterQueryDto {
   readonly assessments?: string;
 
   @ApiProperty({
-    example: ['Мелисса', 'Сейджмиллер'],
+    example: ['Алекс', 'Шлегель'],
     description: 'rezhisser',
     required: false,
   })
-  readonly rezhisser?: string[];
+  readonly filmmaker?: string[];
 
   @ApiProperty({
-    example: ['Илэйн', 'МакЛорин'],
+    example: ['Келли', 'Хилл'],
     description: 'aktyor',
     required: false,
   })
-  readonly aktyor?: string[];
+  readonly actor?: string[];
 
   @ApiProperty({
     example: 20,

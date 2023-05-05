@@ -1,11 +1,13 @@
 export interface IQueryParamsFilter {
   genres?: string[];
-  country?: string;
+  countries?: string | string[];
   year?: string;
+  year_min?: string;
+  year_max?: string;
   rating?: string;
   assessments?: string;
-  rezhisser?: string[];
-  aktyor?: string[];
+  filmmaker?: string[];
+  actor?: string[];
   limit?: string;
 }
 
@@ -32,5 +34,4 @@ export interface IUpdateGenre {
   genre_id: string;
   genre_ru: string;
   genre_en: string;
-  slug: string;
 }

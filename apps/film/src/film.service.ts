@@ -4,7 +4,9 @@ import { Repository } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { v4 as uuid } from 'uuid';
 import {
+  Country,
   Film,
+  FilmCountry,
   FilmGenre,
   FilmLanguageAudio,
   FilmLanguageSubtitle,
@@ -22,6 +24,7 @@ import {
   IUpdateGenre,
 } from './interfaces/film.service.interfaces';
 import sequelize from 'sequelize';
+import { slugify } from 'transliteration';
 
 @Injectable()
 export class FilmService {
@@ -38,6 +41,9 @@ export class FilmService {
     private languageSubtitleRepository: Repository<FilmLanguageSubtitle>,
     @InjectModel(Genre) private genreRepository: Repository<Genre>,
     @InjectModel(FilmGenre) private filmGenreRepository: Repository<FilmGenre>,
+    @InjectModel(Country) private countryRepository: Repository<Country>,
+    @InjectModel(FilmCountry)
+    private filmCountryRepository: Repository<FilmCountry>,
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
   ) {}
 
@@ -72,7 +78,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -80,12 +86,17 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -122,7 +133,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -130,12 +141,17 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
       limit: limit ? +limit : 100,
     });
@@ -170,7 +186,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -178,12 +194,17 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -228,7 +249,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -236,12 +257,17 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
@@ -251,24 +277,47 @@ export class FilmService {
   async getFilteredFilms(query: IQueryParamsFilter) {
     const {
       genres,
-      country,
+      countries,
       year,
+      year_min,
+      year_max,
       rating,
       assessments,
-      rezhisser,
-      aktyor,
+      filmmaker,
+      actor,
       limit,
     } = query;
+
+    const countriesType: string[] | string = Array.isArray(countries)
+      ? countries.map((country) => country.toLowerCase())
+      : typeof countries === 'string'
+      ? countries.toLowerCase()
+      : null;
 
     const filteredFilms = await this.filmRepository.findAll({
       where: {
         [Op.and]: [
-          country
-            ? sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
-                [Op.substring]: country.toLowerCase(),
-              })
-            : { country: { [Op.notLike]: '' } },
-          { year: year || { [Op.ne]: 0 } },
+          {
+            [Op.and]: [
+              { year: year && !isNaN(+year) ? +year : { [Op.ne]: 0 } },
+              {
+                [Op.and]: [
+                  {
+                    year:
+                      year_min && !isNaN(+year_min)
+                        ? { [Op.gte]: +year_min }
+                        : { [Op.ne]: 0 },
+                  },
+                  {
+                    year:
+                      year_max && !isNaN(+year_max)
+                        ? { [Op.lte]: +year_max }
+                        : { [Op.ne]: 0 },
+                  },
+                ],
+              },
+            ],
+          },
           { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
           {
             assessments: assessments
@@ -306,7 +355,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -314,24 +363,54 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
         },
-        { all: true },
+        {
+          model: Country,
+          attributes: ['country_id', 'country', 'slug'],
+          where: {
+            [Op.or]: [
+              countries
+                ? sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('country')),
+                    {
+                      [Op.in]:
+                        typeof countries === 'string'
+                          ? [countriesType]
+                          : countriesType,
+                    },
+                  )
+                : { country: { [Op.notLike]: '' } },
+              {
+                slug: countries ? countriesType : { [Op.notLike]: '' },
+              },
+            ],
+          },
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          all: true,
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
 
-    const filmsFilmMaker = rezhisser
+    const filmsFilmMaker = filmmaker
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: rezhisser[0],
-              last_name: rezhisser[1],
+              first_name: filmmaker[0],
+              last_name: filmmaker[1],
               film_role: 'режиссер',
             },
           ),
@@ -342,15 +421,15 @@ export class FilmService {
       ? filmsFilmMaker.films.map((film: { film_id: string }) => film.film_id)
       : [];
 
-    const filmsActor = aktyor
+    const filmsActor = actor
       ? await firstValueFrom(
           this.personService.send(
             {
               cmd: 'get_films_by_person',
             },
             {
-              first_name: aktyor[0],
-              last_name: aktyor[1],
+              first_name: actor[0],
+              last_name: actor[1],
               film_role: 'актёр',
             },
           ),
@@ -363,11 +442,11 @@ export class FilmService {
 
     let result = filteredFilms;
 
-    if (rezhisser) {
+    if (filmmaker) {
       result = result.filter((film) => filmsIdFilmMaker.includes(film.film_id));
     }
 
-    if (aktyor) {
+    if (actor) {
       result = result.filter((film) => filmsIdActor.includes(film.film_id));
     }
 
@@ -377,12 +456,45 @@ export class FilmService {
   }
 
   async addFilm(film: ICreateFilm) {
+    const checkFilm = await this.filmRepository.findOne({
+      where: { name_ru: film.name_ru, year: film.year },
+    });
+
+    if (checkFilm) {
+      return null;
+    }
+
     const film_id: string = this.generateUUID();
 
     await this.filmRepository.create({ film_id, ...film });
 
-    const { qualities, trailers, languagesAudio, languagesSubtitle, genres } =
-      film;
+    const {
+      country,
+      qualities,
+      trailers,
+      languagesAudio,
+      languagesSubtitle,
+      genres,
+    } = film;
+
+    const checkCountry = await this.countryRepository.findOrCreate({
+      where: {
+        country,
+      },
+      defaults: {
+        country_id: this.generateUUID(),
+        country,
+        slug: slugify(country),
+      },
+    });
+
+    const { country_id } = checkCountry[0];
+
+    await this.filmCountryRepository.create({
+      film_country_id: this.generateUUID(),
+      film_id,
+      country_id,
+    });
 
     qualities.forEach(async (quality: string) => {
       const checkQuality = await this.qualityRepository.findOrCreate({
@@ -418,6 +530,7 @@ export class FilmService {
         defaults: {
           language_id: this.generateUUID(),
           language,
+          slug: slugify(language),
         },
       });
 
@@ -436,6 +549,7 @@ export class FilmService {
         defaults: {
           language_id: this.generateUUID(),
           language,
+          slug: slugify(language),
         },
       });
 
@@ -451,7 +565,7 @@ export class FilmService {
     genres.forEach(async (genreData) => {
       const { genre_ru, genre_en, slug } = genreData;
 
-      const genre = await this.genreRepository.findOrCreate({
+      const checkGenre = await this.genreRepository.findOrCreate({
         where: {
           genre_ru,
         },
@@ -463,7 +577,7 @@ export class FilmService {
         },
       });
 
-      const { genre_id } = genre[0];
+      const { genre_id } = checkGenre[0];
 
       await this.filmGenreRepository.create({
         film_genre_id: this.generateUUID(),
@@ -504,9 +618,7 @@ export class FilmService {
   // COUNTRIES  -------------------------------------------------------------
 
   async getAllCountries() {
-    const countries = await this.filmRepository.findAll({
-      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
-    });
+    const countries = await this.countryRepository.findAll();
 
     return countries;
   }
@@ -514,12 +626,17 @@ export class FilmService {
   async getCountriesByName(queryCountry: { country: string }) {
     const { country } = queryCountry;
 
-    const countries = await this.filmRepository.findAll({
-      attributes: [[sequelize.literal('DISTINCT "country"'), 'country']],
-
-      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
-        [Op.substring]: country.toLowerCase(),
-      }),
+    const countries = await this.countryRepository.findAll({
+      where: {
+        [Op.or]: [
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('country')), {
+            [Op.substring]: country.toLowerCase(),
+          }),
+          sequelize.where(sequelize.fn('LOWER', sequelize.col('slug')), {
+            [Op.substring]: country.toLowerCase(),
+          }),
+        ],
+      },
     });
 
     return countries;
@@ -556,10 +673,10 @@ export class FilmService {
   }
 
   async updateGenre(data: IUpdateGenre) {
-    const { genre_id, genre_ru, genre_en, slug } = data;
+    const { genre_id, genre_ru, genre_en } = data;
 
     await this.genreRepository.update(
-      { genre_ru, genre_en, slug },
+      { genre_ru, genre_en },
       { where: { genre_id } },
     );
 

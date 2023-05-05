@@ -13,11 +13,4 @@ export class UpdateGenreNameDto {
   })
   @IsString({ message: 'genre_en: should be string' })
   readonly genre_en: string;
-
-  @ApiProperty({
-    example: 'western',
-    description: 'slug genre',
-  })
-  @IsString({ message: 'slug: should be string' })
-  readonly slug: string;
 }

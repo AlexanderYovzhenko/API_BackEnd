@@ -17,23 +17,23 @@ export class CreateCommentDto {
   readonly text: string;
 
   @ApiProperty({
-    example: '984fdb2d-da0c-4e04-926a-f72f103c4ccb',
+    example: 'eb5eb005-5818-4cee-9f7b-0fc6c1fae2cc',
     description: 'film_id',
     required: false,
   })
   readonly film_id?: string | null;
 
   @ApiProperty({
-    example: 'comment_id for sub_comment or null for comment',
+    example: 'comment_id or null',
     description: 'parent_id',
     required: false,
   })
   readonly parent_id?: string | null;
 
   @ApiProperty({
-    example: 1,
+    example: '87e25d0b-8f6f-4a38-b372-f881b8aa41e5',
     description: 'user_id',
   })
   @IsNotEmpty()
-  readonly user_id: number;
+  readonly user_id: string;
 }
