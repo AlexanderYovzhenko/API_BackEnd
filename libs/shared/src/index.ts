@@ -1,3 +1,5 @@
+import { from } from 'rxjs';
+
 // modules
 export * from './modules/shared.module';
 export * from './modules/postgres-db.module';
@@ -9,6 +11,7 @@ export * from './services/shared.service';
 
 // entities
 export * from './entities/users.entity';
+export * from './entities/profile.entity';
 
 // interfaces - shared
 export * from './interfaces/shared.service.interface';

@@ -37,6 +37,8 @@ import {
   CreateUserDto,
   CreateRoleDto,
   CreateUserRoleDto,
+  CreateProfileDto,
+  UpdateProfileDto,
   CreateCommentDto,
   UpdateCommentDto,
   CreatePersonDto,
@@ -53,7 +55,10 @@ export class ApiController {
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
     @Inject('USERS_SERVICE') private readonly usersService: ClientProxy,
     @Inject('ROLES_SERVICE') private readonly rolesService: ClientProxy,
+    @Inject('PROFILE_SERVICE') private readonly profileService: ClientProxy,
+    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     @Inject('COMMENT_SERVICE') private readonly commentService: ClientProxy,
+
     private readonly apiService: ApiService,
   ) {}
 
@@ -620,6 +625,114 @@ export class ApiController {
     );
   }
 
+  @ApiOperation({ summary: 'create profile' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('profile')
+  async createProfile(@Body() profile: CreateProfileDto) {
+    return this.profileService.send(
+      {
+        cmd: 'create_profile',
+      },
+      profile,
+    );
+  }
+
+  @ApiOperation({ summary: 'get all profiles' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('profile')
+  async getProfiles() {
+    return this.profileService.send(
+      {
+        cmd: 'get_all_profiles',
+      },
+      {},
+    );
+  }
+  @ApiOperation({ summary: 'get profile by user id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('profile/:user_id')
+  async getProfileById(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+    const profile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'get_profile_by_user_id',
+        },
+        user_id,
+      ),
+    );
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile;
+  }
+
+  @ApiOperation({ summary: 'delete profile' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('profile/:user_id')
+  async deleteProfile(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const deletedProfile = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'delete_profile',
+        },
+
+        user_id,
+      ),
+    );
+
+    if (!deletedProfile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return deletedProfile;
+  }
+
+  @ApiOperation({ summary: 'update profile info' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @HttpCode(HttpStatus.OK)
+  @Patch('profile/:user_id')
+  async updateProfile(
+    @Param('user_id') user_id: string,
+    @Body() profileInfo: UpdateProfileDto,
+  ) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const updatedProfile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'update_profile',
+        },
+        {
+          user_id,
+          ...profileInfo,
+        },
+      ),
+    );
+    if (!updatedProfile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return updatedProfile;
+  }
+
   // COMMENT ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Comment')
@@ -720,12 +833,43 @@ export class ApiController {
         },
       ),
     );
-
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
 
     return comment;
+  }
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('login')
+  async logIn(@Body() data: CreateUserDto) {
+    const token = this.authService.send(
+      {
+        cmd: 'login',
+      },
+      data,
+    );
+
+    return token;
+  }
+
+  @ApiOperation({ summary: 'signup' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('signup')
+  async signUp(@Body() data: CreateUserDto) {
+    const hashedPassword = await this.authService.send(
+      {
+        cmd: 'signup',
+      },
+      data,
+    );
+
+    return this.usersService.send(
+      {
+        cmd: 'create user',
+      },
+      { ...data, password: hashedPassword },
+    );
   }
 
   @ApiTags('Comment')

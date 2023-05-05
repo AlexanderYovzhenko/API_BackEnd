@@ -165,7 +165,7 @@ services:
       - ./apps/comment/.env
     networks:
       - backend
-      
+
   users:
     container_name: users
     build:
@@ -184,7 +184,7 @@ services:
       - ./apps/users/.env
     networks:
       - backend
-      
+
   roles:
     container_name: roles
     build:
@@ -203,10 +203,6 @@ services:
       - ./apps/roles/.env
     networks:
       - backend
-
-networks:
-  backend:
-    driver: bridge
 
 volumes:
   rabbit_data:
