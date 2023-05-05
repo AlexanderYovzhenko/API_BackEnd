@@ -279,6 +279,8 @@ export class FilmService {
       genres,
       countries,
       year,
+      year_min,
+      year_max,
       rating,
       assessments,
       rezhisser,
@@ -292,12 +294,30 @@ export class FilmService {
       ? countries.toLowerCase()
       : null;
 
-    console.log(countriesType);
-
     const filteredFilms = await this.filmRepository.findAll({
       where: {
         [Op.and]: [
-          { year: year || { [Op.ne]: 0 } },
+          {
+            [Op.and]: [
+              { year: year && !isNaN(+year) ? +year : { [Op.ne]: 0 } },
+              {
+                [Op.and]: [
+                  {
+                    year:
+                      year_min && !isNaN(+year_min)
+                        ? { [Op.gte]: +year_min }
+                        : { [Op.ne]: 0 },
+                  },
+                  {
+                    year:
+                      year_max && !isNaN(+year_max)
+                        ? { [Op.lte]: +year_max }
+                        : { [Op.ne]: 0 },
+                  },
+                ],
+              },
+            ],
+          },
           { rating: rating ? { [Op.gte]: +rating } : { [Op.gte]: 0 } },
           {
             assessments: assessments
@@ -441,8 +461,6 @@ export class FilmService {
     });
 
     if (checkFilm) {
-      console.log(!!checkFilm);
-
       return null;
     }
 

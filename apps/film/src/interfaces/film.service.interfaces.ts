@@ -1,7 +1,9 @@
 export interface IQueryParamsFilter {
   genres?: string[];
-  countries?: string[] | string;
+  countries?: string | string[];
   year?: string;
+  year_min?: string;
+  year_max?: string;
   rating?: string;
   assessments?: string;
   rezhisser?: string[];

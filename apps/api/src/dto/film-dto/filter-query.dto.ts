@@ -15,8 +15,14 @@ export class FilterQueryDto {
   })
   readonly countries?: string[];
 
-  @ApiProperty({ example: 2020, description: 'year', required: false })
+  @ApiProperty({ example: 2000, description: 'year', required: false })
   readonly year?: string;
+
+  @ApiProperty({ example: 2001, description: 'min year', required: false })
+  readonly year_min?: string;
+
+  @ApiProperty({ example: 2002, description: 'max year', required: false })
+  readonly year_max?: string;
 
   @ApiProperty({ example: 7.3, description: 'rating', required: false })
   readonly rating?: string;
