@@ -78,7 +78,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -86,7 +86,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -128,7 +128,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -136,7 +136,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -176,7 +176,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -184,7 +184,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -234,7 +234,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -242,7 +242,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -312,7 +312,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesAudio',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
@@ -320,7 +320,7 @@ export class FilmService {
         {
           model: Language,
           as: 'languagesSubtitle',
-          attributes: ['language_id', 'language'],
+          attributes: ['language_id', 'language', 'slug'],
           through: {
             attributes: [],
           },
