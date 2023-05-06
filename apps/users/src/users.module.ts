@@ -11,6 +11,7 @@ import {
 } from '@app/shared';
 
 @Module({
+  imports: [SharedModule, PostgresDBModule, SequelizeModule.forFeature([User])],
   controllers: [UsersController],
   providers: [
     UsersService,
@@ -19,7 +20,5 @@ import {
       useClass: SharedService,
     },
   ],
-  imports: [SharedModule, PostgresDBModule, SequelizeModule.forFeature([User])],
-  exports: [UsersService],
 })
 export class UsersModule {}

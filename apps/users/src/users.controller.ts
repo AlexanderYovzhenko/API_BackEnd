@@ -15,7 +15,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { CreateUserDto } from '../dto/createUserDto';
+import { CreateUserDto } from './dto/createUserDto';
 import { UsersService } from './users.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SharedService } from '@app/shared';
@@ -32,7 +32,7 @@ export class UsersController {
     private readonly usersService: UsersService,
   ) {}
 
-  @MessagePattern({ cmd: 'create user' })
+  @MessagePattern({ cmd: 'create_user' })
   async createUser(@Ctx() context: RmqContext, @Payload() UserDto) {
     /* const newUser */
     this.sharedService.acknowledgeMessage(context);
@@ -43,14 +43,14 @@ export class UsersController {
     //this.client.emit('create profile', profileDto);
   }
 
-  @MessagePattern({ cmd: 'get all users' })
+  @MessagePattern({ cmd: 'get_all_users' })
   getUsers(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
 
     return this.usersService.getUsers();
   }
 
-  @MessagePattern({ cmd: 'get user by email' })
+  @MessagePattern({ cmd: 'get_user_by_email' })
   async getUserByEmail(
     @Ctx() context: RmqContext,
     @Payload()

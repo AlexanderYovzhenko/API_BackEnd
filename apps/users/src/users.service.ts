@@ -1,14 +1,15 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { CreateUserDto } from '../dto/createUserDto';
+import { CreateUserDto } from './dto/createUserDto';
 //import { ClientProxy } from '@nestjs/microservices';
 import { UserInterface } from './interface/user.interface';
 import { User } from '@app/shared';
 import { v4 as uuid } from 'uuid';
+import { Repository } from 'sequelize-typescript';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User) private userRepository: typeof User) {}
+  constructor(@InjectModel(User) private userRepository: Repository<User>) {} // typeof
 
   generateUUID(): string {
     return uuid();
@@ -20,7 +21,7 @@ export class UsersService {
 
     if (userExists.count === 0) {
       const user = await this.userRepository.create({
-        id: this.generateUUID(),
+        user_id: this.generateUUID(),
         ...newUser,
       });
       return user;
