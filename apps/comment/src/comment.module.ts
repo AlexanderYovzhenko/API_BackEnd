@@ -3,6 +3,7 @@ import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
 import {
   PostgresDBModule,
+  Profile,
   SharedModule,
   SharedService,
   User,
@@ -14,7 +15,7 @@ import { Comment } from './entities';
   imports: [
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([Comment, User]),
+    SequelizeModule.forFeature([Comment, User, Profile]),
   ],
   controllers: [CommentController],
   providers: [

@@ -4,6 +4,7 @@ import { Repository } from 'sequelize-typescript';
 import { InjectModel } from '@nestjs/sequelize';
 import { ICreateComment, IUpdateComment } from './interface/comment.interface';
 import { v4 as uuid } from 'uuid';
+import { Profile, User } from '@app/shared';
 
 @Injectable()
 export class CommentService {
@@ -33,19 +34,73 @@ export class CommentService {
       },
       include: [
         {
-          all: true,
+          model: User,
+          attributes: ['email'],
           include: [
             {
-              all: true,
+              model: Profile,
+              attributes: ['profile_id', 'first_name', 'last_name'],
+            },
+          ],
+        },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ['email'],
               include: [
                 {
-                  all: true,
+                  model: Profile,
+                  attributes: ['profile_id', 'first_name', 'last_name'],
+                },
+              ],
+            },
+            {
+              model: Comment,
+              include: [
+                {
+                  model: User,
+                  attributes: ['email'],
                   include: [
                     {
-                      all: true,
+                      model: Profile,
+                      attributes: ['profile_id', 'first_name', 'last_name'],
+                    },
+                  ],
+                },
+                {
+                  model: Comment,
+                  include: [
+                    {
+                      model: User,
+                      attributes: ['email'],
                       include: [
                         {
-                          all: true,
+                          model: Profile,
+                          attributes: ['profile_id', 'first_name', 'last_name'],
+                        },
+                      ],
+                    },
+                    {
+                      model: Comment,
+                      include: [
+                        {
+                          model: User,
+                          attributes: ['email'],
+                          include: [
+                            {
+                              model: Profile,
+                              attributes: [
+                                'profile_id',
+                                'first_name',
+                                'last_name',
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          model: Comment,
                         },
                       ],
                     },
@@ -68,19 +123,73 @@ export class CommentService {
       },
       include: [
         {
-          all: true,
+          model: User,
+          attributes: ['email'],
           include: [
             {
-              all: true,
+              model: Profile,
+              attributes: ['profile_id', 'first_name', 'last_name'],
+            },
+          ],
+        },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ['email'],
               include: [
                 {
-                  all: true,
+                  model: Profile,
+                  attributes: ['profile_id', 'first_name', 'last_name'],
+                },
+              ],
+            },
+            {
+              model: Comment,
+              include: [
+                {
+                  model: User,
+                  attributes: ['email'],
                   include: [
                     {
-                      all: true,
+                      model: Profile,
+                      attributes: ['profile_id', 'first_name', 'last_name'],
+                    },
+                  ],
+                },
+                {
+                  model: Comment,
+                  include: [
+                    {
+                      model: User,
+                      attributes: ['email'],
                       include: [
                         {
-                          all: true,
+                          model: Profile,
+                          attributes: ['profile_id', 'first_name', 'last_name'],
+                        },
+                      ],
+                    },
+                    {
+                      model: Comment,
+                      include: [
+                        {
+                          model: User,
+                          attributes: ['email'],
+                          include: [
+                            {
+                              model: Profile,
+                              attributes: [
+                                'profile_id',
+                                'first_name',
+                                'last_name',
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          model: Comment,
                         },
                       ],
                     },
