@@ -31,10 +31,10 @@ export class ProfileController {
   }
 
   @MessagePattern({ cmd: 'get_all_profiles' })
-  getProfiles(@Ctx() context: RmqContext) {
+  async getProfiles(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.profileService.getProfiles();
+    return await this.profileService.getProfiles();
   }
 
   @MessagePattern({ cmd: 'get_profile_by_user_id' })

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
 import { SequelizeModule } from '@nestjs/sequelize';
-
 import {
   PostgresDBModule,
   SharedModule,
@@ -11,6 +10,11 @@ import {
 } from '@app/shared';
 
 @Module({
+  imports: [
+    SharedModule,
+    PostgresDBModule,
+    SequelizeModule.forFeature([Profile]),
+  ],
   controllers: [ProfileController],
   providers: [
     ProfileService,
@@ -19,11 +23,5 @@ import {
       useClass: SharedService,
     },
   ],
-  imports: [
-    SharedModule,
-    PostgresDBModule,
-    SequelizeModule.forFeature([Profile]),
-  ],
-  exports: [ProfileService],
 })
 export class ProfileModule {}
