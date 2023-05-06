@@ -8,7 +8,7 @@ export * from './services/shared.service';
 // guards
 
 // entities
-export * from './entities/users.entity';
+export * from './entities/user.entity';
 export * from './entities/profile.entity';
 
 // interfaces - shared

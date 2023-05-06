@@ -1,6 +1,7 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface ProfileCreationAttr {
+  profile_id: string;
   user_id: string;
   first_name: string;
   last_name: string;
@@ -8,15 +9,14 @@ interface ProfileCreationAttr {
   city: string;
 }
 
-@Table({ tableName: 'users' })
+@Table({ tableName: 'profile', timestamps: false })
 export class Profile extends Model<Profile, ProfileCreationAttr> {
   @Column({
     type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  profile_id: string;
 
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   user_id: string;
