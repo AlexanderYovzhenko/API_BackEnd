@@ -74,6 +74,258 @@ export class ApiController {
     return this.apiService.checkServer();
   }
 
+  // AUTH ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('login')
+  async logIn(@Body() data: CreateUserDto) {
+    const token = this.authService.send(
+      {
+        cmd: 'login',
+      },
+      data,
+    );
+
+    return token;
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'signup' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Post('signup')
+  async signUp(@Body() data: CreateUserDto) {
+    const hashedPassword = await this.authService.send(
+      {
+        cmd: 'signup',
+      },
+      data,
+    );
+
+    return this.usersService.send(
+      {
+        cmd: 'create_user',
+      },
+      { ...data, password: hashedPassword },
+    );
+  }
+
+  // USER ENDPOINTS -------------------------------------------------------------
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'get all users' })
+  @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
+  @Get('users')
+  async getUsers() {
+    const users = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get_all_users',
+        },
+        {},
+      ),
+    );
+
+    return users;
+  }
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'get user by email' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Get('users/:email')
+  async getUser(@Param('user_email') user_email: string) {
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get_user_by_email',
+        },
+
+        user_email,
+      ),
+    );
+
+    return user;
+  }
+
+  @ApiTags('User')
+  @ApiOperation({ summary: 'create new user' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('users')
+  async createUser(@Body() user: CreateUserDto) {
+    return this.usersService.send(
+      {
+        cmd: 'create_user',
+      },
+      user,
+    );
+  }
+
+  // PROFILE ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'create profile' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @Post('profiles')
+  async createProfile(@Body() profile: CreateProfileDto) {
+    return this.profileService.send(
+      {
+        cmd: 'create_profile',
+      },
+      profile,
+    );
+  }
+
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'get all profiles' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('profiles')
+  async getProfiles() {
+    return this.profileService.send(
+      {
+        cmd: 'get_all_profiles',
+      },
+      {},
+    );
+  }
+
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'get profile by user id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('profiles/:user_id')
+  async getProfileById(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+    const profile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'get_profile_by_user_id',
+        },
+        user_id,
+      ),
+    );
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile;
+  }
+
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'delete profile' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('profiles/:user_id')
+  async deleteProfile(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const deletedProfile = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'delete_profile',
+        },
+
+        user_id,
+      ),
+    );
+
+    if (!deletedProfile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return deletedProfile;
+  }
+
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'update profile info' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @HttpCode(HttpStatus.OK)
+  @Patch('profiles/:user_id')
+  async updateProfile(
+    @Param('user_id') user_id: string,
+    @Body() profileInfo: UpdateProfileDto,
+  ) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const updatedProfile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'update_profile',
+        },
+        {
+          user_id,
+          ...profileInfo,
+        },
+      ),
+    );
+    if (!updatedProfile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return updatedProfile;
+  }
+
+  // ROLE ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'get roles' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('roles')
+  async getRoles() {
+    return this.rolesService.send(
+      {
+        cmd: 'get_all_roles',
+      },
+      {},
+    );
+  }
+
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create role' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('roles')
+  async addRole(@Body() role: CreateRoleDto) {
+    return this.rolesService.send(
+      {
+        cmd: 'create_role',
+      },
+      role,
+    );
+  }
+
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create user role' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('user_role')
+  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
+    return this.rolesService.send(
+      {
+        cmd: 'create_user_role',
+      },
+      userRole,
+    );
+  }
+
   // FILM ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Film')
@@ -523,258 +775,6 @@ export class ApiController {
       },
 
       persons,
-    );
-  }
-
-  // USER ENDPOINTS -------------------------------------------------------------
-
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  @ApiTags('User')
-  @ApiOperation({ summary: 'get all users' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
-  @Get('users')
-  async getUsers() {
-    const users = await firstValueFrom(
-      this.usersService.send(
-        {
-          cmd: 'get all users',
-        },
-        {},
-      ),
-    );
-
-    return users;
-  }
-
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  @ApiTags('User')
-  @ApiOperation({ summary: 'get user by email' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Get('users/:email')
-  async getUser(@Param('user_email') user_email: string) {
-    const user = await firstValueFrom(
-      this.usersService.send(
-        {
-          cmd: 'get user by email',
-        },
-
-        user_email,
-      ),
-    );
-
-    return user;
-  }
-
-  @ApiTags('User')
-  @ApiOperation({ summary: 'create new user' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('users')
-  async createUser(@Body() user: CreateUserDto) {
-    return this.usersService.send(
-      {
-        cmd: 'create user',
-      },
-      user,
-    );
-  }
-
-  // ROLE ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'get roles' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('roles')
-  async getRoles() {
-    return this.rolesService.send(
-      {
-        cmd: 'get_all_roles',
-      },
-      {},
-    );
-  }
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'create role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('roles')
-  async addRole(@Body() role: CreateRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'create_role',
-      },
-      role,
-    );
-  }
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'create user role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('user_role')
-  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'create_user_role',
-      },
-      userRole,
-    );
-  }
-
-  // PROFILE ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'create profile' })
-  @ApiResponse({ status: HttpStatus.CREATED })
-  @Post('profile')
-  async createProfile(@Body() profile: CreateProfileDto) {
-    return this.profileService.send(
-      {
-        cmd: 'create_profile',
-      },
-      profile,
-    );
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'get all profiles' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('profile')
-  async getProfiles() {
-    return this.profileService.send(
-      {
-        cmd: 'get_all_profiles',
-      },
-      {},
-    );
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'get profile by user id' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('profile/:user_id')
-  async getProfileById(@Param('user_id') user_id: string) {
-    const isUUID = this.checkUUID(user_id);
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-    const profile = await firstValueFrom(
-      this.profileService.send(
-        {
-          cmd: 'get_profile_by_user_id',
-        },
-        user_id,
-      ),
-    );
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return profile;
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'delete profile' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('profile/:user_id')
-  async deleteProfile(@Param('user_id') user_id: string) {
-    const isUUID = this.checkUUID(user_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-
-    const deletedProfile = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'delete_profile',
-        },
-
-        user_id,
-      ),
-    );
-
-    if (!deletedProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return deletedProfile;
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'update profile info' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @HttpCode(HttpStatus.OK)
-  @Patch('profile/:user_id')
-  async updateProfile(
-    @Param('user_id') user_id: string,
-    @Body() profileInfo: UpdateProfileDto,
-  ) {
-    const isUUID = this.checkUUID(user_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-
-    const updatedProfile = await firstValueFrom(
-      this.profileService.send(
-        {
-          cmd: 'update_profile',
-        },
-        {
-          user_id,
-          ...profileInfo,
-        },
-      ),
-    );
-    if (!updatedProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return updatedProfile;
-  }
-
-  // AUTH ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Auth')
-  @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('login')
-  async logIn(@Body() data: CreateUserDto) {
-    const token = this.authService.send(
-      {
-        cmd: 'login',
-      },
-      data,
-    );
-
-    return token;
-  }
-
-  @ApiTags('Auth')
-  @ApiOperation({ summary: 'signup' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('signup')
-  async signUp(@Body() data: CreateUserDto) {
-    const hashedPassword = await this.authService.send(
-      {
-        cmd: 'signup',
-      },
-      data,
-    );
-
-    return this.usersService.send(
-      {
-        cmd: 'create user',
-      },
-      { ...data, password: hashedPassword },
     );
   }
 
