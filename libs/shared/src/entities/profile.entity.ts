@@ -1,4 +1,11 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { User } from './user.entity';
 
 interface ProfileCreationAttr {
   profile_id: string;
@@ -19,9 +26,6 @@ export class Profile extends Model<Profile, ProfileCreationAttr> {
   profile_id: string;
 
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
-  user_id: string;
-
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
   first_name: string;
 
   @Column({ type: DataType.STRING })
@@ -32,4 +36,7 @@ export class Profile extends Model<Profile, ProfileCreationAttr> {
 
   @Column({ type: DataType.STRING })
   city: string;
+
+  @BelongsTo(() => User, { foreignKey: 'user_id' })
+  user: User;
 }

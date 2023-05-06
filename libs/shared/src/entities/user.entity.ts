@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, HasOne, Model, Table } from 'sequelize-typescript';
+import { Profile } from './profile.entity';
 
 interface UserCreationAttr {
   user_id: string;
@@ -20,4 +21,11 @@ export class User extends Model<User, UserCreationAttr> {
 
   @Column({ type: DataType.STRING, allowNull: false })
   password: string;
+
+  @HasOne(() => Profile, {
+    foreignKey: 'user_id',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  profile: Profile;
 }

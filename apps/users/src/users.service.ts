@@ -24,6 +24,7 @@ export class UsersService {
         user_id: this.generateUUID(),
         ...newUser,
       });
+
       return user;
     } else {
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
@@ -32,6 +33,7 @@ export class UsersService {
 
   async getUsers() {
     const users = await this.userRepository.findAll();
+
     return users;
   }
 
@@ -39,6 +41,7 @@ export class UsersService {
     const result = await this.userRepository.findAndCountAll({
       where: { email },
     });
+
     return result;
   }
 }
