@@ -8,7 +8,7 @@ import {
 import { InjectModel } from '@nestjs/sequelize';
 import { Repository } from 'sequelize-typescript';
 import * as bcrypt from 'bcryptjs';
-import { AuthInterface } from '../interface/auth.interface';
+import { AuthInterface } from './interface/auth.interface';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
