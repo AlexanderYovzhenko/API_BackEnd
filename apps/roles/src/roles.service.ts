@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Role, UserRole } from './entities';
 import { Repository } from 'sequelize-typescript';
 import { v4 as uuid } from 'uuid';
+import { Profile, User } from '@app/shared';
 
 @Injectable()
 export class RolesService {
@@ -34,13 +35,46 @@ export class RolesService {
   }
 
   async getRoles() {
-    const roles = await this.roleRepository.findAll();
+    const roles = await this.roleRepository.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'email'],
+          include: [
+            {
+              model: Profile,
+              attributes: ['profile_id', 'first_name', 'last_name'],
+            },
+          ],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    });
 
     return roles;
   }
 
   async getRoleByValue(value: string) {
-    const role = await this.roleRepository.findOne({ where: { value } });
+    const role = await this.roleRepository.findOne({
+      where: { value },
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'email'],
+          include: [
+            {
+              model: Profile,
+              attributes: ['profile_id', 'first_name', 'last_name'],
+            },
+          ],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    });
 
     return role;
   }

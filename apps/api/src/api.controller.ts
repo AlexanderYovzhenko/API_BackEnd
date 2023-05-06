@@ -299,6 +299,29 @@ export class ApiController {
   }
 
   @ApiTags('Role')
+  @ApiOperation({ summary: 'get role by value' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @Get('roles/:value')
+  async getRoleByValue(@Query('value') value: string) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'get_role_by_value',
+        },
+
+        value,
+      ),
+    );
+
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+
+    return role;
+  }
+
+  @ApiTags('Role')
   @ApiOperation({ summary: 'create role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
