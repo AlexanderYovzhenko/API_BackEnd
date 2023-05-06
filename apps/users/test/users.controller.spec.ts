@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from '../src/users.controller';
 import { UsersService } from '../src/users.service';
-import { ValidationPipe } from '../pipes/validation.pipe';
+import { ValidationPipe } from '../src/pipes/validation.pipe';
 import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
-import { CreateUserDto } from '../dto/createUserDto';
+import { CreateUserDto } from '../src/dto/createUserDto';
 
 describe('UsersController', () => {
   let controller: UsersController;
