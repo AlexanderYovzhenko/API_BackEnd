@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-
+import { Repository } from 'sequelize-typescript';
 import { ProfileInterface } from './interface/profile.interface';
 import { Profile } from '@app/shared';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectModel(Profile) private profileRepository: typeof Profile,
+    @InjectModel(Profile) private profileRepository: Repository<Profile>,
   ) {}
 
+  generateUUID(): string {
+    return uuid();
+  }
+
   async createProfile(newProfile: ProfileInterface) {
-    const profile = await this.profileRepository.create(newProfile);
+    const profile = await this.profileRepository.create({
+      profile_id: this.generateUUID(),
+      ...newProfile,
+    });
 
     return profile;
   }
@@ -20,6 +28,7 @@ export class ProfileService {
     const users = await this.profileRepository.findAll({
       include: { all: true },
     });
+
     return users;
   }
 
