@@ -26,8 +26,8 @@ export class UserRole extends Model<Role> {
 
   @ForeignKey(() => Role)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING,
     allowNull: false,
   })
-  role_id: number;
+  role_id: string;
 }
