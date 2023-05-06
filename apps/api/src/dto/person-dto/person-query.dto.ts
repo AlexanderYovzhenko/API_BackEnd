@@ -3,14 +3,14 @@ import { IsNotEmpty } from 'class-validator';
 
 export class PersonQueryDto {
   @ApiProperty({
-    example: 'Мелисса',
+    example: 'Алекс',
     description: 'first name',
     required: false,
   })
   readonly first_name?: string;
 
   @ApiProperty({
-    example: 'Сейджмиллер',
+    example: 'Шлегель',
     description: 'last name',
     required: false,
   })

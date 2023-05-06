@@ -1,5 +1,3 @@
-import { from } from 'rxjs';
-
 // modules
 export * from './modules/shared.module';
 export * from './modules/postgres-db.module';

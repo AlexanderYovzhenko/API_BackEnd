@@ -4,6 +4,6 @@
     "declaration": true,
     "outDir": "../../dist/libs/shared"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }
