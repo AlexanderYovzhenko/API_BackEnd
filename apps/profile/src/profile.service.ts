@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-import { ProfileInterface } from './interfaces/profile.interface';
+import { ProfileInterface } from './interface/profile.interface';
 import { Profile } from '@app/shared';
 
 @Injectable()

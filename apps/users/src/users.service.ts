@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from '../dto/createUserDto';
 //import { ClientProxy } from '@nestjs/microservices';
-import { UserInterface } from './interfaces/user.interface';
+import { UserInterface } from './interface/user.interface';
 import { User } from '@app/shared';
 import { v4 as uuid } from 'uuid';
 

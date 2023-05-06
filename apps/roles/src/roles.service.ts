@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Role, UsersRoles } from './entities';
+import { Role, UserRole } from './entities';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectModel(Role) private roleRepository: typeof Role,
-    @InjectModel(UsersRoles) private usersRolesRepository: typeof UsersRoles,
+    @InjectModel(UserRole) private usersRolesRepository: typeof UserRole,
   ) {}
 
   async createRole(role) {

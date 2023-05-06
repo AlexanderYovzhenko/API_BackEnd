@@ -5,7 +5,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { ProfileInterface } from './interfaces/profile.interface';
+import { ProfileInterface } from './interface/profile.interface';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SharedService } from '@app/shared';

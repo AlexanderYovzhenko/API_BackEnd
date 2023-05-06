@@ -7,7 +7,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { SharedService } from '@app/shared';
-import { AuthInterface } from '../interfaces/auth.interface';
+import { AuthInterface } from '../interface/auth.interface';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiTags('Endpoints')
 @ApiBearerAuth()

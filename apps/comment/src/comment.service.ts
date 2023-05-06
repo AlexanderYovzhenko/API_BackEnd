@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Comment } from './entities';
 import { Repository } from 'sequelize-typescript';
 import { InjectModel } from '@nestjs/sequelize';
-import {
-  ICreateComment,
-  IUpdateComment,
-} from './interface/comment-service.interfaces';
+import { ICreateComment, IUpdateComment } from './interface/comment.interface';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
