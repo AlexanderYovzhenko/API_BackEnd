@@ -17,14 +17,24 @@ export class ProfileService {
   }
 
   async createProfile(newProfile: ProfileInterface) {
-    const user = await this.userRepository.findOne({
-      where: {
-        user_id: newProfile.user_id,
-      },
-    });
+    const { user_id, phone } = newProfile;
+
+    const user = await this.getProfileById(user_id);
 
     if (!user) {
       return null;
+    }
+
+    if (user.profile) {
+      return 'profile already exists';
+    }
+
+    const checkPhone = await this.profileRepository.findOne({
+      where: { phone },
+    });
+
+    if (checkPhone) {
+      return 'phone already exists';
     }
 
     const profile = await this.profileRepository.create({

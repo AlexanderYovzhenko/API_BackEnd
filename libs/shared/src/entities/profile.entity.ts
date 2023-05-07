@@ -25,18 +25,22 @@ export class Profile extends Model<Profile, ProfileCreationAttr> {
   })
   profile_id: string;
 
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
+  @Column({ type: DataType.STRING })
   first_name: string;
 
   @Column({ type: DataType.STRING })
   last_name: string;
 
-  @Column({ type: DataType.STRING })
+  @Column({ type: DataType.STRING, unique: true })
   phone: string;
 
   @Column({ type: DataType.STRING })
   city: string;
 
-  @BelongsTo(() => User, { foreignKey: 'user_id' })
+  @BelongsTo(() => User, {
+    foreignKey: 'user_id',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: User;
 }
