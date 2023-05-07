@@ -36,6 +36,7 @@ export class UsersService {
             attributes: [],
           },
         },
+        { all: true },
       ],
     });
 
@@ -52,6 +53,7 @@ export class UsersService {
             attributes: [],
           },
         },
+        { all: true },
       ],
     });
 

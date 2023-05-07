@@ -54,6 +54,7 @@ export class ProfileService {
             attributes: [],
           },
         },
+        { all: true },
       ],
     });
 
@@ -70,6 +71,7 @@ export class ProfileService {
             attributes: [],
           },
         },
+        { all: true },
       ],
     });
 
