@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Repository } from 'sequelize-typescript';
 import { ProfileInterface } from './interface/profile.interface';
-import { Profile, User } from '@app/shared';
+import { Profile, Role, User } from '@app/shared';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -47,7 +47,14 @@ export class ProfileService {
 
   async getProfiles() {
     const users = await this.userRepository.findAll({
-      include: { all: true },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
     });
 
     return users;
@@ -56,7 +63,14 @@ export class ProfileService {
   async getProfileById(user_id: string) {
     const profile = await this.userRepository.findOne({
       where: { user_id },
-      include: { all: true },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
     });
 
     return profile;

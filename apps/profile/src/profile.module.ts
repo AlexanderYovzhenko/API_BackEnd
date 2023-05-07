@@ -8,13 +8,15 @@ import {
   SharedService,
   Profile,
   User,
+  Role,
+  UserRole,
 } from '@app/shared';
 
 @Module({
   imports: [
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([Profile, User]),
+    SequelizeModule.forFeature([Profile, User, Role, UserRole]),
   ],
   controllers: [ProfileController],
   providers: [

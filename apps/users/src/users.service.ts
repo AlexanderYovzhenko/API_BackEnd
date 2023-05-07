@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserInterface, UserUpdateInterface } from './interface/user.interface';
-import { User } from '@app/shared';
+import { Role, User } from '@app/shared';
 import { v4 as uuid } from 'uuid';
 import { Repository } from 'sequelize-typescript';
 import { ConfigService } from '@nestjs/config';
@@ -31,7 +31,10 @@ export class UsersService {
     const users = await this.userRepository.findAll({
       include: [
         {
-          all: true,
+          model: Role,
+          through: {
+            attributes: [],
+          },
         },
       ],
     });
@@ -42,6 +45,14 @@ export class UsersService {
   async getUserByEmail(email: string) {
     const user = await this.userRepository.findOne({
       where: { email },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
     });
 
     return user;
