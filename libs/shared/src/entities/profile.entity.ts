@@ -1,6 +1,14 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { User } from './user.entity';
 
 interface ProfileCreationAttr {
+  profile_id: string;
   user_id: string;
   first_name: string;
   last_name: string;
@@ -8,28 +16,31 @@ interface ProfileCreationAttr {
   city: string;
 }
 
-@Table({ tableName: 'users' })
+@Table({ tableName: 'profile', timestamps: false })
 export class Profile extends Model<Profile, ProfileCreationAttr> {
   @Column({
     type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  profile_id: string;
 
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
-  user_id: string;
-
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
+  @Column({ type: DataType.STRING })
   first_name: string;
 
   @Column({ type: DataType.STRING })
   last_name: string;
 
-  @Column({ type: DataType.STRING })
+  @Column({ type: DataType.STRING, unique: true })
   phone: string;
 
   @Column({ type: DataType.STRING })
   city: string;
+
+  @BelongsTo(() => User, {
+    foreignKey: 'user_id',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  user: User;
 }

@@ -1,18 +1,18 @@
 import {
   CanActivate,
   ExecutionContext,
-  HttpException,
-  HttpStatus,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles_auth_decorator';
+
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -21,25 +21,34 @@ export class RolesGuard implements CanActivate {
         ROLES_KEY,
         [context.getHandler(), context.getClass()],
       );
+
       if (!requiredRoles) {
         return true;
       }
-      const req = context.switchToHttp().getRequest();
-      const authHeader = req.headers.authorization;
-      const bearer = authHeader.split(' ')[0];
-      const token = authHeader.split(' ')[1];
 
-      if (bearer !== 'Bearer' || !token) {
-        throw new UnauthorizedException({ message: 'Not authorized' });
+      const request = context.switchToHttp().getRequest();
+      const autHeader = request.headers.authorization || request.headers.header;
+      const [type, token] = autHeader.split(' ');
+
+      // check has token and type token
+      if (type !== 'Bearer' || !token) {
+        throw new ForbiddenException({
+          message: 'permission denied',
+        });
       }
+
+      // check is correct token
       const user = this.jwtService.verify(token);
-      req.user = user;
-      return user.roles.some((role) => requiredRoles.includes(role.value));
-    } catch (err) {
-      throw new HttpException(
-        { message: 'Permission denied' },
-        HttpStatus.FORBIDDEN,
+      request.user = user;
+
+      // check if the user has role for permission to access the resource
+      return user.roles.some((role: { value: string }) =>
+        requiredRoles.includes(role.value),
       );
+    } catch (error) {
+      throw new ForbiddenException({
+        message: 'permission denied',
+      });
     }
   }
 }

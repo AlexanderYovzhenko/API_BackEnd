@@ -7,10 +7,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import {
-  ICreateComment,
-  IUpdateComment,
-} from './interface/comment-service.interfaces';
+import { ICreateComment, IUpdateComment } from './interface/comment.interface';
 
 @Controller()
 export class CommentController {

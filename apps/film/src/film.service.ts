@@ -22,7 +22,7 @@ import {
   ICreateFilm,
   IQueryParamsFilter,
   IUpdateGenre,
-} from './interfaces/film.service.interfaces';
+} from './interface/film.interface';
 import sequelize from 'sequelize';
 import { slugify } from 'transliteration';
 
@@ -47,7 +47,7 @@ export class FilmService {
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 

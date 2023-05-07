@@ -1,17 +1,14 @@
 import { Controller, Inject } from '@nestjs/common';
+import { ProfileInterface } from './interface/profile.interface';
+import { ProfileService } from './profile.service';
+import { SharedService } from '@app/shared';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { ProfileInterface } from './interfaces/profile.interface';
-import { ProfileService } from './profile.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SharedService } from '@app/shared';
 
-@ApiTags('Endpoints')
-@ApiBearerAuth()
 @Controller()
 export class ProfileController {
   constructor(
@@ -31,10 +28,10 @@ export class ProfileController {
   }
 
   @MessagePattern({ cmd: 'get_all_profiles' })
-  getProfiles(@Ctx() context: RmqContext) {
+  async getProfiles(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.profileService.getProfiles();
+    return await this.profileService.getProfiles();
   }
 
   @MessagePattern({ cmd: 'get_profile_by_user_id' })
@@ -45,31 +42,18 @@ export class ProfileController {
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    const result = await this.profileService.getProfileById(user_id);
-    return result.rows;
+    return await this.profileService.getProfileById(user_id);
   }
 
   @MessagePattern({ cmd: 'update_profile' })
   async updateProfile(
     @Ctx() context: RmqContext,
     @Payload()
-    data: {
-      user_id: string;
-      first_name: string;
-      last_name: string;
-      phone: string;
-      city: string;
-    },
+    updateProfile: ProfileInterface,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.profileService.updateProfile(
-      data.user_id,
-      data.first_name,
-      data.last_name,
-      data.phone,
-      data.city,
-    );
+    return await this.profileService.updateProfile(updateProfile);
   }
 
   @MessagePattern({ cmd: 'delete_profile' })

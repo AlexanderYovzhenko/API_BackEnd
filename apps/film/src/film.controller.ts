@@ -11,7 +11,7 @@ import {
   ICreateFilm,
   IQueryParamsFilter,
   IUpdateGenre,
-} from './interfaces/film.service.interfaces';
+} from './interface/film.interface';
 
 @Controller()
 export class FilmController {

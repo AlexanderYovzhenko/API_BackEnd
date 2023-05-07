@@ -1,18 +1,27 @@
-import { Model, Table, Column, DataType } from 'sequelize-typescript';
+import { User } from '@app/shared';
+import {
+  Model,
+  Table,
+  Column,
+  DataType,
+  BelongsToMany,
+} from 'sequelize-typescript';
+import { UserRole } from './user_role.entity';
+
 interface RoleCreationAttr {
+  role_id: string;
   value: string;
   description: string;
 }
 
-@Table({ tableName: 'roles' })
+@Table({ tableName: 'role', timestamps: false })
 export class Role extends Model<Role, RoleCreationAttr> {
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  role_id: string;
 
   @Column({
     type: DataType.STRING,
@@ -26,4 +35,7 @@ export class Role extends Model<Role, RoleCreationAttr> {
     allowNull: false,
   })
   description: string;
+
+  @BelongsToMany(() => User, () => UserRole)
+  users: User[];
 }

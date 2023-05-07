@@ -52,3 +52,13 @@ npm run test:e2e
 ```bash
 npm run lint
 ```
+
+## Added admin role to admin user (Добавлена роль admin пользователю admin)
+
+```bash
+# login
+{
+  "email": "admin@gmail.com",
+  "password": "admin"
+}
+```

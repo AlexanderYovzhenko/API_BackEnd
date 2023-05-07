@@ -5,11 +5,11 @@ export * from './modules/postgres-db.module';
 // services
 export * from './services/shared.service';
 
-// guards
-
 // entities
-export * from './entities/users.entity';
+export * from './entities/user.entity';
 export * from './entities/profile.entity';
+export * from './entities/role.entity';
+export * from './entities/user_role.entity';
 
 // interfaces - shared
 export * from './interfaces/shared.service.interface';

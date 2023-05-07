@@ -2,10 +2,23 @@ import { Module } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { RolesController } from './roles.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Role, UsersRoles } from './entities';
-import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
+import {
+  PostgresDBModule,
+  Profile,
+  Role,
+  SharedModule,
+  SharedService,
+  User,
+  UserRole,
+} from '@app/shared';
 
 @Module({
+  imports: [
+    SharedModule,
+    PostgresDBModule,
+    SequelizeModule.forFeature([Role, UserRole, User, Profile]),
+  ],
+  controllers: [RolesController],
   providers: [
     RolesService,
     {
@@ -13,12 +26,5 @@ import { PostgresDBModule, SharedModule, SharedService } from '@app/shared';
       useClass: SharedService,
     },
   ],
-  controllers: [RolesController],
-  imports: [
-    SharedModule,
-    PostgresDBModule,
-    SequelizeModule.forFeature([Role, UsersRoles]),
-  ],
-  exports: [RolesService],
 })
 export class RolesModule {}

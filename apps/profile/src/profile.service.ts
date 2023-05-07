@@ -1,46 +1,99 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-
-import { ProfileInterface } from './interfaces/profile.interface';
-import { Profile } from '@app/shared';
+import { Repository } from 'sequelize-typescript';
+import { ProfileInterface } from './interface/profile.interface';
+import { Profile, Role, User } from '@app/shared';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectModel(Profile) private profileRepository: typeof Profile,
+    @InjectModel(Profile) private profileRepository: Repository<Profile>,
+    @InjectModel(User) private userRepository: Repository<User>,
   ) {}
 
+  private generateUUID(): string {
+    return uuid();
+  }
+
   async createProfile(newProfile: ProfileInterface) {
-    const profile = await this.profileRepository.create(newProfile);
+    const { user_id, phone } = newProfile;
+
+    const user = await this.getProfileById(user_id);
+
+    if (!user) {
+      return null;
+    }
+
+    if (user.profile) {
+      return 'profile already exists';
+    }
+
+    const checkPhone = await this.profileRepository.findOne({
+      where: { phone },
+    });
+
+    if (checkPhone) {
+      return 'phone already exists';
+    }
+
+    const profile = await this.profileRepository.create({
+      profile_id: this.generateUUID(),
+      ...newProfile,
+    });
 
     return profile;
   }
 
   async getProfiles() {
-    const users = await this.profileRepository.findAll({
-      include: { all: true },
+    const users = await this.userRepository.findAll({
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
     });
+
     return users;
   }
 
   async getProfileById(user_id: string) {
-    const profile = await this.profileRepository.findAndCountAll({
+    const profile = await this.userRepository.findOne({
       where: { user_id },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
     });
 
     return profile;
   }
 
-  async updateProfile(
-    user_id: string,
-    first_name: string,
-    last_name: string,
-    phone: string,
-    city: string,
-  ) {
+  async updateProfile(updateProfile: ProfileInterface) {
+    const { user_id, first_name, last_name, phone, city } = updateProfile;
+
+    const checkUser = await this.getProfileById(user_id);
+
+    if (!checkUser || !checkUser.profile) {
+      return null;
+    }
+
+    const profile_id = checkUser.profile.profile_id;
+
     await this.profileRepository.update(
       { first_name, last_name, phone, city },
-      { where: { user_id } },
+      {
+        where: { profile_id },
+      },
     );
 
     const updatedProfile = await this.getProfileById(user_id);
@@ -49,17 +102,19 @@ export class ProfileService {
   }
 
   async deleteProfile(user_id: string) {
-    const profile = await this.getProfileById(user_id);
+    const user = await this.getProfileById(user_id);
 
-    if (!profile) {
+    if (!user || !user.profile) {
       return null;
     }
 
+    const profile_id = user.profile.profile_id;
+
     await this.profileRepository.destroy({
-      where: { user_id },
+      where: { profile_id },
       force: true,
     });
 
-    return profile;
+    return user;
   }
 }

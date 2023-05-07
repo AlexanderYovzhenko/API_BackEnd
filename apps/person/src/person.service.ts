@@ -4,10 +4,7 @@ import { Repository } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { v4 as uuid } from 'uuid';
 import { FilmPerson, FilmRole, Person, PersonFilmRole } from './entities';
-import {
-  ICreatePerson,
-  IShortPerson,
-} from './interface/person-service.interfaces';
+import { ICreatePerson, IShortPerson } from './interface/person.interface';
 import sequelize from 'sequelize';
 
 @Injectable()
@@ -21,7 +18,7 @@ export class PersonService {
     private personFilmRoleRepository: Repository<PersonFilmRole>,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 

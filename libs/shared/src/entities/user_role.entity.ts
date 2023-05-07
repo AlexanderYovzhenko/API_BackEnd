@@ -5,23 +5,17 @@ import {
   DataType,
   ForeignKey,
 } from 'sequelize-typescript';
-import { Role } from './role-entity';
+import { Role } from './role.entity';
 import { User } from '@app/shared';
 
-interface RoleCreationAttr {
-  value: string;
-  description: string;
-}
-
-@Table({ tableName: 'users_roles' })
-export class UsersRoles extends Model<Role, RoleCreationAttr> {
+@Table({ tableName: 'user_role', timestamps: false })
+export class UserRole extends Model<UserRole> {
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  user_role_id: string;
 
   @ForeignKey(() => User)
   @Column({
@@ -32,8 +26,8 @@ export class UsersRoles extends Model<Role, RoleCreationAttr> {
 
   @ForeignKey(() => Role)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.STRING,
     allowNull: false,
   })
-  role_id: number;
+  role_id: string;
 }

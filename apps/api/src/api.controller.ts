@@ -7,6 +7,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -44,8 +45,10 @@ import {
   CreatePersonDto,
   CountriesNameQueryDto,
 } from './dto';
-import { RolesGuard } from './guards/roles_guard';
+import { AuthGuard } from './guards/jwt_auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './guards/roles_auth_decorator';
+import { RolesOrSelfUserGuard } from './guards/roles_or_self_user.guard';
 
 @ApiBearerAuth()
 @Controller()
@@ -74,6 +77,489 @@ export class ApiController {
     return this.apiService.checkServer();
   }
 
+  // AUTH ENDPOINTS -------------------------------------------------------------
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('login')
+  async logIn(@Body() user: CreateUserDto) {
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'login',
+        },
+
+        user,
+      ),
+    );
+
+    if (!token) {
+      throw new ForbiddenException({ message: 'wrong email or password' });
+    }
+
+    return token;
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'signup' })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('signup')
+  async signUp(@Body() user: CreateUserDto) {
+    const hashedPassword = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'signup',
+        },
+
+        user,
+      ),
+    );
+
+    if (!hashedPassword) {
+      throw new BadRequestException('user already exists');
+    }
+
+    return this.usersService.send(
+      {
+        cmd: 'create_user',
+      },
+      { ...user, password: hashedPassword },
+    );
+  }
+
+  // USER ENDPOINTS -------------------------------------------------------------
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'get all users' })
+  @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
+  @Get('users')
+  async getUsers() {
+    const users = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get_all_users',
+        },
+        {},
+      ),
+    );
+
+    return users;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'get user by email' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @Get('users/:email')
+  async getUser(@Param('email') email: string) {
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'get_user_by_email',
+        },
+
+        email,
+      ),
+    );
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    return user;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'update user (password, login)' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.OK)
+  @Patch('users/:user_id')
+  async updateUser(
+    @Param('user_id') user_id: string,
+    @Body() updateUser: CreateUserDto,
+  ) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'update_user',
+        },
+        {
+          user_id,
+          ...updateUser,
+        },
+      ),
+    );
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    return user;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('User')
+  @ApiOperation({ summary: 'delete user' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('users/:user_id')
+  async deleteUser(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'delete_user',
+        },
+
+        user_id,
+      ),
+    );
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    return;
+  }
+
+  // PROFILE ENDPOINTS -------------------------------------------------------------
+
+  @UseGuards(AuthGuard)
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'create profile' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreatePersonDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('profiles')
+  async createProfile(@Body() newProfile: CreateProfileDto) {
+    const isUUID = this.checkUUID(newProfile.user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const profile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'create_profile',
+        },
+        newProfile,
+      ),
+    );
+
+    if (!profile) {
+      throw new NotFoundException('user not found');
+    }
+
+    if (profile === 'profile already exists') {
+      throw new BadRequestException('profile already exists');
+    }
+
+    if (profile === 'phone already exists') {
+      throw new BadRequestException('phone already exists');
+    }
+
+    return profile;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'get all profiles' })
+  @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
+  @Get('profiles')
+  async getProfiles() {
+    return this.profileService.send(
+      {
+        cmd: 'get_all_profiles',
+      },
+      {},
+    );
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'get profile by user id' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Get('profiles/:user_id')
+  async getProfileById(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const profile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'get_profile_by_user_id',
+        },
+        user_id,
+      ),
+    );
+
+    if (!profile) {
+      throw new NotFoundException('user not found');
+    }
+
+    return profile;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'update profile info' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.OK)
+  @Patch('profiles/:user_id')
+  async updateProfile(
+    @Param('user_id') user_id: string,
+    @Body() profileInfo: UpdateProfileDto,
+  ) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const updatedProfile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'update_profile',
+        },
+        {
+          user_id,
+          ...profileInfo,
+        },
+      ),
+    );
+
+    if (!updatedProfile) {
+      throw new NotFoundException('profile not found');
+    }
+
+    return updatedProfile;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Profile')
+  @ApiOperation({ summary: 'delete profile' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('profiles/:user_id')
+  async deleteProfile(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const deletedProfile = await firstValueFrom(
+      this.profileService.send(
+        {
+          cmd: 'delete_profile',
+        },
+
+        user_id,
+      ),
+    );
+
+    if (!deletedProfile) {
+      throw new NotFoundException('profile not found');
+    }
+
+    return;
+  }
+
+  // ROLE ENDPOINTS -------------------------------------------------------------
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'get roles' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('roles')
+  async getRoles() {
+    return this.rolesService.send(
+      {
+        cmd: 'get_all_roles',
+      },
+      {},
+    );
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'get role by value' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @Get('roles/:value')
+  async getRoleByValue(@Query('value') value: string) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'get_role_by_value',
+        },
+
+        value,
+      ),
+    );
+
+    if (!role) {
+      throw new NotFoundException('role not found');
+    }
+
+    return role;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create role' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('roles')
+  async addRole(@Body() newRole: CreateRoleDto) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'create_role',
+        },
+        newRole,
+      ),
+    );
+
+    if (!role) {
+      throw new BadRequestException('role already exists');
+    }
+
+    return role;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'update role' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.OK)
+  @Patch('roles/:value')
+  async updateRole(
+    @Body() updateRole: CreateRoleDto,
+    @Query('value') value: string,
+  ) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'update_role',
+        },
+        {
+          value,
+          updateRole,
+        },
+      ),
+    );
+
+    if (role === 'role not found') {
+      throw new NotFoundException('role not found');
+    }
+
+    if (!role) {
+      throw new BadRequestException('role already exists');
+    }
+
+    return role;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create user role' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @Post('user/role')
+  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
+    const roleToUser = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'create_user_role',
+        },
+        userRole,
+      ),
+    );
+
+    if (!roleToUser) {
+      throw new BadRequestException('role to user already exists');
+    }
+
+    return roleToUser;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create user role' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('user/role')
+  async deleteRoleToUser(@Body() userRole: CreateUserRoleDto) {
+    return this.rolesService.send(
+      {
+        cmd: 'delete_user_role',
+      },
+      userRole,
+    );
+  }
+
   // FILM ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Film')
@@ -100,14 +586,12 @@ export class ApiController {
     );
 
     if (!film) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return film;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'get all films' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
@@ -192,8 +676,9 @@ export class ApiController {
     );
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'created film' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateFilmDto })
@@ -211,14 +696,15 @@ export class ApiController {
     );
 
     if (!newFilm) {
-      throw new BadRequestException('Film is already exists');
+      throw new BadRequestException('film is already exists');
     }
 
     return newFilm;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'update film name' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateFilmDto })
@@ -249,14 +735,15 @@ export class ApiController {
     );
 
     if (!updateFilm) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return updateFilm;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'delete film' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
@@ -282,7 +769,7 @@ export class ApiController {
     );
 
     if (!deleteFilm) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return deleteFilm;
@@ -290,8 +777,6 @@ export class ApiController {
 
   // COUNTRIES ENDPOINTS -------------------------------------------------------------
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Country')
   @ApiOperation({ summary: 'get all countries' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -353,14 +838,12 @@ export class ApiController {
     );
 
     if (!genre) {
-      throw new NotFoundException('Genre not found');
+      throw new NotFoundException('genre not found');
     }
 
     return genre;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Genre')
   @ApiOperation({ summary: 'get all genres' })
   @ApiResponse({ status: HttpStatus.OK, type: [UpdateGenreNameDto] })
@@ -379,8 +862,9 @@ export class ApiController {
     return genres;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Genre')
   @ApiOperation({ summary: 'update genre name' })
   @ApiResponse({ status: HttpStatus.OK, type: UpdateGenreNameDto })
@@ -411,7 +895,7 @@ export class ApiController {
     );
 
     if (!updateGenre) {
-      throw new NotFoundException('Genre not found');
+      throw new NotFoundException('genre not found');
     }
 
     return updateGenre;
@@ -443,7 +927,7 @@ export class ApiController {
     );
 
     if (!person) {
-      throw new NotFoundException('Person not found');
+      throw new NotFoundException('person not found');
     }
 
     return person;
@@ -509,8 +993,9 @@ export class ApiController {
     return persons;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Person')
   @ApiOperation({ summary: 'created persons from film' })
   @ApiResponse({ status: HttpStatus.CREATED })
@@ -526,260 +1011,9 @@ export class ApiController {
     );
   }
 
-  // USER ENDPOINTS -------------------------------------------------------------
-
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  @ApiTags('User')
-  @ApiOperation({ summary: 'get all users' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
-  @Get('users')
-  async getUsers() {
-    const users = await firstValueFrom(
-      this.usersService.send(
-        {
-          cmd: 'get all users',
-        },
-        {},
-      ),
-    );
-
-    return users;
-  }
-
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  @ApiTags('User')
-  @ApiOperation({ summary: 'get user by email' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Get('users/:email')
-  async getUser(@Param('user_email') user_email: string) {
-    const user = await firstValueFrom(
-      this.usersService.send(
-        {
-          cmd: 'get user by email',
-        },
-
-        user_email,
-      ),
-    );
-
-    return user;
-  }
-
-  @ApiTags('User')
-  @ApiOperation({ summary: 'create new user' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('users')
-  async createUser(@Body() user: CreateUserDto) {
-    return this.usersService.send(
-      {
-        cmd: 'create user',
-      },
-      user,
-    );
-  }
-
-  // ROLE ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'get roles' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('roles')
-  async getRoles() {
-    return this.rolesService.send(
-      {
-        cmd: 'get_all_roles',
-      },
-      {},
-    );
-  }
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'create role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('roles')
-  async addRole(@Body() role: CreateRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'create_role',
-      },
-      role,
-    );
-  }
-
-  @ApiTags('Role')
-  @ApiOperation({ summary: 'create user role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('user_role')
-  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'create_user_role',
-      },
-      userRole,
-    );
-  }
-
-  // PROFILE ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'create profile' })
-  @ApiResponse({ status: HttpStatus.CREATED })
-  @Post('profile')
-  async createProfile(@Body() profile: CreateProfileDto) {
-    return this.profileService.send(
-      {
-        cmd: 'create_profile',
-      },
-      profile,
-    );
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'get all profiles' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('profile')
-  async getProfiles() {
-    return this.profileService.send(
-      {
-        cmd: 'get_all_profiles',
-      },
-      {},
-    );
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'get profile by user id' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Get('profile/:user_id')
-  async getProfileById(@Param('user_id') user_id: string) {
-    const isUUID = this.checkUUID(user_id);
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-    const profile = await firstValueFrom(
-      this.profileService.send(
-        {
-          cmd: 'get_profile_by_user_id',
-        },
-        user_id,
-      ),
-    );
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return profile;
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'delete profile' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('profile/:user_id')
-  async deleteProfile(@Param('user_id') user_id: string) {
-    const isUUID = this.checkUUID(user_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-
-    const deletedProfile = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'delete_profile',
-        },
-
-        user_id,
-      ),
-    );
-
-    if (!deletedProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return deletedProfile;
-  }
-
-  @ApiTags('Profile')
-  @ApiOperation({ summary: 'update profile info' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @HttpCode(HttpStatus.OK)
-  @Patch('profile/:user_id')
-  async updateProfile(
-    @Param('user_id') user_id: string,
-    @Body() profileInfo: UpdateProfileDto,
-  ) {
-    const isUUID = this.checkUUID(user_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('user_id is not UUID');
-    }
-
-    const updatedProfile = await firstValueFrom(
-      this.profileService.send(
-        {
-          cmd: 'update_profile',
-        },
-        {
-          user_id,
-          ...profileInfo,
-        },
-      ),
-    );
-    if (!updatedProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    return updatedProfile;
-  }
-
-  // AUTH ENDPOINTS -------------------------------------------------------------
-
-  @ApiTags('Auth')
-  @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('login')
-  async logIn(@Body() data: CreateUserDto) {
-    const token = this.authService.send(
-      {
-        cmd: 'login',
-      },
-      data,
-    );
-
-    return token;
-  }
-
-  @ApiTags('Auth')
-  @ApiOperation({ summary: 'signup' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @Post('signup')
-  async signUp(@Body() data: CreateUserDto) {
-    const hashedPassword = await this.authService.send(
-      {
-        cmd: 'signup',
-      },
-      data,
-    );
-
-    return this.usersService.send(
-      {
-        cmd: 'create user',
-      },
-      { ...data, password: hashedPassword },
-    );
-  }
-
   // COMMENT ENDPOINTS -------------------------------------------------------------
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'create comment to film' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateCommentDto })
@@ -795,8 +1029,20 @@ export class ApiController {
       ),
     );
 
+    if (comment === 'user id is not uuid') {
+      throw new BadRequestException('user id is not uuid');
+    }
+
+    if (comment === 'user not found') {
+      throw new BadRequestException('user not found');
+    }
+
+    if (comment === 'parent comment id is not uuid') {
+      throw new BadRequestException('parent comment id is not uuid');
+    }
+
     if (!comment) {
-      throw new BadRequestException('Parent comment not found');
+      throw new BadRequestException('parent comment not found');
     }
 
     return comment;
@@ -844,12 +1090,13 @@ export class ApiController {
     );
 
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;
   }
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'update comment' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateCommentDto })
@@ -879,12 +1126,13 @@ export class ApiController {
       ),
     );
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;
   }
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'delete comment' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
@@ -909,7 +1157,7 @@ export class ApiController {
     );
 
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;

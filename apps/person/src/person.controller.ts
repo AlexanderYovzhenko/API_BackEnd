@@ -7,10 +7,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import {
-  ICreatePerson,
-  IShortPerson,
-} from './interface/person-service.interfaces';
+import { ICreatePerson, IShortPerson } from './interface/person.interface';
 
 @Controller()
 export class PersonController {
