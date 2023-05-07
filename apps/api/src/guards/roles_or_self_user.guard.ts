@@ -43,8 +43,6 @@ export class RolesOrSelfUserGuard implements CanActivate {
 
       const userId = user.user_id;
       const resourceId = request.params.user_id;
-      console.log(userId);
-      console.log(resourceId);
 
       // check if the user has permission to access his resource or if the user has role for permission to access the resource
       return (
