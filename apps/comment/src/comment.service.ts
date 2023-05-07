@@ -33,7 +33,7 @@ export class CommentService {
       return 'user not found';
     }
 
-    if (comment.hasOwnProperty('parent_id')) {
+    if (comment.hasOwnProperty('parent_id') && comment.parent_id !== null) {
       if (!this.checkUUID(comment.parent_id)) {
         return 'parent comment id is not uuid';
       }
