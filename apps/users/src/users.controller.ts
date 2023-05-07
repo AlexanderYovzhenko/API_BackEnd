@@ -7,7 +7,7 @@ import {
 } from '@nestjs/microservices';
 import { UsersService } from './users.service';
 import { SharedService } from '@app/shared';
-import { UserInterface } from './interface/user.interface';
+import { UserInterface, UserUpdateInterface } from './interface/user.interface';
 
 @Controller()
 export class UsersController {
@@ -39,8 +39,28 @@ export class UsersController {
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    const result = await this.usersService.getUserByEmail(email);
+    return await this.usersService.getUserByEmail(email);
+  }
 
-    return result;
+  @MessagePattern({ cmd: 'update_user' })
+  async updateUser(
+    @Ctx() context: RmqContext,
+    @Payload()
+    updateUser: UserUpdateInterface,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.usersService.updateUser(updateUser);
+  }
+
+  @MessagePattern({ cmd: 'delete_user' })
+  async deleteUser(
+    @Ctx() context: RmqContext,
+    @Payload()
+    user_id: string,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.usersService.deleteUser(user_id);
   }
 }

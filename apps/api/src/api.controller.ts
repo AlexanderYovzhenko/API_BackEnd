@@ -83,13 +83,14 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.CREATED })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('login')
-  async logIn(@Body() data: CreateUserDto) {
+  async logIn(@Body() user: CreateUserDto) {
     const token = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'login',
         },
-        data,
+
+        user,
       ),
     );
 
@@ -105,13 +106,14 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.CREATED })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('signup')
-  async signUp(@Body() data: CreateUserDto) {
+  async signUp(@Body() user: CreateUserDto) {
     const hashedPassword = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'signup',
         },
-        data,
+
+        user,
       ),
     );
 
@@ -123,7 +125,7 @@ export class ApiController {
       {
         cmd: 'create_user',
       },
-      { ...data, password: hashedPassword },
+      { ...user, password: hashedPassword },
     );
   }
 
@@ -153,41 +155,98 @@ export class ApiController {
   @ApiTags('User')
   @ApiOperation({ summary: 'get user by email' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @Get('users/:email')
-  async getUser(@Param('user_email') user_email: string) {
+  async getUser(@Param('email') email: string) {
     const user = await firstValueFrom(
       this.usersService.send(
         {
           cmd: 'get_user_by_email',
         },
 
-        user_email,
+        email,
       ),
     );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     return user;
   }
 
   @ApiTags('User')
-  @ApiOperation({ summary: 'create new user' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserDto })
+  @ApiOperation({ summary: 'update user (password, login)' })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('users')
-  async createUser(@Body() user: CreateUserDto) {
-    return this.usersService.send(
-      {
-        cmd: 'create_user',
-      },
-      user,
+  @HttpCode(HttpStatus.OK)
+  @Patch('users/:user_id')
+  async updateUser(
+    @Param('user_id') user_id: string,
+    @Body() updateUser: CreateUserDto,
+  ) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'update_user',
+        },
+        {
+          user_id,
+          ...updateUser,
+        },
+      ),
     );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  @ApiTags('User')
+  @ApiOperation({ summary: 'delete user' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('users/:user_id')
+  async deleteUser(@Param('user_id') user_id: string) {
+    const isUUID = this.checkUUID(user_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('user_id is not UUID');
+    }
+
+    const user = await firstValueFrom(
+      this.usersService.send(
+        {
+          cmd: 'delete_user',
+        },
+
+        user_id,
+      ),
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return;
   }
 
   // PROFILE ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Profile')
   @ApiOperation({ summary: 'create profile' })
-  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.CREATED, type: CreatePersonDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('profiles')
@@ -211,12 +270,20 @@ export class ApiController {
       throw new NotFoundException('User not found');
     }
 
+    if (profile === 'profile already exists') {
+      throw new BadRequestException('profile already exists');
+    }
+
+    if (profile === 'phone already exists') {
+      throw new BadRequestException('phone already exists');
+    }
+
     return profile;
   }
 
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
   @Get('profiles')
   async getProfiles() {
     return this.profileService.send(
@@ -229,7 +296,7 @@ export class ApiController {
 
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get profile by user id' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Get('profiles/:user_id')
@@ -258,7 +325,7 @@ export class ApiController {
 
   @ApiTags('Profile')
   @ApiOperation({ summary: 'update profile info' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.OK)
