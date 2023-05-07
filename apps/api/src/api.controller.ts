@@ -7,6 +7,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -78,30 +79,44 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('login')
   async logIn(@Body() data: CreateUserDto) {
-    const token = this.authService.send(
-      {
-        cmd: 'login',
-      },
-      data,
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'login',
+        },
+        data,
+      ),
     );
+
+    if (!token) {
+      throw new ForbiddenException({ message: 'Wrong email or password' });
+    }
 
     return token;
   }
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'signup' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @Post('signup')
   async signUp(@Body() data: CreateUserDto) {
-    const hashedPassword = await this.authService.send(
-      {
-        cmd: 'signup',
-      },
-      data,
+    const hashedPassword = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'signup',
+        },
+        data,
+      ),
     );
+
+    if (!hashedPassword) {
+      throw new BadRequestException('User already exists');
+    }
 
     return this.usersService.send(
       {

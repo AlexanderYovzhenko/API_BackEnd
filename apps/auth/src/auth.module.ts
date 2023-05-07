@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import {
   PostgresDBModule,
+  Profile,
   SharedModule,
   SharedService,
   User,
@@ -15,7 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   imports: [
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([User]),
+    SequelizeModule.forFeature([User, Profile]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
