@@ -33,7 +33,7 @@ export class RolesGuard implements CanActivate {
       // check has token and type token
       if (type !== 'Bearer' || !token) {
         throw new ForbiddenException({
-          message: 'Permission denied',
+          message: 'permission denied',
         });
       }
 
@@ -47,7 +47,7 @@ export class RolesGuard implements CanActivate {
       );
     } catch (error) {
       throw new ForbiddenException({
-        message: 'Permission denied',
+        message: 'permission denied',
       });
     }
   }

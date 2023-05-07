@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
       // check has token and type token
       if (type !== 'Bearer' || !token) {
         throw new UnauthorizedException({
-          message: 'User unauthorized',
+          message: 'user unauthorized',
         });
       }
 
@@ -33,7 +33,7 @@ export class AuthGuard implements CanActivate {
       return true;
     } catch (error) {
       throw new UnauthorizedException({
-        message: 'User unauthorized',
+        message: 'user unauthorized',
       });
     }
   }

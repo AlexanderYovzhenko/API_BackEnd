@@ -96,7 +96,7 @@ export class ApiController {
     );
 
     if (!token) {
-      throw new ForbiddenException({ message: 'Wrong email or password' });
+      throw new ForbiddenException({ message: 'wrong email or password' });
     }
 
     return token;
@@ -119,7 +119,7 @@ export class ApiController {
     );
 
     if (!hashedPassword) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException('user already exists');
     }
 
     return this.usersService.send(
@@ -171,7 +171,7 @@ export class ApiController {
     );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user not found');
     }
 
     return user;
@@ -210,7 +210,7 @@ export class ApiController {
     );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user not found');
     }
 
     return user;
@@ -244,7 +244,7 @@ export class ApiController {
     );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user not found');
     }
 
     return;
@@ -276,7 +276,7 @@ export class ApiController {
     );
 
     if (!profile) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user not found');
     }
 
     if (profile === 'profile already exists') {
@@ -332,7 +332,7 @@ export class ApiController {
     );
 
     if (!profile) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('user not found');
     }
 
     return profile;
@@ -371,7 +371,7 @@ export class ApiController {
     );
 
     if (!updatedProfile) {
-      throw new NotFoundException('Profile not found');
+      throw new NotFoundException('profile not found');
     }
 
     return updatedProfile;
@@ -405,7 +405,7 @@ export class ApiController {
     );
 
     if (!deletedProfile) {
-      throw new NotFoundException('Profile not found');
+      throw new NotFoundException('profile not found');
     }
 
     return;
@@ -449,7 +449,7 @@ export class ApiController {
     );
 
     if (!role) {
-      throw new NotFoundException('Role not found');
+      throw new NotFoundException('role not found');
     }
 
     return role;
@@ -695,7 +695,7 @@ export class ApiController {
     );
 
     if (!newFilm) {
-      throw new BadRequestException('Film is already exists');
+      throw new BadRequestException('film is already exists');
     }
 
     return newFilm;
@@ -734,7 +734,7 @@ export class ApiController {
     );
 
     if (!updateFilm) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return updateFilm;
@@ -768,7 +768,7 @@ export class ApiController {
     );
 
     if (!deleteFilm) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return deleteFilm;
@@ -837,7 +837,7 @@ export class ApiController {
     );
 
     if (!genre) {
-      throw new NotFoundException('Genre not found');
+      throw new NotFoundException('genre not found');
     }
 
     return genre;
@@ -894,7 +894,7 @@ export class ApiController {
     );
 
     if (!updateGenre) {
-      throw new NotFoundException('Genre not found');
+      throw new NotFoundException('genre not found');
     }
 
     return updateGenre;
@@ -926,7 +926,7 @@ export class ApiController {
     );
 
     if (!person) {
-      throw new NotFoundException('Person not found');
+      throw new NotFoundException('person not found');
     }
 
     return person;
@@ -1028,8 +1028,20 @@ export class ApiController {
       ),
     );
 
+    if (comment === 'user id is not uuid') {
+      throw new BadRequestException('user id is not uuid');
+    }
+
+    if (comment === 'user not found') {
+      throw new BadRequestException('user not found');
+    }
+
+    if (comment === 'parent comment id is not uuid') {
+      throw new BadRequestException('parent comment id is not uuid');
+    }
+
     if (!comment) {
-      throw new BadRequestException('Parent comment not found');
+      throw new BadRequestException('parent comment not found');
     }
 
     return comment;
@@ -1077,7 +1089,7 @@ export class ApiController {
     );
 
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;
@@ -1113,7 +1125,7 @@ export class ApiController {
       ),
     );
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;
@@ -1144,7 +1156,7 @@ export class ApiController {
     );
 
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new NotFoundException('comment not found');
     }
 
     return comment;
