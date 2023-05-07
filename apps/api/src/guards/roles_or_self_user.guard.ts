@@ -10,7 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles_auth_decorator';
 
 @Injectable()
-export class RolesGuard implements CanActivate {
+export class RolesOrSelfUserGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) {}
 
   canActivate(
@@ -33,7 +33,7 @@ export class RolesGuard implements CanActivate {
       // check has token and type token
       if (type !== 'Bearer' || !token) {
         throw new ForbiddenException({
-          message: 'Permission denied',
+          message: 'Only for self or for role admin',
         });
       }
 
@@ -41,13 +41,19 @@ export class RolesGuard implements CanActivate {
       const user = this.jwtService.verify(token);
       request.user = user;
 
-      // check if the user has role for permission to access the resource
-      return user.roles.some((role: { value: string }) =>
-        requiredRoles.includes(role.value),
+      const userId = +user.user_id;
+      const resourceId = +request.params.user_id;
+
+      // check if the user has permission to access his resource or if the user has role for permission to access the resource
+      return (
+        userId === resourceId ||
+        user.roles.some((role: { value: string }) =>
+          requiredRoles.includes(role.value),
+        )
       );
     } catch (error) {
       throw new ForbiddenException({
-        message: 'Permission denied',
+        message: 'Only for self or for role admin',
       });
     }
   }

@@ -45,9 +45,10 @@ import {
   CreatePersonDto,
   CountriesNameQueryDto,
 } from './dto';
+import { AuthGuard } from './guards/jwt_auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './guards/roles_auth_decorator';
-import { AuthGuard } from './guards/jwt_auth.guard';
+import { RolesOrSelfUserGuard } from './guards/roles_or_self_user.guard';
 
 @ApiBearerAuth()
 @Controller()
@@ -131,8 +132,8 @@ export class ApiController {
 
   // USER ENDPOINTS -------------------------------------------------------------
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get all users' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
@@ -150,8 +151,9 @@ export class ApiController {
     return users;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get user by email' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
@@ -175,6 +177,9 @@ export class ApiController {
     return user;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'update user (password, login)' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
@@ -211,6 +216,9 @@ export class ApiController {
     return user;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'delete user' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
@@ -244,6 +252,7 @@ export class ApiController {
 
   // PROFILE ENDPOINTS -------------------------------------------------------------
 
+  @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'create profile' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreatePersonDto })
@@ -281,6 +290,11 @@ export class ApiController {
     return profile;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
@@ -294,6 +308,9 @@ export class ApiController {
     );
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get profile by user id' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
@@ -323,6 +340,9 @@ export class ApiController {
     return profile;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'update profile info' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
@@ -359,6 +379,9 @@ export class ApiController {
     return updatedProfile;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesOrSelfUserGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'delete profile' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
@@ -392,10 +415,12 @@ export class ApiController {
 
   // ROLE ENDPOINTS -------------------------------------------------------------
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get roles' })
   @ApiResponse({ status: HttpStatus.OK })
-  @UseGuards(AuthGuard)
   @Get('roles')
   async getRoles() {
     return this.rolesService.send(
@@ -406,6 +431,9 @@ export class ApiController {
     );
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get role by value' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -430,6 +458,9 @@ export class ApiController {
     return role;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
@@ -445,12 +476,15 @@ export class ApiController {
     );
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @UseGuards(AuthGuard)
-  @Post('user_role')
+  @Post('user/role')
   async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
     return this.rolesService.send(
       {
@@ -467,7 +501,6 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, type: CreateFilmDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Get('films/:film_id')
   async getFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -493,12 +526,9 @@ export class ApiController {
     return film;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'get all films' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
-  @UseGuards(AuthGuard)
   @Get('films')
   async getAllFilms(@Query() queryLimit: LimitQueryDto) {
     return this.filmService.send(
@@ -514,7 +544,6 @@ export class ApiController {
   @ApiOperation({ summary: 'get films by id' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Get('id/films')
   async getFilmsById(@Query() filmsId: FilmsIdQueryDto) {
     const { films } = filmsId;
@@ -553,7 +582,6 @@ export class ApiController {
   @ApiTags('Film')
   @ApiOperation({ summary: 'get films by name' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
-  @UseGuards(AuthGuard)
   @Get('name/films')
   async getFilmsByName(@Query() queryName: FilmsNameQueryDto) {
     return this.filmService.send(
@@ -568,7 +596,6 @@ export class ApiController {
   @ApiTags('Film')
   @ApiOperation({ summary: 'get filtered films' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
-  @UseGuards(AuthGuard)
   @Get('filter/films')
   async getFilteredFilms(
     @Query()
@@ -583,13 +610,13 @@ export class ApiController {
     );
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'created film' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateFilmDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Post('films')
   async addFilm(@Body() film: CreateFilmDto) {
     const newFilm = await firstValueFrom(
@@ -609,15 +636,15 @@ export class ApiController {
     return newFilm;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'update film name' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateFilmDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Patch('films/:film_id')
   async updateFilmName(
     @Param('film_id') film_id: string,
@@ -648,15 +675,15 @@ export class ApiController {
     return updateFilm;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
   @ApiOperation({ summary: 'delete film' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard)
   @Delete('films/:film_id')
   async deleteFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -684,12 +711,9 @@ export class ApiController {
 
   // COUNTRIES ENDPOINTS -------------------------------------------------------------
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Country')
   @ApiOperation({ summary: 'get all countries' })
   @ApiResponse({ status: HttpStatus.OK })
-  @UseGuards(AuthGuard)
   @Get('countries')
   async getAllCountries() {
     const countries = await firstValueFrom(
@@ -707,7 +731,6 @@ export class ApiController {
   @ApiTags('Country')
   @ApiOperation({ summary: 'get country by name' })
   @ApiResponse({ status: HttpStatus.OK })
-  @UseGuards(AuthGuard)
   @Get('name/countries')
   async getCountriesByName(@Query() queryCountry: CountriesNameQueryDto) {
     const countries = await firstValueFrom(
@@ -730,7 +753,6 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, type: UpdateGenreNameDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Get('genres/:genre_id')
   async getGenre(@Param('genre_id') genre_id: string) {
     const isUUID = this.checkUUID(genre_id);
@@ -756,12 +778,9 @@ export class ApiController {
     return genre;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
   @ApiTags('Genre')
   @ApiOperation({ summary: 'get all genres' })
   @ApiResponse({ status: HttpStatus.OK, type: [UpdateGenreNameDto] })
-  @UseGuards(AuthGuard)
   @Get('genres')
   async getAllGenres(@Query() queryLimit: LimitQueryDto) {
     const genres = await firstValueFrom(
@@ -777,15 +796,15 @@ export class ApiController {
     return genres;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Genre')
   @ApiOperation({ summary: 'update genre name' })
   @ApiResponse({ status: HttpStatus.OK, type: UpdateGenreNameDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Patch('genres/:genre_id')
   async updateGenreName(
     @Param('genre_id') genre_id: string,
@@ -823,7 +842,6 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, type: CreatePersonDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Get('persons/:person_id')
   async getPerson(@Param('person_id') person_id: string) {
     const isUUID = this.checkUUID(person_id);
@@ -852,7 +870,6 @@ export class ApiController {
   @ApiTags('Person')
   @ApiOperation({ summary: 'get all persons' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
-  @UseGuards(AuthGuard)
   @Get('persons')
   async getAllPersons(@Query() queryLimit: LimitQueryDto) {
     const persons = await firstValueFrom(
@@ -871,7 +888,6 @@ export class ApiController {
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons from film' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
-  @UseGuards(AuthGuard)
   @Get('persons/films/:film_id')
   async getPersonsFromFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -896,7 +912,6 @@ export class ApiController {
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons who fits' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
-  @UseGuards(AuthGuard)
   @Get('name/persons')
   async getPersonsByName(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
@@ -912,13 +927,13 @@ export class ApiController {
     return persons;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Person')
   @ApiOperation({ summary: 'created persons from film' })
   @ApiResponse({ status: HttpStatus.CREATED })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Post('persons')
   async addPersonsFromFilm(@Body() persons: CreatePersonsFilmDto) {
     return this.personService.send(
@@ -932,11 +947,11 @@ export class ApiController {
 
   // COMMENT ENDPOINTS -------------------------------------------------------------
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'create comment to film' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateCommentDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Post('comments')
   async addComment(@Body() newComment: CreateCommentDto) {
     const comment = await firstValueFrom(
@@ -958,7 +973,6 @@ export class ApiController {
   @ApiTags('Comment')
   @ApiOperation({ summary: 'get all comments of film' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateCommentDto] })
-  @UseGuards(AuthGuard)
   @Get('comments/films/:film_id')
   async getAllCommentFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -980,7 +994,6 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, type: CreateCommentDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Get('comments/:comment_id')
   async getOneComment(@Param('comment_id') comment_id: string) {
     const isUUID = this.checkUUID(comment_id);
@@ -1005,13 +1018,13 @@ export class ApiController {
     return comment;
   }
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'update comment' })
   @ApiResponse({ status: HttpStatus.OK, type: CreateCommentDto })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   @Patch('comments/:comment_id')
   async updateComment(
     @Param('comment_id') comment_id: string,
@@ -1041,13 +1054,13 @@ export class ApiController {
     return comment;
   }
 
+  @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'delete comment' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard)
   @Delete('comments/:comment_id')
   async deleteComment(@Param('comment_id') comment_id: string) {
     const isUUID = this.checkUUID(comment_id);
