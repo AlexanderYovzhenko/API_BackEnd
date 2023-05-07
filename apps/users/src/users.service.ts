@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     @InjectModel(User) private userRepository: Repository<User>,
     private configService: ConfigService,
-  ) {} // typeof
+  ) {}
 
   private generateUUID(): string {
     return uuid();
