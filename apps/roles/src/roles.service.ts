@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Role, UserRole } from './entities';
 import { Repository } from 'sequelize-typescript';
 import { v4 as uuid } from 'uuid';
-import { Profile, User } from '@app/shared';
+import { Profile, Role, User, UserRole } from '@app/shared';
 import { RoleInterface, UserRoleInterface } from './interface/role.interface';
 
 @Injectable()

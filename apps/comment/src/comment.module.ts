@@ -4,9 +4,11 @@ import { CommentService } from './comment.service';
 import {
   PostgresDBModule,
   Profile,
+  Role,
   SharedModule,
   SharedService,
   User,
+  UserRole,
 } from '@app/shared';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Comment } from './entities';
@@ -15,7 +17,7 @@ import { Comment } from './entities';
   imports: [
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([Comment, User, Profile]),
+    SequelizeModule.forFeature([Comment, User, Profile, Role, UserRole]),
   ],
   controllers: [CommentController],
   providers: [

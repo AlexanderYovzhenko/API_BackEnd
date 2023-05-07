@@ -1,5 +1,14 @@
-import { Column, DataType, HasOne, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsToMany,
+  Column,
+  DataType,
+  HasOne,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Profile } from './profile.entity';
+import { Role } from './role.entity';
+import { UserRole } from './user_role.entity';
 
 interface UserCreationAttr {
   user_id: string;
@@ -28,4 +37,7 @@ export class User extends Model<User, UserCreationAttr> {
     onDelete: 'CASCADE',
   })
   profile: Profile;
+
+  @BelongsToMany(() => Role, () => UserRole)
+  roles: Role[];
 }

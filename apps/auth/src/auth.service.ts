@@ -66,9 +66,9 @@ export class AuthService {
   }
 
   private async generateToken(user: User) {
-    const { user_id, email } = user;
+    const { user_id, email, profile } = user;
 
-    const payload = { user_id, email };
+    const payload = { user_id, email, profile };
 
     return {
       token: this.jwtService.sign(payload),
