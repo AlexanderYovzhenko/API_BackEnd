@@ -1,6 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { SharedService } from '@app/shared';
+import { RoleInterface, UserRoleInterface } from './interface/role.interface';
 import {
   Ctx,
   MessagePattern,
@@ -17,10 +18,7 @@ export class RolesController {
   ) {}
 
   @MessagePattern({ cmd: 'create_role' })
-  async createRole(
-    @Ctx() context: RmqContext,
-    @Payload() role: Record<string | number, string[]>,
-  ) {
+  async createRole(@Ctx() context: RmqContext, @Payload() role: RoleInterface) {
     this.sharedService.acknowledgeMessage(context);
 
     return this.roleService.createRole(role);
@@ -29,7 +27,7 @@ export class RolesController {
   @MessagePattern({ cmd: 'create_user_role' })
   async createUserRole(
     @Ctx() context: RmqContext,
-    @Payload() data: Record<string | number, string[]>,
+    @Payload() data: UserRoleInterface,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
@@ -52,5 +50,25 @@ export class RolesController {
     this.sharedService.acknowledgeMessage(context);
 
     return this.roleService.getRoles();
+  }
+
+  @MessagePattern({ cmd: 'update_role' })
+  async updateRole(
+    @Ctx() context: RmqContext,
+    @Payload() data: { value: string; updateRole: RoleInterface },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.roleService.updateRole(data);
+  }
+
+  @MessagePattern({ cmd: 'delete_user_role' })
+  async deleteUserRole(
+    @Ctx() context: RmqContext,
+    @Payload() data: UserRoleInterface,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.roleService.deleteUserRole(data);
   }
 }

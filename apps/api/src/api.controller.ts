@@ -290,11 +290,9 @@ export class ApiController {
     return profile;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
@@ -415,9 +413,9 @@ export class ApiController {
 
   // ROLE ENDPOINTS -------------------------------------------------------------
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get roles' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -431,14 +429,13 @@ export class ApiController {
     );
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get role by value' })
   @ApiResponse({ status: HttpStatus.OK })
   @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @UseGuards(AuthGuard)
   @Get('roles/:value')
   async getRoleByValue(@Query('value') value: string) {
     const role = await firstValueFrom(
@@ -458,37 +455,105 @@ export class ApiController {
     return role;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Post('roles')
-  async addRole(@Body() role: CreateRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'create_role',
-      },
-      role,
+  async addRole(@Body() newRole: CreateRoleDto) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'create_role',
+        },
+        newRole,
+      ),
     );
+
+    if (!role) {
+      throw new BadRequestException('role already exists');
+    }
+
+    return role;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'update role' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.OK)
+  @Patch('roles/:value')
+  async updateRole(
+    @Body() updateRole: CreateRoleDto,
+    @Query('value') value: string,
+  ) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'update_role',
+        },
+        {
+          value,
+          updateRole,
+        },
+      ),
+    );
+
+    if (role === 'role not found') {
+      throw new NotFoundException('role not found');
+    }
+
+    if (!role) {
+      throw new BadRequestException('role already exists');
+    }
+
+    return role;
+  }
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @UseGuards(AuthGuard)
   @Post('user/role')
   async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
+    const roleToUser = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'create_user_role',
+        },
+        userRole,
+      ),
+    );
+
+    if (!roleToUser) {
+      throw new BadRequestException('role to user already exists');
+    }
+
+    return roleToUser;
+  }
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesGuard)
+  // @UseGuards(AuthGuard)
+  @ApiTags('Role')
+  @ApiOperation({ summary: 'create user role' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('user/role')
+  async deleteRoleToUser(@Body() userRole: CreateUserRoleDto) {
     return this.rolesService.send(
       {
-        cmd: 'create_user_role',
+        cmd: 'delete_user_role',
       },
       userRole,
     );
@@ -520,7 +585,7 @@ export class ApiController {
     );
 
     if (!film) {
-      throw new NotFoundException('Film not found');
+      throw new NotFoundException('film not found');
     }
 
     return film;

@@ -4,6 +4,7 @@ import { Role, UserRole } from './entities';
 import { Repository } from 'sequelize-typescript';
 import { v4 as uuid } from 'uuid';
 import { Profile, User } from '@app/shared';
+import { RoleInterface, UserRoleInterface } from './interface/role.interface';
 
 @Injectable()
 export class RolesService {
@@ -14,24 +15,6 @@ export class RolesService {
 
   private generateUUID(): string {
     return uuid();
-  }
-
-  async createRole(role) {
-    const newRole = await this.roleRepository.create({
-      role_id: this.generateUUID(),
-      ...role,
-    });
-
-    return newRole;
-  }
-
-  async createUserRole(data) {
-    const newUserRole = await this.usersRolesRepository.create({
-      user_role_id: this.generateUUID(),
-      ...data,
-    });
-
-    return newUserRole;
   }
 
   async getRoles() {
@@ -77,5 +60,85 @@ export class RolesService {
     });
 
     return role;
+  }
+
+  async createRole(newRole: RoleInterface) {
+    const { value } = newRole;
+
+    const checkNewRole = await this.getRoleByValue(value);
+
+    if (checkNewRole) {
+      return null;
+    }
+
+    const role = await this.roleRepository.create({
+      role_id: this.generateUUID(),
+      ...newRole,
+    });
+
+    return role;
+  }
+
+  async updateRole(data: { value: string; updateRole: RoleInterface }) {
+    const { value } = data;
+
+    const checkRole = await this.getRoleByValue(value);
+
+    if (!checkRole) {
+      return 'role not found';
+    }
+
+    const checkNewRole = await this.getRoleByValue(data.updateRole.value);
+
+    if (checkNewRole) {
+      return null;
+    }
+
+    await this.roleRepository.update(
+      { ...data.updateRole },
+      {
+        where: {
+          value,
+        },
+      },
+    );
+
+    const role = await this.getRoleByValue(data.updateRole.value);
+
+    return role;
+  }
+
+  async createUserRole(data: UserRoleInterface) {
+    const { user_id, role_id } = data;
+
+    const checkUserRole = await this.usersRolesRepository.findOne({
+      where: { user_id, role_id },
+    });
+
+    if (checkUserRole) {
+      return null;
+    }
+
+    const newUserRole = await this.usersRolesRepository.create({
+      user_role_id: this.generateUUID(),
+      ...data,
+    });
+
+    return newUserRole;
+  }
+
+  async deleteUserRole(data: UserRoleInterface) {
+    const { user_id, role_id } = data;
+
+    const userRole = await this.usersRolesRepository.findOne({
+      where: { user_id, role_id },
+    });
+
+    await this.usersRolesRepository.destroy({
+      where: { user_id, role_id },
+      force: true,
+    });
+
+    return userRole;
   }
 }

@@ -9,7 +9,7 @@ import { Role } from './role.entity';
 import { User } from '@app/shared';
 
 @Table({ tableName: 'user_role', timestamps: false })
-export class UserRole extends Model<Role> {
+export class UserRole extends Model<UserRole> {
   @Column({
     type: DataType.UUID,
     unique: true,
