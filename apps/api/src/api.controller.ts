@@ -134,6 +134,7 @@ export class ApiController {
 
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get all users' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
@@ -290,9 +291,9 @@ export class ApiController {
     return profile;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
   @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
@@ -413,9 +414,9 @@ export class ApiController {
 
   // ROLE ENDPOINTS -------------------------------------------------------------
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get roles' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -429,9 +430,9 @@ export class ApiController {
     );
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get role by value' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -455,9 +456,9 @@ export class ApiController {
     return role;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
@@ -480,9 +481,9 @@ export class ApiController {
     return role;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'update role' })
   @ApiResponse({ status: HttpStatus.OK })
@@ -516,9 +517,9 @@ export class ApiController {
     return role;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
@@ -541,9 +542,9 @@ export class ApiController {
     return roleToUser;
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })

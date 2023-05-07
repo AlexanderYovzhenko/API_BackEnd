@@ -1,4 +1,4 @@
-import { User } from '@app/shared';
+import { Role, User } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Repository } from 'sequelize-typescript';
@@ -47,6 +47,14 @@ export class AuthService {
 
     const userExists = await this.userRepository.findOne({
       where: { email },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
     });
 
     if (!userExists) {
@@ -66,9 +74,9 @@ export class AuthService {
   }
 
   private async generateToken(user: User) {
-    const { user_id, email, profile, roles } = user;
+    const { user_id, email, roles } = user;
 
-    const payload = { user_id, email, profile, roles };
+    const payload = { user_id, email, roles };
 
     return {
       token: this.jwtService.sign(payload),
