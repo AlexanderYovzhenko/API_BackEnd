@@ -1,16 +1,14 @@
 import { Controller, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { SharedService } from '@app/shared';
+import { AuthInterface } from './interface/auth.interface';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { SharedService } from '@app/shared';
-import { AuthInterface } from './interface/auth.interface';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-@ApiTags('Endpoints')
-@ApiBearerAuth()
+
 @Controller()
 export class AuthController {
   constructor(

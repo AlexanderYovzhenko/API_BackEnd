@@ -1,13 +1,12 @@
 import { Controller, Inject } from '@nestjs/common';
 import { RolesService } from './roles.service';
-
+import { SharedService } from '@app/shared';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { SharedService } from '@app/shared';
 
 @Controller('roles')
 export class RolesController {
