@@ -546,7 +546,7 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Role')
-  @ApiOperation({ summary: 'create user role' })
+  @ApiOperation({ summary: 'delete user role' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST })
   @HttpCode(HttpStatus.NO_CONTENT)
