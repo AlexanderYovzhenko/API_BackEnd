@@ -12,7 +12,7 @@ export class RolesService {
     @InjectModel(UserRole) private usersRolesRepository: Repository<UserRole>,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 

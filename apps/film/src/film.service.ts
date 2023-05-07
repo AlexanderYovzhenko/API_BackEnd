@@ -47,7 +47,7 @@ export class FilmService {
     @Inject('PERSON_SERVICE') private readonly personService: ClientProxy,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 

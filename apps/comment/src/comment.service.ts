@@ -12,7 +12,7 @@ export class CommentService {
     @InjectModel(Comment) private commentRepository: Repository<Comment>,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 

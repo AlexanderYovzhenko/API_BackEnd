@@ -18,7 +18,7 @@ export class PersonService {
     private personFilmRoleRepository: Repository<PersonFilmRole>,
   ) {}
 
-  generateUUID(): string {
+  private generateUUID(): string {
     return uuid();
   }
 
