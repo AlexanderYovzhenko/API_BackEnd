@@ -49,11 +49,11 @@ export class CommentService {
 
     const comment_id = this.generateUUID();
 
-    const like = '36';
+    // const like = '36';
 
     const newComment = await this.commentRepository.create({
       comment_id,
-      like,
+      // like,
       ...comment,
     });
 
