@@ -63,11 +63,11 @@ export class UsersService {
   async updateUser(updateUser: UserUpdateInterface) {
     const { user_id, email, password } = updateUser;
 
-    const user = await this.userRepository.findOne({
+    const checkUser = await this.userRepository.findOne({
       where: { user_id },
     });
 
-    if (!user) {
+    if (!checkUser) {
       return null;
     }
 
@@ -79,6 +79,10 @@ export class UsersService {
         where: { user_id },
       },
     );
+
+    const user = await this.userRepository.findOne({
+      where: { user_id },
+    });
 
     return user;
   }
