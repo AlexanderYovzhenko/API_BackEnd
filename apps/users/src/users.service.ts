@@ -19,10 +19,14 @@ export class UsersService {
   }
 
   async createUser(newUser: UserInterface) {
-    const user = await this.userRepository.create({
-      user_id: this.generateUUID(),
+    const user_id = this.generateUUID();
+
+    await this.userRepository.create({
+      user_id,
       ...newUser,
     });
+
+    const user = await this.getUserById(user_id);
 
     return user;
   }
@@ -60,6 +64,23 @@ export class UsersService {
     return user;
   }
 
+  private async getUserById(user_id: string) {
+    const user = await this.userRepository.findOne({
+      where: { user_id },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+        { all: true },
+      ],
+    });
+
+    return user;
+  }
+
   async updateUser(updateUser: UserUpdateInterface) {
     const { user_id, email, password } = updateUser;
 
@@ -80,9 +101,7 @@ export class UsersService {
       },
     );
 
-    const user = await this.userRepository.findOne({
-      where: { user_id },
-    });
+    const user = await this.getUserById(user_id);
 
     return user;
   }
