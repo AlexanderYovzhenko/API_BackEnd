@@ -4,3 +4,4 @@ dist
 .vscode
 parser
 pg_data
+db

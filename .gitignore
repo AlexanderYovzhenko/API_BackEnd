@@ -105,6 +105,3 @@ dist
 
 # Idea
 .idea
-
-# DB postgres
-db/
