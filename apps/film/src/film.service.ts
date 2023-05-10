@@ -586,7 +586,9 @@ export class FilmService {
       });
     });
 
-    return { film_id, ...film };
+    const newFilm = await this.getFilm(film_id);
+
+    return newFilm;
   }
 
   async updateFilm(film_id: string, name_ru: string, name_en: string) {

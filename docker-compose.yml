@@ -19,18 +19,18 @@ services:
     container_name: postgres
     image: postgres:latest
     restart: unless-stopped
+    env_file:
+      - .env
     expose:
       - 5432
     ports:
       - '5432:5432'
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./db/data:/var/lib/postgresql/data
-    env_file:
-      - ./apps/api/.env
     networks:
       - backend
 

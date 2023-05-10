@@ -37,10 +37,12 @@ export class ProfileService {
       return 'phone already exists';
     }
 
-    const profile = await this.profileRepository.create({
+    await this.profileRepository.create({
       profile_id: this.generateUUID(),
       ...newProfile,
     });
+
+    const profile = await this.getProfileById(user_id);
 
     return profile;
   }

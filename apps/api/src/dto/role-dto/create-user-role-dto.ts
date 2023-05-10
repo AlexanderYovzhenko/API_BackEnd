@@ -7,7 +7,7 @@ export class CreateUserRoleDto {
   })
   readonly user_id: string;
   @ApiProperty({
-    example: 'c3b3e340-06a9-47df-80bd-e98d29bfbb45',
+    example: 'ab20ab59-8a26-450c-81f0-9b5cbe46b3e4',
     description: 'id of the role from the role table',
   })
   readonly role_id: string;

@@ -108,22 +108,26 @@ export class RolesService {
   }
 
   async createUserRole(data: UserRoleInterface) {
-    const { user_id, role_id } = data;
+    try {
+      const { user_id, role_id } = data;
 
-    const checkUserRole = await this.usersRolesRepository.findOne({
-      where: { user_id, role_id },
-    });
+      const checkUserRole = await this.usersRolesRepository.findOne({
+        where: { user_id, role_id },
+      });
 
-    if (checkUserRole) {
-      return null;
+      if (checkUserRole) {
+        return null;
+      }
+
+      const newUserRole = await this.usersRolesRepository.create({
+        user_role_id: this.generateUUID(),
+        ...data,
+      });
+
+      return newUserRole;
+    } catch (error) {
+      return 'data not correct';
     }
-
-    const newUserRole = await this.usersRolesRepository.create({
-      user_role_id: this.generateUUID(),
-      ...data,
-    });
-
-    return newUserRole;
   }
 
   async deleteUserRole(data: UserRoleInterface) {

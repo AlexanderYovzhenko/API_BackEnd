@@ -31,7 +31,7 @@ export class CreateCommentDto {
   readonly parent_id?: string | null;
 
   @ApiProperty({
-    example: '87e25d0b-8f6f-4a38-b372-f881b8aa41e5',
+    example: 'f7b2bc15-ea49-453e-a924-c0c32b21cee0',
     description: 'user_id',
   })
   @IsNotEmpty()

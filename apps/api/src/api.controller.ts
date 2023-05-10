@@ -42,13 +42,26 @@ import {
   UpdateProfileDto,
   CreateCommentDto,
   UpdateCommentDto,
-  CreatePersonDto,
   CountriesNameQueryDto,
 } from './dto';
 import { AuthGuard } from './guards/jwt_auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './guards/roles_auth_decorator';
 import { RolesOrSelfUserGuard } from './guards/roles_or_self_user.guard';
+import {
+  schemaComment,
+  schemaCountry,
+  schemaCreateUser,
+  schemaError,
+  schemaFilm,
+  schemaGenre,
+  schemaLogin,
+  schemaPerson,
+  schemaProfile,
+  schemaRole,
+  schemaUser,
+  schemaUserRole,
+} from './schemas';
 
 @ApiBearerAuth()
 @Controller()
@@ -81,8 +94,8 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.CREATED })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('login')
   async logIn(@Body() user: CreateUserDto) {
     const token = await firstValueFrom(
@@ -104,8 +117,8 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'signup' })
-  @ApiResponse({ status: HttpStatus.CREATED })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaCreateUser })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('signup')
   async signUp(@Body() user: CreateUserDto) {
     const hashedPassword = await firstValueFrom(
@@ -137,7 +150,10 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get all users' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateUserDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaUser },
+  })
   @Get('users')
   async getUsers() {
     const users = await firstValueFrom(
@@ -157,8 +173,8 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get user by email' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaUser })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @Get('users/:email')
   async getUser(@Param('email') email: string) {
     const user = await firstValueFrom(
@@ -183,9 +199,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'update user (password, login)' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateUserDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaUser })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('users/:user_id')
   async updateUser(
@@ -223,8 +239,8 @@ export class ApiController {
   @ApiTags('User')
   @ApiOperation({ summary: 'delete user' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('users/:user_id')
   async deleteUser(@Param('user_id') user_id: string) {
@@ -256,9 +272,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'create profile' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreatePersonDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaProfile })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('profiles')
   async createProfile(@Body() newProfile: CreateProfileDto) {
     const isUUID = this.checkUUID(newProfile.user_id);
@@ -296,7 +312,10 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get all profiles' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateProfileDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaProfile },
+  })
   @Get('profiles')
   async getProfiles() {
     return this.profileService.send(
@@ -312,9 +331,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'get profile by user id' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaProfile })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('profiles/:user_id')
   async getProfileById(@Param('user_id') user_id: string) {
     const isUUID = this.checkUUID(user_id);
@@ -344,9 +363,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Profile')
   @ApiOperation({ summary: 'update profile info' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateProfileDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaProfile })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('profiles/:user_id')
   async updateProfile(
@@ -384,8 +403,8 @@ export class ApiController {
   @ApiTags('Profile')
   @ApiOperation({ summary: 'delete profile' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('profiles/:user_id')
   async deleteProfile(@Param('user_id') user_id: string) {
@@ -418,8 +437,36 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Role')
+  @ApiOperation({ summary: 'create role' })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaRole })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Post('roles')
+  async addRole(@Body() newRole: CreateRoleDto) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'create_role',
+        },
+        newRole,
+      ),
+    );
+
+    if (!role) {
+      throw new BadRequestException('role already exists');
+    }
+
+    return role;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
   @ApiOperation({ summary: 'get roles' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaRole },
+  })
   @Get('roles')
   async getRoles() {
     return this.rolesService.send(
@@ -435,8 +482,8 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'get role by value' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaRole })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @Get('roles/:value')
   async getRoleByValue(@Query('value') value: string) {
     const role = await firstValueFrom(
@@ -460,34 +507,10 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Role')
-  @ApiOperation({ summary: 'create role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('roles')
-  async addRole(@Body() newRole: CreateRoleDto) {
-    const role = await firstValueFrom(
-      this.rolesService.send(
-        {
-          cmd: 'create_role',
-        },
-        newRole,
-      ),
-    );
-
-    if (!role) {
-      throw new BadRequestException('role already exists');
-    }
-
-    return role;
-  }
-
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @ApiTags('Role')
   @ApiOperation({ summary: 'update role' })
-  @ApiResponse({ status: HttpStatus.OK })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaRole })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('roles/:value')
   async updateRole(
@@ -522,8 +545,8 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUserRoleDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaUserRole })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('user/role')
   async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
     const roleToUser = await firstValueFrom(
@@ -539,6 +562,10 @@ export class ApiController {
       throw new BadRequestException('role to user already exists');
     }
 
+    if (roleToUser === 'data not correct') {
+      throw new BadRequestException('data not correct');
+    }
+
     return roleToUser;
   }
 
@@ -548,25 +575,59 @@ export class ApiController {
   @ApiTags('Role')
   @ApiOperation({ summary: 'delete user role' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('user/role')
   async deleteRoleToUser(@Body() userRole: CreateUserRoleDto) {
-    return this.rolesService.send(
-      {
-        cmd: 'delete_user_role',
-      },
-      userRole,
+    const roleToUser = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'delete_user_role',
+        },
+        userRole,
+      ),
     );
+
+    if (!roleToUser) {
+      throw new BadRequestException('role to user not found');
+    }
+
+    return;
   }
 
   // FILM ENDPOINTS -------------------------------------------------------------
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Film')
+  @ApiOperation({ summary: 'created film' })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaFilm })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Post('films')
+  async addFilm(@Body() film: CreateFilmDto) {
+    const newFilm = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'add_film',
+        },
+
+        film,
+      ),
+    );
+
+    if (!newFilm) {
+      throw new BadRequestException('film is already exists');
+    }
+
+    return newFilm;
+  }
+
   @ApiTags('Film')
   @ApiOperation({ summary: 'get film by id' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateFilmDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('films/:film_id')
   async getFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -594,7 +655,10 @@ export class ApiController {
 
   @ApiTags('Film')
   @ApiOperation({ summary: 'get all films' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaFilm },
+  })
   @Get('films')
   async getAllFilms(@Query() queryLimit: LimitQueryDto) {
     return this.filmService.send(
@@ -608,8 +672,11 @@ export class ApiController {
 
   @ApiTags('Film')
   @ApiOperation({ summary: 'get films by id' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaFilm },
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('id/films')
   async getFilmsById(@Query() filmsId: FilmsIdQueryDto) {
     const { films } = filmsId;
@@ -647,7 +714,10 @@ export class ApiController {
 
   @ApiTags('Film')
   @ApiOperation({ summary: 'get films by name' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaFilm },
+  })
   @Get('name/films')
   async getFilmsByName(@Query() queryName: FilmsNameQueryDto) {
     return this.filmService.send(
@@ -661,7 +731,10 @@ export class ApiController {
 
   @ApiTags('Film')
   @ApiOperation({ summary: 'get filtered films' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateFilmDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaFilm },
+  })
   @Get('filter/films')
   async getFilteredFilms(
     @Query()
@@ -680,36 +753,10 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Film')
-  @ApiOperation({ summary: 'created film' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateFilmDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('films')
-  async addFilm(@Body() film: CreateFilmDto) {
-    const newFilm = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'add_film',
-        },
-
-        film,
-      ),
-    );
-
-    if (!newFilm) {
-      throw new BadRequestException('film is already exists');
-    }
-
-    return newFilm;
-  }
-
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @ApiTags('Film')
   @ApiOperation({ summary: 'update film name' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateFilmDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('films/:film_id')
   async updateFilmName(
@@ -747,8 +794,8 @@ export class ApiController {
   @ApiTags('Film')
   @ApiOperation({ summary: 'delete film' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('films/:film_id')
   async deleteFilm(@Param('film_id') film_id: string) {
@@ -779,7 +826,10 @@ export class ApiController {
 
   @ApiTags('Country')
   @ApiOperation({ summary: 'get all countries' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaCountry },
+  })
   @Get('countries')
   async getAllCountries() {
     const countries = await firstValueFrom(
@@ -796,7 +846,10 @@ export class ApiController {
 
   @ApiTags('Country')
   @ApiOperation({ summary: 'get country by name' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaCountry },
+  })
   @Get('name/countries')
   async getCountriesByName(@Query() queryCountry: CountriesNameQueryDto) {
     const countries = await firstValueFrom(
@@ -816,9 +869,9 @@ export class ApiController {
 
   @ApiTags('Genre')
   @ApiOperation({ summary: 'get genre by id' })
-  @ApiResponse({ status: HttpStatus.OK, type: UpdateGenreNameDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaGenre })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('genres/:genre_id')
   async getGenre(@Param('genre_id') genre_id: string) {
     const isUUID = this.checkUUID(genre_id);
@@ -846,7 +899,10 @@ export class ApiController {
 
   @ApiTags('Genre')
   @ApiOperation({ summary: 'get all genres' })
-  @ApiResponse({ status: HttpStatus.OK, type: [UpdateGenreNameDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaGenre },
+  })
   @Get('genres')
   async getAllGenres(@Query() queryLimit: LimitQueryDto) {
     const genres = await firstValueFrom(
@@ -867,9 +923,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Genre')
   @ApiOperation({ summary: 'update genre name' })
-  @ApiResponse({ status: HttpStatus.OK, type: UpdateGenreNameDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaGenre })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('genres/:genre_id')
   async updateGenreName(
@@ -903,11 +959,32 @@ export class ApiController {
 
   // PERSON ENDPOINTS -------------------------------------------------------------
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Person')
+  @ApiOperation({ summary: 'created persons from film' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    schema: { type: 'array', items: schemaPerson },
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Post('persons')
+  async addPersonsFromFilm(@Body() persons: CreatePersonsFilmDto) {
+    return this.personService.send(
+      {
+        cmd: 'add_person',
+      },
+
+      persons,
+    );
+  }
+
   @ApiTags('Person')
   @ApiOperation({ summary: 'get person by id' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreatePersonDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaPerson })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('persons/:person_id')
   async getPerson(@Param('person_id') person_id: string) {
     const isUUID = this.checkUUID(person_id);
@@ -935,7 +1012,10 @@ export class ApiController {
 
   @ApiTags('Person')
   @ApiOperation({ summary: 'get all persons' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaPerson },
+  })
   @Get('persons')
   async getAllPersons(@Query() queryLimit: LimitQueryDto) {
     const persons = await firstValueFrom(
@@ -953,7 +1033,10 @@ export class ApiController {
 
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons from film' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaPerson },
+  })
   @Get('persons/films/:film_id')
   async getPersonsFromFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -977,7 +1060,10 @@ export class ApiController {
 
   @ApiTags('Person')
   @ApiOperation({ summary: 'get persons who fits' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreatePersonDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaPerson },
+  })
   @Get('name/persons')
   async getPersonsByName(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
@@ -993,31 +1079,16 @@ export class ApiController {
     return persons;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @ApiTags('Person')
-  @ApiOperation({ summary: 'created persons from film' })
-  @ApiResponse({ status: HttpStatus.CREATED })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
-  @Post('persons')
-  async addPersonsFromFilm(@Body() persons: CreatePersonsFilmDto) {
-    return this.personService.send(
-      {
-        cmd: 'add_person',
-      },
-
-      persons,
-    );
-  }
-
   // COMMENT ENDPOINTS -------------------------------------------------------------
 
   @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'create comment to film' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateCommentDto })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    schema: schemaComment,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('comments')
   async addComment(@Body() newComment: CreateCommentDto) {
     const comment = await firstValueFrom(
@@ -1050,7 +1121,10 @@ export class ApiController {
 
   @ApiTags('Comment')
   @ApiOperation({ summary: 'get all comments of film' })
-  @ApiResponse({ status: HttpStatus.OK, type: [CreateCommentDto] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaComment },
+  })
   @Get('comments/films/:film_id')
   async getAllCommentFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -1069,9 +1143,9 @@ export class ApiController {
 
   @ApiTags('Comment')
   @ApiOperation({ summary: 'get comment by id' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateCommentDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaComment })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('comments/:comment_id')
   async getOneComment(@Param('comment_id') comment_id: string) {
     const isUUID = this.checkUUID(comment_id);
@@ -1099,9 +1173,9 @@ export class ApiController {
   @UseGuards(AuthGuard)
   @ApiTags('Comment')
   @ApiOperation({ summary: 'update comment' })
-  @ApiResponse({ status: HttpStatus.OK, type: CreateCommentDto })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaComment })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('comments/:comment_id')
   async updateComment(
@@ -1136,8 +1210,8 @@ export class ApiController {
   @ApiTags('Comment')
   @ApiOperation({ summary: 'delete comment' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('comments/:comment_id')
   async deleteComment(@Param('comment_id') comment_id: string) {

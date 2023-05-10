@@ -262,8 +262,8 @@ export class PersonService {
       });
     });
 
-    return {
-      film_id,
-    };
+    const personsFilm = await this.getPersonsFromFilm(film_id);
+
+    return personsFilm;
   }
 }

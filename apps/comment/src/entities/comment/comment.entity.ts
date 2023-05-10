@@ -12,7 +12,7 @@ interface CommentCreationAttrs {
   comment_id: string;
   title?: string | null;
   text: string;
-  // like: string;
+  like: string;
   film_id?: string | null;
   parent_id?: string | null;
   user_id: string;
@@ -33,8 +33,8 @@ export class Comment extends Model<Comment, CommentCreationAttrs> {
   @Column({ type: DataType.TEXT, allowNull: false })
   text: string;
 
-  // @Column({ type: DataType.STRING, allowNull: false })
-  // like: string;
+  @Column({ type: DataType.STRING, allowNull: false })
+  like: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
   film_id: string;
