@@ -17,8 +17,12 @@ Application on NestJS(Postgres, Sequelize, RabbitMQ, Docker) for films with regi
 ## Documentation for endpoints
 <h3>Home <a href="http://localhost:4000/" target="blank">localhost:4000</a> - home page, check if the server is running</h3>
 <h3>Docs <a href="http://localhost:4000/api/docs" target="blank">localhost:4000/api/docs</a> - detailed documentation</h3>
-<h3>RabbitMQ <a href="http://localhost:15672/" target="blank">localhost:15672</a> - rabbitMQ manager</h3>
+
+</br>
+
+## PgAdmin and RabbitMQ managers
 <h3>PgAdmin <a href="http://localhost:15432/" target="blank">localhost:15432</a> - Postgres Admin</h3>
+<h3>RabbitMQ <a href="http://localhost:15672/" target="blank">localhost:15672</a> - rabbitMQ manager</h3>
 
 </br>
 
@@ -28,23 +32,26 @@ Application on NestJS(Postgres, Sequelize, RabbitMQ, Docker) for films with regi
 git clone https://github.com/GoldenManBel/API_BackEnd.git
 ```
 
-## Installing NPM modules
-
-```bash
-npm install
-```
-
 ## Running application in docker
 
 ```bash
 docker compose up --build
 ```
 
+## Installing NPM modules
+
+```bash
+npm install
+```
+
 ## Testing
 
 ```bash
-# e2e tests
 npm run test:e2e
+
+npm run test:cov
+
+npm run test
 ```
 
 ## Auto-fix and format
@@ -64,4 +71,4 @@ npm run lint
 ```
 
 ## Scheme tables 
-  ![express report test](https://github.com/GoldenManBel/API_BackEnd/blob/fix__comment/scheme/Scheme_Tables.jpg)
+  ![scheme tables](https://github.com/GoldenManBel/API_BackEnd/blob/fix__comment/scheme/Scheme_Tables.jpg)
