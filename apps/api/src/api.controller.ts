@@ -865,6 +865,27 @@ export class ApiController {
   // GENRES ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Genre')
+  @ApiOperation({ summary: 'get all genres' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaGenre },
+  })
+  @Get('genres')
+  async getAllGenres(@Query() queryLimit: LimitQueryDto) {
+    const genres = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'get_all_genres',
+        },
+
+        queryLimit,
+      ),
+    );
+
+    return genres;
+  }
+
+  @ApiTags('Genre')
   @ApiOperation({ summary: 'get genre by id' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaGenre })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
@@ -892,27 +913,6 @@ export class ApiController {
     }
 
     return genre;
-  }
-
-  @ApiTags('Genre')
-  @ApiOperation({ summary: 'get all genres' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    schema: { type: 'array', items: schemaGenre },
-  })
-  @Get('genres')
-  async getAllGenres(@Query() queryLimit: LimitQueryDto) {
-    const genres = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'get_all_genres',
-        },
-
-        queryLimit,
-      ),
-    );
-
-    return genres;
   }
 
   @Roles('ADMIN')
