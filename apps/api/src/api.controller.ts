@@ -168,9 +168,6 @@ export class ApiController {
     return users;
   }
 
-  @Roles('ADMIN')
-  @UseGuards(RolesOrSelfUserGuard)
-  @UseGuards(AuthGuard)
   @ApiTags('User')
   @ApiOperation({ summary: 'get user by email' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaUser })
