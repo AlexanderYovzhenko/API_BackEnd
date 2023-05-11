@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter, SharedModule } from '@app/shared';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AllExceptionsFilter, SharedModule } from '@app/shared';
 
 @Module({
   imports: [
