@@ -17,6 +17,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -62,7 +63,7 @@ import {
   schemaUser,
   schemaUserRole,
 } from './schemas';
-
+import { AuthGuard as nestAuth } from '@nestjs/passport';
 @ApiBearerAuth()
 @Controller()
 export class ApiController {
@@ -140,6 +141,33 @@ export class ApiController {
         cmd: 'create_user',
       },
       { ...user, password: hashedPassword },
+    );
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'google login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('auth/google')
+  @UseGuards(nestAuth('google'))
+  async googleLogin(@Req() req) {
+    return await this.authService.send(
+      {
+        cmd: 'google login',
+      },
+      req,
+    );
+  }
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'vk login' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @Get('auth/vk')
+  @UseGuards(nestAuth('vk'))
+  async vkLogin(@Req() req) {
+    return await this.authService.send(
+      {
+        cmd: 'vk login',
+      },
+      req,
     );
   }
 
