@@ -35,7 +35,35 @@ git clone https://github.com/GoldenManBel/API_BackEnd.git
 ## Running application in docker
 
 ```bash
+# delete containers
+docker container prune
+```
+
+```bash
+# delete volumes
+docker volume prune    
+```
+
+```bash
 docker compose up --build
+```
+
+## Running restore database
+
+```bash
+docker cp ./backend.dump postgres:/backend.dump
+```
+
+```bash
+docker exec -i -t postgres sh
+```
+
+```bash
+pg_restore -U postgres -d backend --clean backend.dump
+```
+
+```bash
+exit
 ```
 
 ## Installing NPM modules
@@ -48,9 +76,13 @@ npm install
 
 ```bash
 npm run test:e2e
+```
 
+```bash
 npm run test:cov
+```
 
+```bash
 npm run test
 ```
 
