@@ -76,9 +76,13 @@ npm install
 
 ```bash
 npm run test:e2e
+```
 
+```bash
 npm run test:cov
+```
 
+```bash
 npm run test
 ```
 
