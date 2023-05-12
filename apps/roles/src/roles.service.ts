@@ -64,9 +64,9 @@ export class RolesService {
   async createRole(newRole: RoleInterface) {
     const { value } = newRole;
 
-    const checkNewRole = await this.getRoleByValue(value);
+    const checkRole = await this.getRoleByValue(value);
 
-    if (checkNewRole) {
+    if (checkRole) {
       return null;
     }
 

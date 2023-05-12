@@ -14,14 +14,14 @@ export class RolesController {
   constructor(
     @Inject('SharedServiceInterface')
     private readonly sharedService: SharedService,
-    private roleService: RolesService,
+    private rolesService: RolesService,
   ) {}
 
   @MessagePattern({ cmd: 'create_role' })
   async createRole(@Ctx() context: RmqContext, @Payload() role: RoleInterface) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.createRole(role);
+    return await this.rolesService.createRole(role);
   }
 
   @MessagePattern({ cmd: 'create_user_role' })
@@ -31,25 +31,25 @@ export class RolesController {
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.createUserRole(data);
+    return await this.rolesService.createUserRole(data);
   }
 
   @MessagePattern({ cmd: 'get_role_by_value' })
-  getByValue(
+  async getRoleByValue(
     @Ctx() context: RmqContext,
     @Payload()
     value: string,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.getRoleByValue(value);
+    return await this.rolesService.getRoleByValue(value);
   }
 
   @MessagePattern({ cmd: 'get_all_roles' })
-  getRoles(@Ctx() context: RmqContext) {
+  async getRoles(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.getRoles();
+    return await this.rolesService.getRoles();
   }
 
   @MessagePattern({ cmd: 'update_role' })
@@ -59,7 +59,7 @@ export class RolesController {
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.updateRole(data);
+    return await this.rolesService.updateRole(data);
   }
 
   @MessagePattern({ cmd: 'delete_user_role' })
@@ -69,6 +69,6 @@ export class RolesController {
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.roleService.deleteUserRole(data);
+    return await this.rolesService.deleteUserRole(data);
   }
 }
