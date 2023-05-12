@@ -14,7 +14,9 @@ export const mockPersonRepository = {
       return Promise.resolve(personStub());
     }
 
-    return personStub().person_id === person_id ? personStub() : null;
+    return personStub().person_id === person_id
+      ? Promise.resolve(personStub())
+      : Promise.resolve(null);
   }),
 
   getAllPersons: jest.fn().mockResolvedValue(Promise.resolve([personStub()])),
