@@ -84,9 +84,7 @@ export class UsersService {
   async updateUser(updateUser: UserUpdateInterface) {
     const { user_id, email, password } = updateUser;
 
-    const checkUser = await this.userRepository.findOne({
-      where: { user_id },
-    });
+    const checkUser = await this.getUserById(user_id);
 
     if (!checkUser) {
       return null;
