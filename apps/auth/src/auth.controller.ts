@@ -1,4 +1,4 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SharedService } from '@app/shared';
 import { AuthInterface } from './interface/auth.interface';
@@ -29,5 +29,17 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.signUp(userData);
+  }
+
+  @MessagePattern({ cmd: 'google login' })
+  async googleAuth(@Req() req) {
+    return await this.authService.oauthLogin(req);
+  }
+
+  @MessagePattern({ cmd: 'vk login' })
+  async vkLogin(@Ctx() context: RmqContext, @Payload() userData: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.vkLogin(userData);
   }
 }
