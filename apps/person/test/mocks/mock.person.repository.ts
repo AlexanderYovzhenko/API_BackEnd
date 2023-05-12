@@ -11,7 +11,7 @@ export const mockPersonRepository = {
 
   findOne: jest.fn().mockImplementation(({ where: { person_id } }) => {
     if (typeof person_id !== 'string') {
-      return personStub();
+      return Promise.resolve(personStub());
     }
 
     return personStub().person_id === person_id ? personStub() : null;
@@ -19,7 +19,7 @@ export const mockPersonRepository = {
 
   getAllPersons: jest.fn().mockResolvedValue(Promise.resolve([personStub()])),
 
-  findAll: jest.fn().mockResolvedValue([personStub()]),
+  findAll: jest.fn().mockResolvedValue(Promise.resolve([personStub()])),
 
   getPersonsFromFilm: jest
     .fn()
@@ -35,5 +35,5 @@ export const mockPersonRepository = {
     .fn()
     .mockResolvedValue(Promise.resolve([personStub()])),
 
-  findOrCreate: jest.fn().mockResolvedValue([personStub(), 1]),
+  findOrCreate: jest.fn().mockResolvedValue(Promise.resolve([personStub(), 1])),
 };
