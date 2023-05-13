@@ -90,7 +90,8 @@
       "!**/dist/**",
       "!**/*.d.ts",
       "!**/apps/api/**",
-      "!**/libs/shared/src/utils/**"
+      "!**/libs/shared/src/utils/**",
+      "!**/libs/shared/src/exception-filters/**"
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
