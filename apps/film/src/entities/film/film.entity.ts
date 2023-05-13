@@ -28,6 +28,7 @@ interface FilmCreationAttrs {
   reviews: number;
   age_limit: number;
   duration: number;
+  img: string;
 }
 
 @Table({ tableName: 'film', timestamps: false })
