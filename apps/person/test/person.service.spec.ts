@@ -168,6 +168,20 @@ describe('PersonService', () => {
       ).toBeDefined();
     });
 
+    it('should be return empty array', async () => {
+      expect(
+        await personService.addPersonsFromFilm(
+          [
+            {
+              ...filmRoleStub(),
+              ...personStub(),
+            },
+          ],
+          '123',
+        ),
+      ).toEqual([]);
+    });
+
     it('should be return array persons by film', async () => {
       expect(
         await personService.addPersonsFromFilm(
