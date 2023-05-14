@@ -15,10 +15,12 @@
     "start:prod": "node dist/apps/api/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.{ts,js}\" --fix",
     "test": "jest",
-    "test:watch": "jest --watch",
+    "test:detail": "jest --verbose",
     "test:cov": "jest --coverage",
+    "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./jest-e2e.json",
+    "test:e2e-watch": "jest --config ./jest-e2e.json --watchAll",
     "parser": "node libs/shared/src/utils/parser/index.js"
   },
   "dependencies": {
