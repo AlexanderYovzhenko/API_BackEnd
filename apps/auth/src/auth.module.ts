@@ -16,23 +16,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { GoogleStrategy } from './oath/google.strategy';
 import { VkStrategy } from './oath/vk.strategy';
+import { Token } from './entities';
 @Module({
   imports: [
     HttpModule,
-    GoogleStrategy,
-    VkStrategy,
+    // GoogleStrategy,
+    // VkStrategy,
     SharedModule,
     PostgresDBModule,
-    SequelizeModule.forFeature([User, Profile, Role, UserRole]),
+    SequelizeModule.forFeature([User, Profile, Role, UserRole, Token]),
     JwtModule.registerAsync({
+      global: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: await configService.get('JWT_SECRET_KEY'),
-        signOptions: {
-          expiresIn: '24h',
-        },
-      }),
+      useFactory: async () => ({}),
     }),
   ],
   controllers: [AuthController],

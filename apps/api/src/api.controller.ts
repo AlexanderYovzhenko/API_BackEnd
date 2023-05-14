@@ -18,6 +18,8 @@ import {
   Post,
   Query,
   Req,
+  Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -63,7 +65,9 @@ import {
   schemaUser,
   schemaUserRole,
 } from './schemas';
+import { Request, Response } from 'express';
 import { AuthGuard as nestAuth } from '@nestjs/passport';
+
 @ApiBearerAuth()
 @Controller()
 export class ApiController {
@@ -94,29 +98,6 @@ export class ApiController {
   // AUTH ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Auth')
-  @ApiOperation({ summary: 'login' })
-  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
-  @Post('login')
-  async logIn(@Body() user: CreateUserDto) {
-    const token = await firstValueFrom(
-      this.authService.send(
-        {
-          cmd: 'login',
-        },
-
-        user,
-      ),
-    );
-
-    if (!token) {
-      throw new ForbiddenException({ message: 'wrong email or password' });
-    }
-
-    return token;
-  }
-
-  @ApiTags('Auth')
   @ApiOperation({ summary: 'signup' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaCreateUser })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
@@ -145,14 +126,42 @@ export class ApiController {
   }
 
   @ApiTags('Auth')
+  @ApiOperation({ summary: 'login' })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Post('login')
+  async logIn(@Body() user: CreateUserDto, @Res() res: Response) {
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'login',
+        },
+
+        user,
+      ),
+    );
+
+    if (!token) {
+      throw new ForbiddenException({ message: 'wrong email or password' });
+    }
+
+    res.cookie('refreshToken', token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+
+    return res.json({ accessToken: token.accessToken });
+  }
+
+  @ApiTags('Auth')
   @ApiOperation({ summary: 'google login' })
   @ApiResponse({ status: HttpStatus.OK })
-  @Get('auth/google')
-  @UseGuards(nestAuth('google'))
+  @Get('google/login')
+  // @UseGuards(nestAuth('google'))
   async googleLogin(@Req() req) {
-    return await this.authService.send(
+    return this.authService.send(
       {
-        cmd: 'google login',
+        cmd: 'google_login',
       },
       req,
     );
@@ -160,15 +169,88 @@ export class ApiController {
   @ApiTags('Auth')
   @ApiOperation({ summary: 'vk login' })
   @ApiResponse({ status: HttpStatus.OK })
-  @Get('auth/vk')
-  @UseGuards(nestAuth('vk'))
+  @Get('vk/login')
+  // @UseGuards(nestAuth('vk'))
   async vkLogin(@Req() req) {
-    return await this.authService.send(
+    return this.authService.send(
       {
-        cmd: 'vk login',
+        cmd: 'vk_login',
       },
       req,
     );
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'refresh access token' })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Post('refresh')
+  async Refresh(@Req() req: Request, @Res() res: Response) {
+    if (!req.hasOwnProperty('cookies')) {
+      throw new BadRequestException('cookies not found');
+    }
+
+    if (!req.cookies.hasOwnProperty('refreshToken')) {
+      throw new UnauthorizedException({
+        message: 'user unauthorized',
+      });
+    }
+
+    const { refreshToken } = req.cookies;
+
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'refresh',
+        },
+
+        refreshToken,
+      ),
+    );
+
+    if (!token) {
+      throw new UnauthorizedException({
+        message: 'user unauthorized',
+      });
+    }
+
+    res.cookie('refreshToken', token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+
+    return res.json({ accessToken: token.accessToken });
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'logout' })
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @HttpCode(HttpStatus.OK)
+  @Delete('logout')
+  async logOut(@Req() req: Request, @Res() res: Response) {
+    if (!req.hasOwnProperty('cookies')) {
+      throw new BadRequestException('cookies not found');
+    }
+
+    if (!req.cookies.hasOwnProperty('refreshToken')) {
+      throw new BadRequestException('refresh token not found');
+    }
+
+    const { refreshToken } = req.cookies;
+
+    const result = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'logout',
+        },
+
+        refreshToken,
+      ),
+    );
+
+    res.clearCookie('refreshToken');
+    return res.json(result);
   }
 
   // USER ENDPOINTS -------------------------------------------------------------

@@ -31,15 +31,31 @@ export class AuthController {
     return await this.authService.signUp(userData);
   }
 
-  @MessagePattern({ cmd: 'google login' })
-  async googleAuth(@Req() req) {
+  @MessagePattern({ cmd: 'google_login' })
+  async googleAuth(@Ctx() context: RmqContext, @Req() req) {
+    this.sharedService.acknowledgeMessage(context);
+
     return await this.authService.oauthLogin(req);
   }
 
-  @MessagePattern({ cmd: 'vk login' })
+  @MessagePattern({ cmd: 'vk_login' })
   async vkLogin(@Ctx() context: RmqContext, @Payload() userData: string) {
     this.sharedService.acknowledgeMessage(context);
 
     return this.authService.vkLogin(userData);
+  }
+
+  @MessagePattern({ cmd: 'refresh' })
+  async refresh(@Ctx() context: RmqContext, @Payload() refreshToken: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.authService.refresh(refreshToken);
+  }
+
+  @MessagePattern({ cmd: 'logout' })
+  async logOut(@Ctx() context: RmqContext, @Payload() refreshToken: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.authService.logOut(refreshToken);
   }
 }

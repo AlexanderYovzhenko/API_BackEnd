@@ -7,16 +7,24 @@ import { AuthInterface } from './interface/auth.interface';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { v4 as uuid } from 'uuid';
+import { Token } from './entities';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User)
     private userRepository: Repository<User>,
+    @InjectModel(Token)
+    private tokenRepository: Repository<Token>,
     private configService: ConfigService,
     private jwtService: JwtService,
     private readonly httpService: HttpService,
   ) {}
+
+  private generateUUID(): string {
+    return uuid();
+  }
 
   async logIn(user: AuthInterface) {
     const validatedUser = await this.validateUser(user);
@@ -25,7 +33,35 @@ export class AuthService {
       return null;
     }
 
-    return await this.generateToken(validatedUser);
+    const accessToken = await this.generateAccessToken(validatedUser);
+    const refreshToken = await this.generateRefreshToken(validatedUser);
+
+    const checkToken = await this.tokenRepository.findOne({
+      include: [
+        {
+          model: User,
+          where: {
+            user_id: validatedUser.user_id,
+          },
+        },
+      ],
+    });
+
+    checkToken
+      ? await this.tokenRepository.update(
+          { token: refreshToken.refreshToken },
+          { where: { token_id: checkToken.token_id } },
+        )
+      : await this.tokenRepository.create({
+          token_id: this.generateUUID(),
+          token: refreshToken.refreshToken,
+          user_id: validatedUser.user_id,
+        });
+
+    return {
+      ...accessToken,
+      ...refreshToken,
+    };
   }
 
   async signUp(user: AuthInterface) {
@@ -75,13 +111,35 @@ export class AuthService {
     return userExists;
   }
 
-  private async generateToken(user: User) {
-    const { user_id, email, roles } = user;
+  private async generateAccessToken(user: User) {
+    const { user_id, roles } = user;
+    const payload = { user_id, roles };
 
-    const payload = { user_id, email, roles };
+    const jwtSecretAccessKey = await this.configService.get(
+      'JWT_SECRET_ACCESS_KEY',
+    );
 
     return {
-      token: this.jwtService.sign(payload),
+      accessToken: await this.jwtService.signAsync(payload, {
+        secret: jwtSecretAccessKey,
+        expiresIn: '30m',
+      }),
+    };
+  }
+
+  private async generateRefreshToken(user: User) {
+    const { user_id, roles } = user;
+    const payload = { user_id, roles };
+
+    const jwtSecretRefreshKey = await this.configService.get(
+      'JWT_SECRET_REFRESH_KEY',
+    );
+
+    return {
+      refreshToken: await this.jwtService.signAsync(payload, {
+        secret: jwtSecretRefreshKey,
+        expiresIn: '30d',
+      }),
     };
   }
 
@@ -115,11 +173,68 @@ export class AuthService {
     );
   }
 
+  async refresh(token: string) {
+    try {
+      const jwtSecretRefreshKey = this.configService.get(
+        'JWT_SECRET_REFRESH_KEY',
+      );
+
+      const checkUserData = this.jwtService.verify(token, {
+        secret: jwtSecretRefreshKey,
+      });
+
+      const checkToken = await this.tokenRepository.findOne({
+        where: { token },
+      });
+
+      if (!checkUserData || !checkToken) {
+        return null;
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { user_id: checkUserData.user_id },
+        include: [
+          {
+            model: Role,
+            through: {
+              attributes: [],
+            },
+          },
+        ],
+      });
+
+      const accessToken = await this.generateAccessToken(user);
+      const refreshToken = await this.generateRefreshToken(user);
+
+      await this.tokenRepository.update(
+        { token: refreshToken.refreshToken },
+        { where: { token_id: checkToken.token_id } },
+      );
+
+      return {
+        ...accessToken,
+        ...refreshToken,
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logOut(token: string) {
+    const result = await this.tokenRepository.destroy({
+      where: { token },
+      force: true,
+    });
+
+    return result;
+  }
+
   async getUserDataFromVk(userId: string, token: string): Promise<any> {
     return await this.httpService.get(
       `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_400,has_mobile,home_town,contacts,mobile_phone&access_token=${token}&v=5.120`,
     );
   }
+
   async vkLogin(auth: string) {
     let authData;
 
@@ -134,16 +249,20 @@ export class AuthService {
       const _user = await this.userRepository.findAndCountAll({
         where: { email: authData.data.email },
       });
+
       const foundUser = _user.rows[0];
+
       if (_user) {
         return this.logIn(foundUser);
       }
     }
   }
+
   async oauthLogin(req) {
     if (!req.user) {
       return null;
     }
+
     return req.user;
   }
 }

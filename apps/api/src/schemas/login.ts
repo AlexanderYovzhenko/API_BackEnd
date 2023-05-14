@@ -1,7 +1,7 @@
 const schemaLogin = {
   type: 'object',
   properties: {
-    token: { type: 'string' },
+    accessToken: { type: 'string' },
   },
 };
 
