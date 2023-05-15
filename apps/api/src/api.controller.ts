@@ -62,6 +62,7 @@ import {
   schemaFilm,
   schemaGenre,
   schemaLogin,
+  schemaLoginGoogle,
   schemaPerson,
   schemaProfile,
   schemaRole,
@@ -165,6 +166,7 @@ export class ApiController {
   @ApiTags('Auth')
   @ApiOperation({ summary: 'google login' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogle })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @UseGuards(NestAuth('google'))
   @Get('google/login/callback')
@@ -190,6 +192,8 @@ export class ApiController {
     });
 
     if (token.hasOwnProperty('password')) {
+      res.status(HttpStatus.CREATED);
+
       return res.json({
         user: { email: user.email, password: token.password },
         accessToken: token.accessToken,
