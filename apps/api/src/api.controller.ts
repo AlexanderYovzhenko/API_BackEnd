@@ -70,6 +70,7 @@ import {
   schemaUserRole,
 } from './schemas';
 import { RequestWithUser } from './interface/request.interface';
+import { ConfigService } from '@nestjs/config';
 
 @ApiBearerAuth()
 @Controller()
@@ -82,8 +83,8 @@ export class ApiController {
     @Inject('PROFILE_SERVICE') private readonly profileService: ClientProxy,
     @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     @Inject('COMMENT_SERVICE') private readonly commentService: ClientProxy,
-
     private readonly apiService: ApiService,
+    private configService: ConfigService,
   ) {}
 
   private checkUUID(uuid: string) {
@@ -191,30 +192,77 @@ export class ApiController {
       httpOnly: true,
     });
 
+    const CLIENT_URL = this.configService.get('CLIENT_URL');
+
     if (token.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
-      return res.json({
-        user: { email: user.email, password: token.password },
-        accessToken: token.accessToken,
-      });
+      res.header(
+        'UserData',
+        JSON.stringify({ email: user.email, password: token.password }),
+      );
+      res.header('Authorization', 'Bearer ' + token.accessToken);
+      res.redirect(CLIENT_URL);
+      return;
     }
 
-    return res.json({ accessToken: token.accessToken });
+    res.header('Authorization', 'Bearer ' + token.accessToken);
+    res.redirect(CLIENT_URL);
+    return;
+  }
+
+  @ApiTags('Auth')
+  @UseGuards(NestAuth('vk'))
+  @Get('vk/login')
+  async vk() {
+    return;
   }
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'vk login' })
-  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
-  @Get('vk/login')
-  // @UseGuards(nestAuth('vk'))
-  async vkLogin(@Req() req) {
-    return this.authService.send(
-      {
-        cmd: 'vk_login',
-      },
-      req,
-    );
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogle })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @UseGuards(NestAuth('vk'))
+  @Get('vk/login/callback')
+  async vkLogin(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Body() body: any,
+  ) {
+    const { user } = req;
+
+    console.log(user);
+    console.log(body);
+
+    // if (!user) {
+    //   throw new BadRequestException('user not found');
+    // }
+
+    // const token = await firstValueFrom(
+    //   this.authService.send(
+    //     {
+    //       cmd: 'vk_login',
+    //     },
+    //     user.email,
+    //   ),
+    // );
+
+    // res.cookie('refreshToken', token.refreshToken, {
+    //   maxAge: 30 * 24 * 60 * 60 * 1000,
+    //   httpOnly: true,
+    // });
+
+    // if (token.hasOwnProperty('password')) {
+    //   res.status(HttpStatus.CREATED);
+
+    //   return res.json({
+    //     user: { email: user.email, password: token.password },
+    //     accessToken: token.accessToken,
+    //   });
+    // }
+
+    // return res.json({ accessToken: token.accessToken });
   }
 
   @ApiTags('Auth')

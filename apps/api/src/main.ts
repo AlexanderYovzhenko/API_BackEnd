@@ -18,7 +18,6 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const PORT = await configService.get('PORT');
-  const CLIENT_URL = await configService.get('CLIENT_URL');
 
   app.useGlobalInterceptors(new LoggingInterceptor());
 
@@ -28,7 +27,6 @@ async function bootstrap() {
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    // origin: CLIENT_URL,
   });
 
   app.useGlobalPipes(
