@@ -1,7 +1,8 @@
-import { Controller, Inject, Req } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SharedService } from '@app/shared';
 import { AuthInterface } from './interface/auth.interface';
+import { Request } from 'express';
 import {
   Ctx,
   MessagePattern,
@@ -32,17 +33,17 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'google_login' })
-  async googleAuth(@Ctx() context: RmqContext, @Req() req) {
+  async googleAuth(@Ctx() context: RmqContext, @Payload() email: string) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.authService.oauthLogin(req);
+    return await this.authService.googleAuth(email);
   }
 
   @MessagePattern({ cmd: 'vk_login' })
-  async vkLogin(@Ctx() context: RmqContext, @Payload() userData: string) {
+  async vkAuth(@Ctx() context: RmqContext, @Payload() userData: string) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.authService.vkLogin(userData);
+    return this.authService.vkAuth(userData);
   }
 
   @MessagePattern({ cmd: 'refresh' })

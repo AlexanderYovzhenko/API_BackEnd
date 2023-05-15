@@ -2,6 +2,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import validator from 'validator';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
+import { Request, Response } from 'express';
+import { AuthGuard as NestAuth } from '@nestjs/passport';
 import {
   BadRequestException,
   Body,
@@ -12,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Ip,
   NotFoundException,
   Param,
   Patch,
@@ -65,8 +68,7 @@ import {
   schemaUser,
   schemaUserRole,
 } from './schemas';
-import { Request, Response } from 'express';
-import { AuthGuard as nestAuth } from '@nestjs/passport';
+import { RequestWithUser } from './interface/request.interface';
 
 @ApiBearerAuth()
 @Controller()
@@ -154,21 +156,52 @@ export class ApiController {
   }
 
   @ApiTags('Auth')
-  @ApiOperation({ summary: 'google login' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @UseGuards(NestAuth('google'))
   @Get('google/login')
-  // @UseGuards(nestAuth('google'))
-  async googleLogin(@Req() req) {
-    return this.authService.send(
-      {
-        cmd: 'google_login',
-      },
-      req,
-    );
+  async google() {
+    return;
   }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'google login' })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @UseGuards(NestAuth('google'))
+  @Get('google/login/callback')
+  async googleLogin(@Req() req: RequestWithUser, @Res() res: Response) {
+    const { user } = req;
+
+    if (!user) {
+      throw new BadRequestException('user not found');
+    }
+
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'google_login',
+        },
+        user.email,
+      ),
+    );
+
+    res.cookie('refreshToken', token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+
+    if (token.hasOwnProperty('password')) {
+      return res.json({
+        user: { email: user.email, password: token.password },
+        accessToken: token.accessToken,
+      });
+    }
+
+    return res.json({ accessToken: token.accessToken });
+  }
+
   @ApiTags('Auth')
   @ApiOperation({ summary: 'vk login' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
   @Get('vk/login')
   // @UseGuards(nestAuth('vk'))
   async vkLogin(@Req() req) {

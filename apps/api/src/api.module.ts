@@ -5,6 +5,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter, SharedModule } from '@app/shared';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AllExceptionsFilter, SharedModule } from '@app/shared';
   controllers: [ApiController],
   providers: [
     ApiService,
+    GoogleStrategy,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

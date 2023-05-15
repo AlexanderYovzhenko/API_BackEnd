@@ -112,8 +112,8 @@ export class AuthService {
   }
 
   private async generateAccessToken(user: User) {
-    const { user_id, roles } = user;
-    const payload = { user_id, roles };
+    const { user_id, email, roles } = user;
+    const payload = { user_id, email, roles };
 
     const jwtSecretAccessKey = await this.configService.get(
       'JWT_SECRET_ACCESS_KEY',
@@ -128,8 +128,8 @@ export class AuthService {
   }
 
   private async generateRefreshToken(user: User) {
-    const { user_id, roles } = user;
-    const payload = { user_id, roles };
+    const { user_id, email, roles } = user;
+    const payload = { user_id, email, roles };
 
     const jwtSecretRefreshKey = await this.configService.get(
       'JWT_SECRET_REFRESH_KEY',
@@ -155,22 +155,6 @@ export class AuthService {
 
   private async checkHashPassword(password: string, passwordExists: string) {
     return await bcrypt.compare(password, passwordExists);
-  }
-
-  async getVkToken(code: string): Promise<any> {
-    const VKDATA = {
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-    };
-
-    const host =
-      process.env.NODE_ENV === 'prod'
-        ? process.env.APP_HOST
-        : process.env.APP_LOCAL;
-
-    return await this.httpService.get(
-      `https://oauth.vk.com/access_token?client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/signin&code=${code}`,
-    );
   }
 
   async refresh(token: string) {
@@ -229,13 +213,92 @@ export class AuthService {
     return result;
   }
 
+  async googleAuth(email: string) {
+    const password = this.generateUUID();
+
+    const checkUser = await this.userRepository.findOrCreate({
+      where: { email },
+      defaults: {
+        user_id: this.generateUUID(),
+        email,
+        password: await this.hashPassword(password),
+      },
+    });
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+      include: [
+        {
+          model: Role,
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    });
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+
+    const checkToken = await this.tokenRepository.findOne({
+      include: [
+        {
+          model: User,
+          where: {
+            user_id: user.user_id,
+          },
+        },
+      ],
+    });
+
+    checkToken
+      ? await this.tokenRepository.update(
+          { token: refreshToken.refreshToken },
+          { where: { token_id: checkToken.token_id } },
+        )
+      : await this.tokenRepository.create({
+          token_id: this.generateUUID(),
+          token: refreshToken.refreshToken,
+          user_id: user.user_id,
+        });
+
+    if (checkUser[1]) {
+      return {
+        password,
+        ...accessToken,
+        ...refreshToken,
+      };
+    }
+
+    return {
+      ...accessToken,
+      ...refreshToken,
+    };
+  }
+
+  async getVkToken(code: string): Promise<any> {
+    const VKDATA = {
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+    };
+
+    const host =
+      process.env.NODE_ENV === 'prod'
+        ? process.env.APP_HOST
+        : process.env.APP_LOCAL;
+
+    return await this.httpService.get(
+      `https://oauth.vk.com/access_token?client_id=${VKDATA.client_id}&client_secret=${VKDATA.client_secret}&redirect_uri=${host}/signin&code=${code}`,
+    );
+  }
+
   async getUserDataFromVk(userId: string, token: string): Promise<any> {
     return await this.httpService.get(
       `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_400,has_mobile,home_town,contacts,mobile_phone&access_token=${token}&v=5.120`,
     );
   }
 
-  async vkLogin(auth: string) {
+  async vkAuth(auth: string) {
     let authData;
 
     try {
@@ -256,13 +319,5 @@ export class AuthService {
         return this.logIn(foundUser);
       }
     }
-  }
-
-  async oauthLogin(req) {
-    if (!req.user) {
-      return null;
-    }
-
-    return req.user;
   }
 }
