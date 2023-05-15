@@ -96,5 +96,6 @@ npm run lint
 }
 ```
 
-## Scheme tables 
-  ![scheme tables](https://github.com/GoldenManBel/API_BackEnd/blob/fix__comment/scheme/Scheme_Tables.jpg)
+## Schemes tables 
+  ![scheme tables](https://github.com/GoldenManBel/API_BackEnd/blob/fix__comment/diagrams/Scheme_Tables.jpg)
+  ![scheme tables](https://github.com/GoldenManBel/API_BackEnd/blob/fix__comment/diagrams/Scheme_Tables_Another_Format.jpg)
