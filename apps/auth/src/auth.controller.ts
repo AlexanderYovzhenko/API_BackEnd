@@ -2,7 +2,6 @@ import { Controller, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SharedService } from '@app/shared';
 import { AuthInterface } from './interface/auth.interface';
-import { Request } from 'express';
 import {
   Ctx,
   MessagePattern,
