@@ -134,7 +134,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Post('login')
   async logIn(@Body() user: CreateUserDto, @Res() res: Response) {
-    const token = await firstValueFrom(
+    const tokens = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'login',
@@ -144,16 +144,16 @@ export class ApiController {
       ),
     );
 
-    if (!token) {
+    if (!tokens) {
       throw new ForbiddenException({ message: 'wrong email or password' });
     }
 
-    res.cookie('refreshToken', token.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
 
-    return res.json({ accessToken: token.accessToken });
+    return res.json({ accessToken: tokens.accessToken });
   }
 
   @ApiTags('Auth')
@@ -189,7 +189,7 @@ export class ApiController {
 
     const { email } = user;
 
-    const token = await firstValueFrom(
+    const tokens = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'google_login',
@@ -198,24 +198,24 @@ export class ApiController {
       ),
     );
 
-    res.cookie('refreshToken', token.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
 
-    if (token.hasOwnProperty('password')) {
+    if (tokens.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
       res.header(
         'UserData',
-        JSON.stringify({ email: token.email, password: token.password }),
+        JSON.stringify({ email: tokens.email, password: tokens.password }),
       );
-      res.header('AccessToken', token.accessToken);
+      res.header('AccessToken', tokens.accessToken);
       res.redirect(CLIENT_URL);
       return;
     }
 
-    res.header('AccessToken', token.accessToken);
+    res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
     return;
   }
@@ -236,7 +236,7 @@ export class ApiController {
   async vkLogin(@Query('code') code: string, @Res() res: Response) {
     const CLIENT_URL = this.configService.get('CLIENT_URL');
 
-    const token = await firstValueFrom(
+    const tokens = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'vk_login',
@@ -245,30 +245,30 @@ export class ApiController {
       ),
     );
 
-    if (!token) {
+    if (!tokens) {
       res.header('Error', 'email not found');
       res.redirect(CLIENT_URL);
       return;
     }
 
-    res.cookie('refreshToken', token.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
 
-    if (token.hasOwnProperty('password')) {
+    if (tokens.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
       res.header(
         'UserData',
-        JSON.stringify({ email: token.email, password: token.password }),
+        JSON.stringify({ email: tokens.email, password: tokens.password }),
       );
-      res.header('AccessToken', token.accessToken);
+      res.header('AccessToken', tokens.accessToken);
       res.redirect(CLIENT_URL);
       return;
     }
 
-    res.header('AccessToken', token.accessToken);
+    res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
     return;
   }
@@ -291,7 +291,7 @@ export class ApiController {
 
     const { refreshToken } = req.cookies;
 
-    const token = await firstValueFrom(
+    const tokens = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'refresh',
@@ -301,18 +301,18 @@ export class ApiController {
       ),
     );
 
-    if (!token) {
+    if (!tokens) {
       throw new UnauthorizedException({
         message: 'user unauthorized',
       });
     }
 
-    res.cookie('refreshToken', token.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
 
-    return res.json({ accessToken: token.accessToken });
+    return res.json({ accessToken: tokens.accessToken });
   }
 
   @ApiTags('Auth')
