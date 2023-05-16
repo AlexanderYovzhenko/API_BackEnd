@@ -198,6 +198,12 @@ export class ApiController {
       ),
     );
 
+    if (!tokens) {
+      res.header('Error', 'email not found');
+      res.redirect(CLIENT_URL);
+      return;
+    }
+
     res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,

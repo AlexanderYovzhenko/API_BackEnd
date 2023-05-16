@@ -41,41 +41,45 @@ export class AuthService {
   }
 
   async logIn(user: AuthInterface) {
-    const validatedUser = await this.validateUser(user);
+    try {
+      const validatedUser = await this.validateUser(user);
 
-    if (!validatedUser) {
+      if (!validatedUser) {
+        return null;
+      }
+
+      const accessToken = await this.generateAccessToken(validatedUser);
+      const refreshToken = await this.generateRefreshToken(validatedUser);
+
+      const checkToken = await this.tokenRepository.findOne({
+        include: [
+          {
+            model: User,
+            where: {
+              user_id: validatedUser.user_id,
+            },
+          },
+        ],
+      });
+
+      checkToken
+        ? await this.tokenRepository.update(
+            { token: refreshToken.refreshToken },
+            { where: { token_id: checkToken.token_id } },
+          )
+        : await this.tokenRepository.create({
+            token_id: this.generateUUID(),
+            token: refreshToken.refreshToken,
+            user_id: validatedUser.user_id,
+          });
+
+      return {
+        ...accessToken,
+        ...refreshToken,
+      };
+    } catch (error) {
       return null;
     }
-
-    const accessToken = await this.generateAccessToken(validatedUser);
-    const refreshToken = await this.generateRefreshToken(validatedUser);
-
-    const checkToken = await this.tokenRepository.findOne({
-      include: [
-        {
-          model: User,
-          where: {
-            user_id: validatedUser.user_id,
-          },
-        },
-      ],
-    });
-
-    checkToken
-      ? await this.tokenRepository.update(
-          { token: refreshToken.refreshToken },
-          { where: { token_id: checkToken.token_id } },
-        )
-      : await this.tokenRepository.create({
-          token_id: this.generateUUID(),
-          token: refreshToken.refreshToken,
-          user_id: validatedUser.user_id,
-        });
-
-    return {
-      ...accessToken,
-      ...refreshToken,
-    };
   }
 
   async refresh(token: string) {
@@ -135,7 +139,11 @@ export class AuthService {
   }
 
   async googleAuth(email: string) {
-    return await this.addUserGoogleVk(email);
+    try {
+      return await this.addUserGoogleVk(email);
+    } catch (error) {
+      return null;
+    }
   }
 
   async vkAuth(code: string) {
