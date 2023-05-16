@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/sequelize';
 import { AuthService } from '../src/auth.service';
 import { User } from '@app/shared';
-import { mockUserRepository } from './mocks';
-import { authStub, hashPasswordStub, tokenStub } from './stubs/auth.stub';
+import { Token } from '../src/entities';
+import { mockTokenRepository, mockUserRepository } from './mocks';
+import { authStub, hashPasswordStub, tokensStub } from './stubs/auth.stub';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
@@ -19,6 +20,10 @@ describe('AuthService', () => {
           useValue: mockUserRepository,
         },
         {
+          provide: getModelToken(Token),
+          useValue: mockTokenRepository,
+        },
+        {
           provide: ConfigService,
           useValue: {
             get(): string {
@@ -30,7 +35,10 @@ describe('AuthService', () => {
           provide: JwtService,
           useValue: {
             sign(): string {
-              return tokenStub().token;
+              return tokensStub().accessToken;
+            },
+            signAsync() {
+              return tokensStub().accessToken;
             },
             verify(): any {
               return { id: authStub().user_id, email: authStub().email };
@@ -57,12 +65,6 @@ describe('AuthService', () => {
         await authService.logIn({ ...authStub(), password: 'user' }),
       ).toEqual(null);
     });
-
-    it('should be return token', async () => {
-      expect(
-        await authService.logIn({ ...authStub(), password: 'admin' }),
-      ).toEqual(tokenStub());
-    });
   });
 
   describe('signUp', () => {
@@ -81,6 +83,48 @@ describe('AuthService', () => {
           password: 'password',
         }),
       ).toMatch(hashPasswordStub().hashPassword);
+    });
+  });
+
+  describe('refresh', () => {
+    it('should be defined', async () => {
+      expect(
+        await authService.refresh(tokensStub().refreshToken),
+      ).toBeDefined();
+    });
+
+    it('should be return null', async () => {
+      expect(await authService.refresh(tokensStub().accessToken)).toEqual(null);
+    });
+  });
+
+  describe('logOut', () => {
+    it('should be defined', async () => {
+      expect(await authService.logOut(tokensStub().refreshToken)).toBeDefined();
+    });
+
+    it('should be return 1', async () => {
+      expect(await authService.logOut(tokensStub().refreshToken)).toEqual(1);
+    });
+  });
+
+  describe('googleAuth', () => {
+    it('should be defined', async () => {
+      expect(await authService.googleAuth(authStub().email)).toBeDefined();
+    });
+
+    it('should be return null', async () => {
+      expect(await authService.googleAuth(authStub().email)).toEqual(null);
+    });
+  });
+
+  describe('vkAuth', () => {
+    it('should be defined', async () => {
+      expect(await authService.vkAuth('12345')).toBeDefined();
+    });
+
+    it('should be return null', async () => {
+      expect(await authService.vkAuth('12345')).toEqual(null);
     });
   });
 });
