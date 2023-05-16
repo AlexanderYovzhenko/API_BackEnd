@@ -13,12 +13,10 @@ import {
 } from '@app/shared';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
 import { Token } from './entities';
 
 @Module({
   imports: [
-    HttpModule,
     SharedModule,
     PostgresDBModule,
     SequelizeModule.forFeature([User, Profile, Role, UserRole, Token]),

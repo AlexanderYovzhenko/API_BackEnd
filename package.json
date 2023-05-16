@@ -24,7 +24,6 @@
     "parser": "node libs/shared/src/utils/parser/index.js"
   },
   "dependencies": {
-    "@nestjs/axios": "^2.0.0",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",

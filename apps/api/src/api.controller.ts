@@ -14,7 +14,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  Ip,
   NotFoundException,
   Param,
   Patch,
@@ -62,7 +61,7 @@ import {
   schemaFilm,
   schemaGenre,
   schemaLogin,
-  schemaLoginGoogle,
+  schemaLoginGoogleVK,
   schemaPerson,
   schemaProfile,
   schemaRole,
@@ -167,23 +166,35 @@ export class ApiController {
   @ApiTags('Auth')
   @ApiOperation({ summary: 'google login' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
-  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogle })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogleVK })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @UseGuards(NestAuth('google'))
   @Get('google/login/callback')
   async googleLogin(@Req() req: RequestWithUser, @Res() res: Response) {
+    const CLIENT_URL = this.configService.get('CLIENT_URL');
+
+    if (!req.hasOwnProperty('user')) {
+      res.header('Error', 'user not found');
+      res.redirect(CLIENT_URL);
+      return;
+    }
+
     const { user } = req;
 
-    if (!user) {
-      throw new BadRequestException('user not found');
+    if (!user.hasOwnProperty('email')) {
+      res.header('Error', 'email not found');
+      res.redirect(CLIENT_URL);
+      return;
     }
+
+    const { email } = user;
 
     const token = await firstValueFrom(
       this.authService.send(
         {
           cmd: 'google_login',
         },
-        user.email,
+        email,
       ),
     );
 
@@ -192,21 +203,19 @@ export class ApiController {
       httpOnly: true,
     });
 
-    const CLIENT_URL = this.configService.get('CLIENT_URL');
-
     if (token.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
       res.header(
         'UserData',
-        JSON.stringify({ email: user.email, password: token.password }),
+        JSON.stringify({ email: token.email, password: token.password }),
       );
-      res.header('Authorization', 'Bearer ' + token.accessToken);
+      res.header('AccessToken', token.accessToken);
       res.redirect(CLIENT_URL);
       return;
     }
 
-    res.header('Authorization', 'Bearer ' + token.accessToken);
+    res.header('AccessToken', token.accessToken);
     res.redirect(CLIENT_URL);
     return;
   }
@@ -221,48 +230,47 @@ export class ApiController {
   @ApiTags('Auth')
   @ApiOperation({ summary: 'vk login' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
-  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogle })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogleVK })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
-  @UseGuards(NestAuth('vk'))
   @Get('vk/login/callback')
-  async vkLogin(
-    @Req() req: RequestWithUser,
-    @Res() res: Response,
-    @Body() body: any,
-  ) {
-    const { user } = req;
+  async vkLogin(@Query('code') code: string, @Res() res: Response) {
+    const CLIENT_URL = this.configService.get('CLIENT_URL');
 
-    console.log(user);
-    console.log(body);
+    const token = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'vk_login',
+        },
+        code,
+      ),
+    );
 
-    // if (!user) {
-    //   throw new BadRequestException('user not found');
-    // }
+    if (!token) {
+      res.header('Error', 'email not found');
+      res.redirect(CLIENT_URL);
+      return;
+    }
 
-    // const token = await firstValueFrom(
-    //   this.authService.send(
-    //     {
-    //       cmd: 'vk_login',
-    //     },
-    //     user.email,
-    //   ),
-    // );
+    res.cookie('refreshToken', token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
 
-    // res.cookie('refreshToken', token.refreshToken, {
-    //   maxAge: 30 * 24 * 60 * 60 * 1000,
-    //   httpOnly: true,
-    // });
+    if (token.hasOwnProperty('password')) {
+      res.status(HttpStatus.CREATED);
 
-    // if (token.hasOwnProperty('password')) {
-    //   res.status(HttpStatus.CREATED);
+      res.header(
+        'UserData',
+        JSON.stringify({ email: token.email, password: token.password }),
+      );
+      res.header('AccessToken', token.accessToken);
+      res.redirect(CLIENT_URL);
+      return;
+    }
 
-    //   return res.json({
-    //     user: { email: user.email, password: token.password },
-    //     accessToken: token.accessToken,
-    //   });
-    // }
-
-    // return res.json({ accessToken: token.accessToken });
+    res.header('AccessToken', token.accessToken);
+    res.redirect(CLIENT_URL);
+    return;
   }
 
   @ApiTags('Auth')

@@ -18,13 +18,6 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  @MessagePattern({ cmd: 'login' })
-  async logIn(@Ctx() context: RmqContext, @Payload() userData: AuthInterface) {
-    this.sharedService.acknowledgeMessage(context);
-
-    return await this.authService.logIn(userData);
-  }
-
   @MessagePattern({ cmd: 'signup' })
   async signUp(@Ctx() context: RmqContext, @Payload() userData: AuthInterface) {
     this.sharedService.acknowledgeMessage(context);
@@ -32,18 +25,11 @@ export class AuthController {
     return await this.authService.signUp(userData);
   }
 
-  @MessagePattern({ cmd: 'google_login' })
-  async googleAuth(@Ctx() context: RmqContext, @Payload() email: string) {
+  @MessagePattern({ cmd: 'login' })
+  async logIn(@Ctx() context: RmqContext, @Payload() userData: AuthInterface) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.authService.googleAuth(email);
-  }
-
-  @MessagePattern({ cmd: 'vk_login' })
-  async vkAuth(@Ctx() context: RmqContext, @Payload() userData: string) {
-    this.sharedService.acknowledgeMessage(context);
-
-    return this.authService.vkAuth(userData);
+    return await this.authService.logIn(userData);
   }
 
   @MessagePattern({ cmd: 'refresh' })
@@ -58,5 +44,19 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.logOut(refreshToken);
+  }
+
+  @MessagePattern({ cmd: 'google_login' })
+  async googleAuth(@Ctx() context: RmqContext, @Payload() email: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.authService.googleAuth(email);
+  }
+
+  @MessagePattern({ cmd: 'vk_login' })
+  async vkAuth(@Ctx() context: RmqContext, @Payload() code: string) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.vkAuth(code);
   }
 }

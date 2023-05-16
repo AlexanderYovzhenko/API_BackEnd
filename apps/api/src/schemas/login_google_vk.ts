@@ -1,7 +1,7 @@
-const schemaLoginGoogle = {
+const schemaLoginGoogleVK = {
   type: 'object',
   properties: {
-    user: {
+    userData: {
       type: 'object',
       properties: { email: { type: 'string' }, password: { type: 'string' } },
     },
@@ -9,4 +9,4 @@ const schemaLoginGoogle = {
   },
 };
 
-export { schemaLoginGoogle };
+export { schemaLoginGoogleVK };
