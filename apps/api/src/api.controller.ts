@@ -712,7 +712,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('roles/:value')
-  async getRoleByValue(@Query('value') value: string) {
+  async getRoleByValue(@Param('value') value: string) {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
@@ -744,7 +744,7 @@ export class ApiController {
   @Patch('roles/:value')
   async updateRole(
     @Body() updateRole: CreateRoleDto,
-    @Query('value') value: string,
+    @Param('value') value: string,
   ) {
     const role = await firstValueFrom(
       this.rolesService.send(
@@ -780,7 +780,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('roles/:value')
-  async deleteRole(@Query('value') value: string) {
+  async deleteRole(@Param('value') value: string) {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
