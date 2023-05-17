@@ -283,6 +283,7 @@ export class ApiController {
   @ApiOperation({ summary: 'refresh access token' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('refresh')
   async Refresh(@Req() req: Request, @Res() res: Response) {
     if (!req.hasOwnProperty('cookies')) {
