@@ -363,6 +363,8 @@ export class ApiController {
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaUser },
   })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('users')
   async getUsers() {
     const users = await firstValueFrom(
@@ -408,6 +410,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaUser })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('users/:user_id')
   async updateUser(
@@ -447,6 +451,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('users/:user_id')
   async deleteUser(@Param('user_id') user_id: string) {
@@ -481,6 +487,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaProfile })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('profiles')
   async createProfile(@Body() newProfile: CreateProfileDto) {
     const isUUID = this.checkUUID(newProfile.user_id);
@@ -522,6 +529,8 @@ export class ApiController {
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaProfile },
   })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('profiles')
   async getProfiles() {
     return this.profileService.send(
@@ -540,6 +549,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaProfile })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('profiles/:user_id')
   async getProfileById(@Param('user_id') user_id: string) {
     const isUUID = this.checkUUID(user_id);
@@ -572,6 +583,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaProfile })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('profiles/:user_id')
   async updateProfile(
@@ -590,8 +603,8 @@ export class ApiController {
           cmd: 'update_profile',
         },
         {
-          user_id,
           ...profileInfo,
+          user_id,
         },
       ),
     );
@@ -611,6 +624,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('profiles/:user_id')
   async deleteProfile(@Param('user_id') user_id: string) {
@@ -646,6 +661,8 @@ export class ApiController {
   @ApiOperation({ summary: 'create role' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaRole })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('roles')
   async addRole(@Body() newRole: CreateRoleDto) {
     const role = await firstValueFrom(
@@ -673,6 +690,8 @@ export class ApiController {
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaRole },
   })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('roles')
   async getRoles() {
     return this.rolesService.send(
@@ -690,6 +709,8 @@ export class ApiController {
   @ApiOperation({ summary: 'get role by value' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaRole })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('roles/:value')
   async getRoleByValue(@Query('value') value: string) {
     const role = await firstValueFrom(
@@ -717,6 +738,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaRole })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('roles/:value')
   async updateRole(
@@ -753,6 +776,8 @@ export class ApiController {
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaUserRole })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('user/role')
   async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
     const roleToUser = await firstValueFrom(
@@ -782,6 +807,8 @@ export class ApiController {
   @ApiOperation({ summary: 'delete user role' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('user/role')
   async deleteRoleToUser(@Body() userRole: CreateUserRoleDto) {
@@ -810,6 +837,8 @@ export class ApiController {
   @ApiOperation({ summary: 'created film' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaFilm })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('films')
   async addFilm(@Body() film: CreateFilmDto) {
     const newFilm = await firstValueFrom(
@@ -963,6 +992,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('films/:film_id')
   async updateFilmName(
@@ -1002,6 +1033,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('films/:film_id')
   async deleteFilm(@Param('film_id') film_id: string) {
@@ -1132,6 +1165,8 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaGenre })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('genres/:genre_id')
   async updateGenreName(
@@ -1175,6 +1210,8 @@ export class ApiController {
     schema: { type: 'array', items: schemaPerson },
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('persons')
   async addPersonsFromFilm(@Body() persons: CreatePersonsFilmDto) {
     return this.personService.send(
@@ -1295,6 +1332,7 @@ export class ApiController {
     schema: schemaComment,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('comments')
   async addComment(@Body() newComment: CreateCommentDto) {
     const comment = await firstValueFrom(
@@ -1382,6 +1420,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaComment })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @HttpCode(HttpStatus.OK)
   @Patch('comments/:comment_id')
   async updateComment(
@@ -1418,6 +1457,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('comments/:comment_id')
   async deleteComment(@Param('comment_id') comment_id: string) {
