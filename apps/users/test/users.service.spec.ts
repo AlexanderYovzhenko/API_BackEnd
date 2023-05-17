@@ -41,12 +41,7 @@ describe('UsersService', () => {
     });
 
     it('should be return new user', async () => {
-      expect(await usersService.createUser(userStub())).toEqual({
-        user_id: userStub().user_id,
-        email: userStub().email,
-        createdAt: userStub().createdAt,
-        updatedAt: userStub().updatedAt,
-      });
+      expect(await usersService.createUser(userStub())).toEqual(userStub());
     });
   });
 
