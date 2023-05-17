@@ -242,13 +242,11 @@ describe('FilmService', () => {
 
   describe('getCountriesByName', () => {
     it('should be defined', async () => {
-      expect(
-        await filmService.getCountriesByName({ country: 'usa' }),
-      ).toBeDefined();
+      expect(await filmService.getCountriesByName('usa')).toBeDefined();
     });
 
     it('should be return array countries by name', async () => {
-      expect(await filmService.getCountriesByName({ country: 'usa' })).toEqual([
+      expect(await filmService.getCountriesByName('usa')).toEqual([
         countryStub(),
       ]);
     });

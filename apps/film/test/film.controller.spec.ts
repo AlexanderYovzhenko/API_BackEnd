@@ -215,16 +215,14 @@ describe('FilmController', () => {
   describe('getCountriesByName', () => {
     it('should be defined', async () => {
       return expect(
-        await filmController.getCountriesByName(context as RmqContext, {
-          country: 'usa',
-        }),
+        await filmController.getCountriesByName(context as RmqContext, 'usa'),
       ).toBeDefined();
     });
 
     it('should return countries', async () => {
       const result = await filmController.getCountriesByName(
         context as RmqContext,
-        { country: 'usa' },
+        'usa',
       );
 
       expect(result).toEqual([countryStub()]);
