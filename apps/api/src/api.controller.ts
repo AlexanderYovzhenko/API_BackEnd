@@ -888,6 +888,23 @@ export class ApiController {
   }
 
   @ApiTags('Film')
+  @ApiOperation({ summary: 'get all films' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaFilm },
+  })
+  @Get('films')
+  async getAllFilms(@Query() queryLimit: LimitQueryDto) {
+    return this.filmService.send(
+      {
+        cmd: 'get_all_films',
+      },
+
+      queryLimit,
+    );
+  }
+
+  @ApiTags('Film')
   @ApiOperation({ summary: 'get film by id' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
@@ -917,21 +934,81 @@ export class ApiController {
     return film;
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @ApiTags('Film')
-  @ApiOperation({ summary: 'get all films' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    schema: { type: 'array', items: schemaFilm },
-  })
-  @Get('films')
-  async getAllFilms(@Query() queryLimit: LimitQueryDto) {
-    return this.filmService.send(
-      {
-        cmd: 'get_all_films',
-      },
+  @ApiOperation({ summary: 'update film name' })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
+  @HttpCode(HttpStatus.OK)
+  @Patch('films/:film_id')
+  async updateFilmName(
+    @Param('film_id') film_id: string,
+    @Body() filmNames: UpdateFilmNameDto,
+  ) {
+    const isUUID = this.checkUUID(film_id);
 
-      queryLimit,
+    if (!isUUID) {
+      throw new BadRequestException('film_id is not UUID');
+    }
+
+    const updateFilm = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'update_film_name',
+        },
+        {
+          film_id,
+          ...filmNames,
+        },
+      ),
     );
+
+    if (!updateFilm) {
+      throw new NotFoundException('film not found');
+    }
+
+    return updateFilm;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Film')
+  @ApiOperation({ summary: 'delete film' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('films/:film_id')
+  async deleteFilm(@Param('film_id') film_id: string) {
+    const isUUID = this.checkUUID(film_id);
+
+    if (!isUUID) {
+      throw new BadRequestException('film_id is not UUID');
+    }
+
+    const deleteFilm = await firstValueFrom(
+      this.filmService.send(
+        {
+          cmd: 'delete_film',
+        },
+
+        film_id,
+      ),
+    );
+
+    if (!deleteFilm) {
+      throw new NotFoundException('film not found');
+    }
+
+    return deleteFilm;
   }
 
   @ApiTags('Film')
@@ -1012,84 +1089,6 @@ export class ApiController {
       query,
     );
   }
-
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @ApiTags('Film')
-  @ApiOperation({ summary: 'update film name' })
-  @ApiResponse({ status: HttpStatus.OK, schema: schemaFilm })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
-  @HttpCode(HttpStatus.OK)
-  @Patch('films/:film_id')
-  async updateFilmName(
-    @Param('film_id') film_id: string,
-    @Body() filmNames: UpdateFilmNameDto,
-  ) {
-    const isUUID = this.checkUUID(film_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('film_id is not UUID');
-    }
-
-    const updateFilm = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'update_film_name',
-        },
-        {
-          film_id,
-          ...filmNames,
-        },
-      ),
-    );
-
-    if (!updateFilm) {
-      throw new NotFoundException('film not found');
-    }
-
-    return updateFilm;
-  }
-
-  @Roles('ADMIN')
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
-  @ApiTags('Film')
-  @ApiOperation({ summary: 'delete film' })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
-  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('films/:film_id')
-  async deleteFilm(@Param('film_id') film_id: string) {
-    const isUUID = this.checkUUID(film_id);
-
-    if (!isUUID) {
-      throw new BadRequestException('film_id is not UUID');
-    }
-
-    const deleteFilm = await firstValueFrom(
-      this.filmService.send(
-        {
-          cmd: 'delete_film',
-        },
-
-        film_id,
-      ),
-    );
-
-    if (!deleteFilm) {
-      throw new NotFoundException('film not found');
-    }
-
-    return deleteFilm;
-  }
-
   // COUNTRIES ENDPOINTS -------------------------------------------------------------
 
   @ApiTags('Country')
@@ -1119,14 +1118,14 @@ export class ApiController {
     schema: { type: 'array', items: schemaCountry },
   })
   @Get('name/countries')
-  async getCountriesByName(@Query() queryCountry: CountriesNameQueryDto) {
+  async getCountriesByName(@Query('country') country: CountriesNameQueryDto) {
     const countries = await firstValueFrom(
       this.filmService.send(
         {
           cmd: 'get_countries_by_name',
         },
 
-        queryCountry,
+        country,
       ),
     );
 
@@ -1253,6 +1252,27 @@ export class ApiController {
   }
 
   @ApiTags('Person')
+  @ApiOperation({ summary: 'get all persons' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: { type: 'array', items: schemaPerson },
+  })
+  @Get('persons')
+  async getAllPersons(@Query() queryLimit: LimitQueryDto) {
+    const persons = await firstValueFrom(
+      this.personService.send(
+        {
+          cmd: 'get_all_persons',
+        },
+
+        queryLimit,
+      ),
+    );
+
+    return persons;
+  }
+
+  @ApiTags('Person')
   @ApiOperation({ summary: 'get person by id' })
   @ApiResponse({ status: HttpStatus.OK, schema: schemaPerson })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
@@ -1283,32 +1303,12 @@ export class ApiController {
   }
 
   @ApiTags('Person')
-  @ApiOperation({ summary: 'get all persons' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    schema: { type: 'array', items: schemaPerson },
-  })
-  @Get('persons')
-  async getAllPersons(@Query() queryLimit: LimitQueryDto) {
-    const persons = await firstValueFrom(
-      this.personService.send(
-        {
-          cmd: 'get_all_persons',
-        },
-
-        queryLimit,
-      ),
-    );
-
-    return persons;
-  }
-
-  @ApiTags('Person')
   @ApiOperation({ summary: 'get persons from film' })
   @ApiResponse({
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaPerson },
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('persons/films/:film_id')
   async getPersonsFromFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -1336,6 +1336,7 @@ export class ApiController {
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaPerson },
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('name/persons')
   async getPersonsByName(@Query() person: PersonQueryDto) {
     const persons = await firstValueFrom(
@@ -1398,6 +1399,7 @@ export class ApiController {
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaComment },
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('comments/films/:film_id')
   async getAllCommentFilm(@Param('film_id') film_id: string) {
     const isUUID = this.checkUUID(film_id);
@@ -1473,6 +1475,7 @@ export class ApiController {
         },
       ),
     );
+
     if (!comment) {
       throw new NotFoundException('comment not found');
     }
