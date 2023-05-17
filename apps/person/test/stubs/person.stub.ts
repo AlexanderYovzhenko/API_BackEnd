@@ -11,5 +11,12 @@ export const personStub = () => {
         film_id: '7982ecf2-8fae-471c-8ddf-2e3cbdab3602',
       },
     ],
+    dataValues: {
+      films: [
+        {
+          film_id: '7982ecf2-8fae-471c-8ddf-2e3cbdab3602',
+        },
+      ],
+    },
   };
 };
