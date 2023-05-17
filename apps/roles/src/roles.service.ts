@@ -107,6 +107,21 @@ export class RolesService {
     return role;
   }
 
+  async deleteRole(value: string) {
+    const checkRole = await this.getRoleByValue(value);
+
+    if (!checkRole) {
+      return null;
+    }
+
+    await this.roleRepository.destroy({
+      where: { value },
+      force: true,
+    });
+
+    return checkRole;
+  }
+
   async createUserRole(data: UserRoleInterface) {
     try {
       const { user_id, role_id } = data;

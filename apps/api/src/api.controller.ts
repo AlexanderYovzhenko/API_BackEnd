@@ -773,6 +773,35 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Role')
+  @ApiOperation({ summary: 'delete role' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('roles/:value')
+  async deleteRole(@Query('value') value: string) {
+    const role = await firstValueFrom(
+      this.rolesService.send(
+        {
+          cmd: 'delete_role',
+        },
+
+        value,
+      ),
+    );
+
+    if (!role) {
+      throw new NotFoundException('role not found');
+    }
+
+    return;
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @ApiTags('Role')
   @ApiOperation({ summary: 'create user role' })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaUserRole })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
