@@ -44,6 +44,10 @@ export class PersonService {
       return null;
     }
 
+    const films = this.filteredUniqueFilmIds(person.films);
+
+    person.dataValues.films = films;
+
     return person;
   }
 
@@ -265,5 +269,24 @@ export class PersonService {
     const personsFilm = await this.getPersonsFromFilm(film_id);
 
     return personsFilm;
+  }
+
+  private filteredUniqueFilmIds(films) {
+    const filmsId = [];
+
+    // Извлечь только уникальные значения film_id
+    const uniqueFilmIds = films.filter((film: { film_id: string }) => {
+      if (!filmsId.includes(film.film_id)) {
+        filmsId.push(film.film_id);
+
+        return true;
+      }
+
+      return false;
+    });
+
+    filmsId.length = 0;
+
+    return uniqueFilmIds;
   }
 }
