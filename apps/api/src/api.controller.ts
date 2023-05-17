@@ -685,7 +685,7 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @ApiTags('Role')
-  @ApiOperation({ summary: 'get roles' })
+  @ApiOperation({ summary: 'get all roles' })
   @ApiResponse({
     status: HttpStatus.OK,
     schema: { type: 'array', items: schemaRole },
