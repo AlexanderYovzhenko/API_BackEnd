@@ -28,12 +28,7 @@ export class UsersService {
 
     const user = await this.getUserById(user_id);
 
-    return {
-      user_id: user.user_id,
-      email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return user;
   }
 
   async getUsers() {

@@ -3,7 +3,6 @@ const schemaUser = {
   properties: {
     user_id: { type: 'string' },
     email: { type: 'string' },
-    password: { type: 'string' },
     createdAt: { type: 'string' },
     updatedAt: { type: 'string' },
     roles: {
