@@ -466,7 +466,7 @@ export class FilmService {
 
     const film_id: string = this.generateUUID();
 
-    await this.filmRepository.create({ film_id, ...film });
+    await this.filmRepository.create({ ...film, film_id });
 
     const {
       country,
@@ -625,9 +625,7 @@ export class FilmService {
     return countries;
   }
 
-  async getCountriesByName(queryCountry: { country: string }) {
-    const { country } = queryCountry;
-
+  async getCountriesByName(country: string) {
     const countries = await this.countryRepository.findAll({
       where: {
         [Op.or]: [

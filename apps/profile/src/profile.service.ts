@@ -49,6 +49,7 @@ export class ProfileService {
 
   async getProfiles() {
     const users = await this.userRepository.findAll({
+      attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
         {
           model: Role,
@@ -66,6 +67,7 @@ export class ProfileService {
   async getProfileById(user_id: string) {
     const profile = await this.userRepository.findOne({
       where: { user_id },
+      attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
         {
           model: Role,

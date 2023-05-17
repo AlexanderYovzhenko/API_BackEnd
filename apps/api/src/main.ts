@@ -3,6 +3,7 @@ import { ApiModule } from './api.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import {
   AllExceptionsFilter,
   LoggingInterceptor,
@@ -19,7 +20,14 @@ async function bootstrap() {
   const PORT = await configService.get('PORT');
 
   app.useGlobalInterceptors(new LoggingInterceptor());
-  app.enableCors();
+
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

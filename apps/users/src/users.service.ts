@@ -33,6 +33,7 @@ export class UsersService {
 
   async getUsers() {
     const users = await this.userRepository.findAll({
+      attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
         {
           model: Role,
@@ -50,6 +51,7 @@ export class UsersService {
   async getUserByEmail(email: string) {
     const user = await this.userRepository.findOne({
       where: { email },
+      attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
         {
           model: Role,
@@ -67,6 +69,7 @@ export class UsersService {
   private async getUserById(user_id: string) {
     const user = await this.userRepository.findOne({
       where: { user_id },
+      attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
         {
           model: Role,
@@ -84,9 +87,7 @@ export class UsersService {
   async updateUser(updateUser: UserUpdateInterface) {
     const { user_id, email, password } = updateUser;
 
-    const checkUser = await this.userRepository.findOne({
-      where: { user_id },
-    });
+    const checkUser = await this.getUserById(user_id);
 
     if (!checkUser) {
       return null;

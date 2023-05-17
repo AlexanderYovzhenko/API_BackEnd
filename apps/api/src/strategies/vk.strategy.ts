@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback, Profile } from 'passport-vkontakte';
+import { config } from 'dotenv';
+
+config();
 
 @Injectable()
 export class VkStrategy extends PassportStrategy(Strategy, 'vk') {
   constructor() {
     super({
       clientID: process.env.VK_CLIENT_ID,
-      clientSecret: process.env.VK_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/vk/callback',
+      clientSecret: process.env.VK_SECRET,
+      callbackURL: process.env.VK_SERVER_CALLBACK,
       scope: ['email'],
       profileFields: ['email', 'photo_400_orig'],
     });
@@ -19,15 +22,12 @@ export class VkStrategy extends PassportStrategy(Strategy, 'vk') {
     refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
-  ) {
+  ): Promise<any> {
+    const { emails } = profile;
     const user = {
-      vkId: profile.id,
-      email: profile.emails[0].value,
-      firstName: profile.name.givenName,
-      lastName: profile.name.familyName,
-      photo: profile.photos[0].value,
-      accessToken,
+      email: emails[0].value,
     };
+
     done(null, user);
   }
 }

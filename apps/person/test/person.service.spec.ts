@@ -1,71 +1,204 @@
-// import { Test } from '@nestjs/testing';
-// import { PersonService } from '../src/person.service';
-// import { FilmPerson, FilmRole, Person, PersonFilmRole } from '../src/entities';
-// import { Repository } from 'sequelize-typescript';
-// import { PersonModule } from '../src/person.module'; // Import the module containing PersonRepository
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/sequelize';
+import { PersonService } from '../src/person.service';
+import { FilmPerson, FilmRole, Person, PersonFilmRole } from '../src/entities';
+import { personStub } from './stubs/person.stub';
+import {
+  mockFilmPersonRepository,
+  mockFilmRoleRepository,
+  mockPersonFilmRoleRepository,
+  mockPersonRepository,
+} from './mocks';
+import { filmRoleStub } from './stubs/filmRole.stub';
 
-// describe('PersonService', () => {
-//   let service: PersonService;
-//   let personRepository: Repository<Person>;
-//   let filmPersonRepository: Repository<FilmPerson>;
-//   let filmRoleRepository: Repository<FilmRole>;
-//   let personFilmRoleRepository: Repository<PersonFilmRole>;
+describe('PersonService', () => {
+  let personService: PersonService;
 
-//   beforeEach(async () => {
-//     const moduleRef = await Test.createTestingModule({
-//       // imports: [PersonModule],
-//       providers: [
-//         PersonService,
-//         {
-//           provide: Person,
-//           useValue: Person,
-//         },
-//         {
-//           provide: FilmPerson,
-//           useValue: FilmPerson,
-//         },
-//         {
-//           provide: FilmRole,
-//           useValue: FilmRole,
-//         },
-//         {
-//           provide: PersonFilmRole,
-//           useValue: PersonFilmRole,
-//         },
-//       ],
-//     }).compile();
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PersonService,
+        {
+          provide: getModelToken(Person),
+          useValue: mockPersonRepository,
+        },
+        {
+          provide: getModelToken(FilmPerson),
+          useValue: mockFilmPersonRepository,
+        },
+        {
+          provide: getModelToken(FilmRole),
+          useValue: mockFilmRoleRepository,
+        },
+        {
+          provide: getModelToken(PersonFilmRole),
+          useValue: mockPersonFilmRoleRepository,
+        },
+      ],
+    }).compile();
 
-//     service = moduleRef.get<PersonService>(PersonService);
-//     personRepository = moduleRef.get<Repository<Person>>(Person); // Use Repository here
-//     filmPersonRepository = moduleRef.get<Repository<FilmPerson>>(FilmPerson);
-//     filmRoleRepository = moduleRef.get<Repository<FilmRole>>(FilmRole);
-//     personFilmRoleRepository =
-//       moduleRef.get<Repository<PersonFilmRole>>(PersonFilmRole);
-//   });
+    personService = module.get<PersonService>(PersonService);
+  });
 
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
+  it('should be defined', () => {
+    expect(personService).toBeDefined();
+  });
 
-//   it('should call the findAll method of PersonRepository', async () => {
-//     const persons = [
-//       {
-//         person_id: '1',
-//         first_name_ru: 'John',
-//         last_name_ru: 'Doe',
-//         first_name_en: 'John',
-//         last_name_en: 'Doe',
-//         img: '',
-//       },
-//     ];
+  describe('getPerson', () => {
+    it('should be defined', async () => {
+      expect(
+        await personService.getPerson(personStub().person_id),
+      ).toBeDefined();
+    });
 
-//     jest.spyOn(service, 'getAllPersons').mockResolvedValue(persons as Person[]);
+    it('should be return person by id', async () => {
+      expect(await personService.getPerson(personStub().person_id)).toEqual({
+        person_id: expect.any(String),
+        ...personStub(),
+      });
+    });
 
-//     const result = await service.getAllPersons({ limit: '5' });
+    it('should be return null', async () => {
+      expect(await personService.getPerson('123')).toEqual(null);
+    });
+  });
 
-//     expect(service.getAllPersons).toHaveBeenCalledTimes(1);
-//     expect(result).toEqual(persons);
-//   });
+  describe('getAllPersons', () => {
+    it('should be defined', async () => {
+      expect(await personService.getAllPersons({ limit: '1' })).toBeDefined();
+    });
 
-//   // Add other tests for the remaining service methods
-// });
+    it('should be return array persons', async () => {
+      expect(await personService.getAllPersons({ limit: '1' })).toEqual([
+        {
+          person_id: expect.any(String),
+          ...personStub(),
+        },
+      ]);
+    });
+  });
+
+  describe('getPersonsFromFilm', () => {
+    it('should be defined', async () => {
+      expect(
+        await personService.getPersonsFromFilm(personStub().films[0].film_id),
+      ).toBeDefined();
+    });
+
+    it('should be return array persons from film', async () => {
+      expect(
+        await personService.getPersonsFromFilm(personStub().films[0].film_id),
+      ).toEqual([
+        {
+          person_id: expect.any(String),
+          ...personStub(),
+        },
+      ]);
+    });
+
+    it('should be return empty array', async () => {
+      expect(await personService.getPersonsFromFilm('123')).toEqual([]);
+    });
+  });
+
+  describe('getPersonsByName', () => {
+    it('should be defined', async () => {
+      expect(
+        await personService.getPersonsByName({
+          first_name: 'Alex',
+          last_name: 'Bar',
+          film_role: 'actor',
+        }),
+      ).toBeDefined();
+    });
+
+    it('should be return array persons by name', async () => {
+      expect(
+        await personService.getPersonsByName({
+          first_name: 'Alex',
+          last_name: 'Bar',
+          film_role: 'actor',
+        }),
+      ).toEqual([
+        {
+          person_id: expect.any(String),
+          ...personStub(),
+        },
+      ]);
+    });
+  });
+
+  describe('getFilmsByPerson', () => {
+    it('should be defined', async () => {
+      expect(
+        await personService.getFilmsByPerson({
+          first_name: 'Alex',
+          last_name: 'Bar',
+          film_role: 'actor',
+        }),
+      ).toBeDefined();
+    });
+
+    it('should be return array films by person', async () => {
+      expect(
+        await personService.getFilmsByPerson({
+          first_name: 'Alex',
+          last_name: 'Bar',
+          film_role: 'actor',
+        }),
+      ).toEqual({
+        person_id: expect.any(String),
+        ...personStub(),
+      });
+    });
+  });
+
+  describe('addPersonsFromFilm', () => {
+    it('should be defined', async () => {
+      expect(
+        await personService.addPersonsFromFilm(
+          [
+            {
+              ...filmRoleStub(),
+              ...personStub(),
+            },
+          ],
+          personStub().films[0].film_id,
+        ),
+      ).toBeDefined();
+    });
+
+    it('should be return empty array', async () => {
+      expect(
+        await personService.addPersonsFromFilm(
+          [
+            {
+              ...filmRoleStub(),
+              ...personStub(),
+            },
+          ],
+          '123',
+        ),
+      ).toEqual([]);
+    });
+
+    it('should be return array persons by film', async () => {
+      expect(
+        await personService.addPersonsFromFilm(
+          [
+            {
+              ...filmRoleStub(),
+              ...personStub(),
+            },
+          ],
+          personStub().films[0].film_id,
+        ),
+      ).toEqual([
+        {
+          person_id: expect.any(String),
+          ...personStub(),
+        },
+      ]);
+    });
+  });
+});

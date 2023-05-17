@@ -2,22 +2,20 @@ import { Module } from '@nestjs/common';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter, SharedModule } from '@app/shared';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AllExceptionsFilter, SharedModule } from '@app/shared';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { VkStrategy } from './strategies/vk.strategy';
 
 @Module({
   imports: [
     SharedModule,
     JwtModule.registerAsync({
+      global: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: await configService.get('JWT_SECRET_KEY'),
-        signOptions: {
-          expiresIn: '24h',
-        },
-      }),
+      useFactory: async () => ({}),
     }),
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     SharedModule.registerRmq('FILM_SERVICE', process.env.RABBITMQ_FILM_QUEUE),
@@ -39,6 +37,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [ApiController],
   providers: [
     ApiService,
+    GoogleStrategy,
+    VkStrategy,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

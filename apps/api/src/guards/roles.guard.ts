@@ -8,10 +8,15 @@ import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles_auth_decorator';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector) {}
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+    private configService: ConfigService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
@@ -37,8 +42,14 @@ export class RolesGuard implements CanActivate {
         });
       }
 
+      const jwtSecretAccessKey = this.configService.get(
+        'JWT_SECRET_ACCESS_KEY',
+      );
+
       // check is correct token
-      const user = this.jwtService.verify(token);
+      const user = this.jwtService.verify(token, {
+        secret: jwtSecretAccessKey,
+      });
       request.user = user;
 
       // check if the user has role for permission to access the resource

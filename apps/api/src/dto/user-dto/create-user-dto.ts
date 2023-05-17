@@ -15,6 +15,6 @@ export class CreateUserDto {
     description: 'user password',
   })
   @IsString({ message: 'User password Should be string' })
-  @Length(4, 16, { message: 'Length should be from 4 to 16' })
+  @Length(4, 30, { message: 'Length should be from 4 to 30' })
   readonly password: string;
 }

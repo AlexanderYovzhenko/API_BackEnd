@@ -108,11 +108,11 @@ export class FilmController {
   @MessagePattern({ cmd: 'get_countries_by_name' })
   async getCountriesByName(
     @Ctx() context: RmqContext,
-    @Payload() queryCountry: { country: string },
+    @Payload() country: string,
   ) {
     this.sharedService.acknowledgeMessage(context);
 
-    return await this.filmService.getCountriesByName(queryCountry);
+    return await this.filmService.getCountriesByName(country);
   }
 
   @MessagePattern({ cmd: 'get_genre' })

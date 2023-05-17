@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
@@ -26,8 +30,14 @@ export class AuthGuard implements CanActivate {
         });
       }
 
+      const jwtSecretAccessKey = this.configService.get(
+        'JWT_SECRET_ACCESS_KEY',
+      );
+
       // check is correct token
-      const user = this.jwtService.verify(token);
+      const user = this.jwtService.verify(token, {
+        secret: jwtSecretAccessKey,
+      });
       request.user = user;
 
       return true;

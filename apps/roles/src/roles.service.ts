@@ -64,9 +64,9 @@ export class RolesService {
   async createRole(newRole: RoleInterface) {
     const { value } = newRole;
 
-    const checkNewRole = await this.getRoleByValue(value);
+    const checkRole = await this.getRoleByValue(value);
 
-    if (checkNewRole) {
+    if (checkRole) {
       return null;
     }
 
@@ -105,6 +105,21 @@ export class RolesService {
     const role = await this.getRoleByValue(data.updateRole.value);
 
     return role;
+  }
+
+  async deleteRole(value: string) {
+    const checkRole = await this.getRoleByValue(value);
+
+    if (!checkRole) {
+      return null;
+    }
+
+    await this.roleRepository.destroy({
+      where: { value },
+      force: true,
+    });
+
+    return checkRole;
   }
 
   async createUserRole(data: UserRoleInterface) {

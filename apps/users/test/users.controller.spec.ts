@@ -1,102 +1,135 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from '../src/users.controller';
 import { UsersService } from '../src/users.service';
-import { ValidationPipe } from '../src/pipes/validation.pipe';
-import { ArgumentMetadata, BadRequestException } from '@nestjs/common';
-import { CreateUserDto } from '../src/dto/createUserDto';
+import { SharedService } from '@app/shared';
+import { ConfigService } from '@nestjs/config';
+import { RmqContext } from '@nestjs/microservices';
+import { context, mockUsersService, mockSharedService } from './mocks';
+import { userStub } from './stubs/user.stub';
 
 describe('UsersController', () => {
-  let controller: UsersController;
-  let pipe: ValidationPipe;
-  const mockUserService = {
-    //fake implementantion
-    createUser: jest.fn((dto) => {
-      return {
-        ...dto,
-      };
-    }),
-  };
+  let usersController: UsersController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [UsersService],
-    })
-      .overrideProvider(UsersService)
-      .useValue(mockUserService)
-      .compile();
+      providers: [
+        UsersService,
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: 'SharedServiceInterface',
+          useClass: SharedService,
+        },
+        {
+          provide: SharedService,
+          useValue: mockSharedService,
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get(): string {
+              return 'mock-value';
+            },
+          },
+        },
+      ],
+    }).compile();
 
-    controller = module.get<UsersController>(UsersController);
-    pipe = new ValidationPipe();
+    usersController = module.get<UsersController>(UsersController);
   });
 
-  it('user controller is defined', () => {
-    expect(controller).toBeDefined();
+  it('should be defined', () => {
+    expect(usersController).toBeDefined();
   });
 
-  it('create user', () => {
-    const dto = {
-      email: 'test',
-      password: 'test',
-    };
+  describe('createUser', () => {
+    it('should be defined', async () => {
+      return expect(
+        await usersController.createUser(context as RmqContext, userStub()),
+      ).toBeDefined();
+    });
 
-    expect(controller.createUser(dto)).toEqual({
-      email: 'test',
-      password: 'test',
+    it('should return an user', async () => {
+      const result = await usersController.createUser(
+        context as RmqContext,
+        userStub(),
+      );
+
+      expect(result).toEqual(userStub());
     });
   });
 
-  it('validation pipe is defined', () => {
-    expect(pipe).toBeDefined();
-  });
+  describe('getUsers', () => {
+    it('should be defined', async () => {
+      return expect(
+        await usersController.getUsers(context as RmqContext),
+      ).toBeDefined();
+    });
 
-  it('validation error empty data', async () => {
-    const metadata: ArgumentMetadata = {
-      type: 'body',
-      metatype: CreateUserDto,
-      data: '',
-    };
+    it('should return array users', async () => {
+      const result = await usersController.getUsers(context as RmqContext);
 
-    const value = () => pipe.transform(<CreateUserDto>{}, metadata);
-    await value().catch((err) => {
-      expect(err.status).toEqual(400);
+      expect(result).toEqual([userStub()]);
     });
   });
 
-  it('validation email error', async () => {
-    const wrongData = {
-      email: 'test',
-      password: '123456',
-    };
-    const metadata: ArgumentMetadata = {
-      type: 'body',
-      metatype: CreateUserDto,
-      data: '',
-    };
+  describe('getUserByEmail', () => {
+    it('should be defined', async () => {
+      return expect(
+        await usersController.getUserByEmail(
+          context as RmqContext,
+          'admin@gmail.com',
+        ),
+      ).toBeDefined();
+    });
 
-    const value = () => pipe.transform(wrongData, metadata);
-    await value().catch((err) => {
-      expect(err.status).toEqual(400);
+    it('should return an user', async () => {
+      const result = await usersController.getUserByEmail(
+        context as RmqContext,
+        'admin@gmail.com',
+      );
+
+      expect(result).toEqual(userStub());
     });
   });
 
-  it('validation passing', async () => {
-    const data = {
-      //ВЫНЕСТИ В ФИКСТУРЫ
-      email: 'test@test.com',
-      password: '123456',
-    };
-    const metadata: ArgumentMetadata = {
-      type: 'body',
-      metatype: CreateUserDto,
-      data: '',
-    };
+  describe('updateUser', () => {
+    it('should be defined', async () => {
+      return expect(
+        await usersController.updateUser(context as RmqContext, userStub()),
+      ).toBeDefined();
+    });
 
-    const value = () => pipe.transform(data, metadata);
-    const result = await value();
-    expect(result).toStrictEqual({
-      email: 'test@test.com',
-      password: '123456',
+    it('should return an user', async () => {
+      const result = await usersController.updateUser(
+        context as RmqContext,
+        userStub(),
+      );
+
+      expect(result).toEqual(userStub());
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should be defined', async () => {
+      return expect(
+        await usersController.deleteUser(
+          context as RmqContext,
+          userStub().user_id,
+        ),
+      ).toBeDefined();
+    });
+
+    it('should return an user', async () => {
+      const result = await usersController.deleteUser(
+        context as RmqContext,
+        userStub().user_id,
+      );
+
+      expect(result).toEqual(userStub());
     });
   });
 });
