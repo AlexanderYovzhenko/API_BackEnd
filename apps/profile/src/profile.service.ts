@@ -16,7 +16,7 @@ export class ProfileService {
     return uuid();
   }
 
-  async createProfile(newProfile: ProfileInterface) {
+  async createProfile(newProfile: ProfileInterface): Promise<User | string> {
     const { user_id, phone } = newProfile;
 
     const user = await this.getProfileById(user_id);
@@ -47,7 +47,7 @@ export class ProfileService {
     return profile;
   }
 
-  async getProfiles() {
+  async getProfiles(): Promise<User[]> {
     const users = await this.userRepository.findAll({
       attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
@@ -64,7 +64,7 @@ export class ProfileService {
     return users;
   }
 
-  async getProfileById(user_id: string) {
+  async getProfileById(user_id: string): Promise<User> {
     const profile = await this.userRepository.findOne({
       where: { user_id },
       attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
@@ -82,7 +82,7 @@ export class ProfileService {
     return profile;
   }
 
-  async updateProfile(updateProfile: ProfileInterface) {
+  async updateProfile(updateProfile: ProfileInterface): Promise<User> {
     const { user_id, first_name, last_name, phone, city } = updateProfile;
 
     const checkUser = await this.getProfileById(user_id);
@@ -105,7 +105,7 @@ export class ProfileService {
     return updatedProfile;
   }
 
-  async deleteProfile(user_id: string) {
+  async deleteProfile(user_id: string): Promise<User> {
     const user = await this.getProfileById(user_id);
 
     if (!user || !user.profile) {

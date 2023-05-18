@@ -12,6 +12,7 @@ import {
   IQueryParamsFilter,
   IUpdateGenre,
 } from './interface/film.interface';
+import { Country, Film, Genre } from './entities';
 
 @Controller()
 export class FilmController {
@@ -22,7 +23,10 @@ export class FilmController {
   ) {}
 
   @MessagePattern({ cmd: 'get_film' })
-  async getFilm(@Ctx() context: RmqContext, @Payload() film_id: string) {
+  async getFilm(
+    @Ctx() context: RmqContext,
+    @Payload() film_id: string,
+  ): Promise<Film> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getFilm(film_id);
@@ -32,7 +36,7 @@ export class FilmController {
   async getAllFilms(
     @Ctx() context: RmqContext,
     @Payload() queryLimit: { limit: string },
-  ) {
+  ): Promise<Film[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getAllFilms(queryLimit);
@@ -42,7 +46,7 @@ export class FilmController {
   async getFilmsById(
     @Ctx() context: RmqContext,
     @Payload() filmsId: { films: string[] },
-  ) {
+  ): Promise<Film[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getFilmsById(filmsId);
@@ -63,14 +67,17 @@ export class FilmController {
     @Ctx() context: RmqContext,
     @Payload()
     query: IQueryParamsFilter,
-  ) {
+  ): Promise<Film[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getFilteredFilms(query);
   }
 
   @MessagePattern({ cmd: 'add_film' })
-  async addFilm(@Ctx() context: RmqContext, @Payload() film: ICreateFilm) {
+  async addFilm(
+    @Ctx() context: RmqContext,
+    @Payload() film: ICreateFilm,
+  ): Promise<Film> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.addFilm(film);
@@ -81,7 +88,7 @@ export class FilmController {
     @Ctx() context: RmqContext,
     @Payload()
     data: { film_id: string; name_ru: string; name_en: string },
-  ) {
+  ): Promise<Film> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.updateFilm(
@@ -92,14 +99,17 @@ export class FilmController {
   }
 
   @MessagePattern({ cmd: 'delete_film' })
-  async deleteFilm(@Ctx() context: RmqContext, @Payload() film_id: string) {
+  async deleteFilm(
+    @Ctx() context: RmqContext,
+    @Payload() film_id: string,
+  ): Promise<Film> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.deleteFilm(film_id);
   }
 
   @MessagePattern({ cmd: 'get_all_countries' })
-  async getAllCountries(@Ctx() context: RmqContext) {
+  async getAllCountries(@Ctx() context: RmqContext): Promise<Country[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getAllCountries();
@@ -109,14 +119,17 @@ export class FilmController {
   async getCountriesByName(
     @Ctx() context: RmqContext,
     @Payload() country: string,
-  ) {
+  ): Promise<Country[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getCountriesByName(country);
   }
 
   @MessagePattern({ cmd: 'get_genre' })
-  async getGenre(@Ctx() context: RmqContext, @Payload() genre_id: string) {
+  async getGenre(
+    @Ctx() context: RmqContext,
+    @Payload() genre_id: string,
+  ): Promise<Genre> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getGenre(genre_id);
@@ -126,7 +139,7 @@ export class FilmController {
   async getAllGenres(
     @Ctx() context: RmqContext,
     @Payload() queryLimit: { limit: string },
-  ) {
+  ): Promise<Genre[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.getAllGenres(queryLimit);
@@ -137,7 +150,7 @@ export class FilmController {
     @Ctx() context: RmqContext,
     @Payload()
     data: IUpdateGenre,
-  ) {
+  ): Promise<Genre> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.filmService.updateGenre(data);

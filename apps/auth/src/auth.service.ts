@@ -3,7 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Repository } from 'sequelize-typescript';
 import * as bcrypt from 'bcryptjs';
-import { AuthInterface } from './interface/auth.interface';
+import {
+  AuthInterface,
+  TokenAuthInterface,
+  TokenInterface,
+} from './interface/auth.interface';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
@@ -24,7 +28,7 @@ export class AuthService {
     return uuid();
   }
 
-  async signUp(user: AuthInterface) {
+  async signUp(user: AuthInterface): Promise<string> {
     const { email, password } = user;
 
     const checkUser = await this.userRepository.findOne({
@@ -40,7 +44,7 @@ export class AuthService {
     return hashPassword;
   }
 
-  async logIn(user: AuthInterface) {
+  async logIn(user: AuthInterface): Promise<TokenInterface> {
     try {
       const validatedUser = await this.validateUser(user);
 
@@ -82,7 +86,7 @@ export class AuthService {
     }
   }
 
-  async refresh(token: string) {
+  async refresh(token: string): Promise<TokenInterface> {
     try {
       const jwtSecretRefreshKey = await this.configService.get(
         'JWT_SECRET_REFRESH_KEY',
@@ -129,7 +133,7 @@ export class AuthService {
     }
   }
 
-  async logOut(token: string) {
+  async logOut(token: string): Promise<number> {
     const result = await this.tokenRepository.destroy({
       where: { token },
       force: true,
@@ -138,7 +142,7 @@ export class AuthService {
     return result;
   }
 
-  async googleAuth(email: string) {
+  async googleAuth(email: string): Promise<TokenInterface> {
     try {
       return await this.addUserGoogleVk(email);
     } catch (error) {
@@ -146,7 +150,7 @@ export class AuthService {
     }
   }
 
-  async vkAuth(code: string) {
+  async vkAuth(code: string): Promise<TokenInterface> {
     try {
       const email = await this.getVkUserData(code);
 
@@ -160,7 +164,7 @@ export class AuthService {
     }
   }
 
-  async getVkUserData(code: string) {
+  async getVkUserData(code: string): Promise<string | null> {
     const client_id = await this.configService.get('VK_CLIENT_ID');
     const client_secret = await this.configService.get('VK_SECRET');
     const host = await this.configService.get('VK_SERVER_CALLBACK');
@@ -179,7 +183,9 @@ export class AuthService {
     return null;
   }
 
-  private async addUserGoogleVk(email: string) {
+  private async addUserGoogleVk(
+    email: string,
+  ): Promise<TokenAuthInterface | TokenInterface> {
     const password = this.generateUUID();
 
     const checkUser = await this.userRepository.findOrCreate({
@@ -243,7 +249,7 @@ export class AuthService {
     };
   }
 
-  private async validateUser(user: AuthInterface) {
+  private async validateUser(user: AuthInterface): Promise<User> {
     const { email, password } = user;
 
     const checkUser = await this.userRepository.findOne({
@@ -274,7 +280,9 @@ export class AuthService {
     return checkUser;
   }
 
-  private async generateAccessToken(user: User) {
+  private async generateAccessToken(user: User): Promise<{
+    accessToken: string;
+  }> {
     const { user_id, email, roles } = user;
     const payload = { user_id, email, roles };
 
@@ -290,7 +298,9 @@ export class AuthService {
     };
   }
 
-  private async generateRefreshToken(user: User) {
+  private async generateRefreshToken(user: User): Promise<{
+    refreshToken: string;
+  }> {
     const { user_id, email, roles } = user;
     const payload = { user_id, email, roles };
 
@@ -306,7 +316,7 @@ export class AuthService {
     };
   }
 
-  private async hashPassword(password: string) {
+  private async hashPassword(password: string): Promise<string> {
     const saltRounds = await this.configService.get('SALT_ROUNDS');
 
     const salt = await bcrypt.genSalt(parseInt(saltRounds));
@@ -316,7 +326,10 @@ export class AuthService {
     return hashPassword;
   }
 
-  private async checkHashPassword(password: string, passwordExists: string) {
+  private async checkHashPassword(
+    password: string,
+    passwordExists: string,
+  ): Promise<boolean> {
     return await bcrypt.compare(password, passwordExists);
   }
 }

@@ -22,7 +22,7 @@ export class PersonService {
     return uuid();
   }
 
-  async getPerson(person_id: string) {
+  async getPerson(person_id: string): Promise<Person> {
     const person = await this.personRepository.findOne({
       where: { person_id },
       include: [
@@ -51,7 +51,7 @@ export class PersonService {
     return person;
   }
 
-  async getAllPersons(queryLimit: { limit: string }) {
+  async getAllPersons(queryLimit: { limit: string }): Promise<Person[]> {
     const { limit } = queryLimit;
 
     const persons = await this.personRepository.findAll({
@@ -74,7 +74,7 @@ export class PersonService {
     return persons;
   }
 
-  async getPersonsFromFilm(film_id: string) {
+  async getPersonsFromFilm(film_id: string): Promise<Person[]> {
     const personsFromFilm = await this.personRepository.findAll({
       include: [
         {
@@ -98,7 +98,7 @@ export class PersonService {
     );
   }
 
-  async getPersonsByName(person: IShortPerson) {
+  async getPersonsByName(person: IShortPerson): Promise<Person[]> {
     const { first_name, last_name, film_role } = person;
     const first_name_lower = first_name ? first_name.toLowerCase() : '';
     const last_name_lower = last_name ? last_name.toLowerCase() : '';
@@ -151,7 +151,7 @@ export class PersonService {
     return personsFits;
   }
 
-  async getFilmsByPerson(person: IShortPerson) {
+  async getFilmsByPerson(person: IShortPerson): Promise<Person> {
     const { first_name, last_name, film_role } = person;
     const first_name_lower = first_name ? first_name.toLowerCase() : '';
     const last_name_lower = last_name ? last_name.toLowerCase() : '';
@@ -204,7 +204,10 @@ export class PersonService {
     return filmsPerson;
   }
 
-  async addPersonsFromFilm(persons: ICreatePerson[], film_id: string) {
+  async addPersonsFromFilm(
+    persons: ICreatePerson[],
+    film_id: string,
+  ): Promise<Person[]> {
     persons.forEach(async (person) => {
       const {
         film_role,
@@ -271,7 +274,7 @@ export class PersonService {
     return personsFilm;
   }
 
-  private filteredUniqueFilmIds(films) {
+  private filteredUniqueFilmIds(films: FilmPerson[]): FilmPerson[] {
     const filmsId = [];
 
     // Извлечь только уникальные значения film_id

@@ -1,6 +1,6 @@
 import { Controller, Inject } from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { SharedService } from '@app/shared';
+import { Role, SharedService, UserRole } from '@app/shared';
 import { RoleInterface, UserRoleInterface } from './interface/role.interface';
 import {
   Ctx,
@@ -18,7 +18,10 @@ export class RolesController {
   ) {}
 
   @MessagePattern({ cmd: 'create_role' })
-  async createRole(@Ctx() context: RmqContext, @Payload() role: RoleInterface) {
+  async createRole(
+    @Ctx() context: RmqContext,
+    @Payload() role: RoleInterface,
+  ): Promise<Role> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.createRole(role);
@@ -29,7 +32,7 @@ export class RolesController {
     @Ctx() context: RmqContext,
     @Payload()
     value: string,
-  ) {
+  ): Promise<Role> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.getRoleByValue(value);
@@ -46,14 +49,17 @@ export class RolesController {
   async updateRole(
     @Ctx() context: RmqContext,
     @Payload() data: { value: string; updateRole: RoleInterface },
-  ) {
+  ): Promise<string | Role> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.updateRole(data);
   }
 
   @MessagePattern({ cmd: 'delete_role' })
-  async deleteRole(@Ctx() context: RmqContext, @Payload() value: string) {
+  async deleteRole(
+    @Ctx() context: RmqContext,
+    @Payload() value: string,
+  ): Promise<Role> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.deleteRole(value);
@@ -63,7 +69,7 @@ export class RolesController {
   async createUserRole(
     @Ctx() context: RmqContext,
     @Payload() data: UserRoleInterface,
-  ) {
+  ): Promise<string | UserRole> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.createUserRole(data);
@@ -73,7 +79,7 @@ export class RolesController {
   async deleteUserRole(
     @Ctx() context: RmqContext,
     @Payload() data: UserRoleInterface,
-  ) {
+  ): Promise<UserRole> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.rolesService.deleteUserRole(data);

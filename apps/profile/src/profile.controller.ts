@@ -1,7 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { ProfileInterface } from './interface/profile.interface';
 import { ProfileService } from './profile.service';
-import { SharedService } from '@app/shared';
+import { SharedService, User } from '@app/shared';
 import {
   Ctx,
   MessagePattern,
@@ -21,14 +21,14 @@ export class ProfileController {
   async createProfile(
     @Ctx() context: RmqContext,
     @Payload() profile: ProfileInterface,
-  ) {
+  ): Promise<User | string> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.profileService.createProfile(profile);
   }
 
   @MessagePattern({ cmd: 'get_all_profiles' })
-  async getProfiles(@Ctx() context: RmqContext) {
+  async getProfiles(@Ctx() context: RmqContext): Promise<User[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.profileService.getProfiles();
@@ -39,7 +39,7 @@ export class ProfileController {
     @Ctx() context: RmqContext,
     @Payload()
     user_id: string,
-  ) {
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.profileService.getProfileById(user_id);
@@ -50,14 +50,17 @@ export class ProfileController {
     @Ctx() context: RmqContext,
     @Payload()
     updateProfile: ProfileInterface,
-  ) {
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.profileService.updateProfile(updateProfile);
   }
 
   @MessagePattern({ cmd: 'delete_profile' })
-  async deleteProfile(@Ctx() context: RmqContext, @Payload() user_id: string) {
+  async deleteProfile(
+    @Ctx() context: RmqContext,
+    @Payload() user_id: string,
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.profileService.deleteProfile(user_id);

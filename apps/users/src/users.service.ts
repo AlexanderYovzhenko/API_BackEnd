@@ -18,7 +18,7 @@ export class UsersService {
     return uuid();
   }
 
-  async createUser(newUser: UserInterface) {
+  async createUser(newUser: UserInterface): Promise<User> {
     const user_id = this.generateUUID();
 
     await this.userRepository.create({
@@ -31,7 +31,7 @@ export class UsersService {
     return user;
   }
 
-  async getUsers() {
+  async getUsers(): Promise<User[]> {
     const users = await this.userRepository.findAll({
       attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
       include: [
@@ -48,7 +48,7 @@ export class UsersService {
     return users;
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
       attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
@@ -66,7 +66,7 @@ export class UsersService {
     return user;
   }
 
-  private async getUserById(user_id: string) {
+  private async getUserById(user_id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { user_id },
       attributes: ['user_id', 'email', 'createdAt', 'updatedAt'],
@@ -84,7 +84,7 @@ export class UsersService {
     return user;
   }
 
-  async updateUser(updateUser: UserUpdateInterface) {
+  async updateUser(updateUser: UserUpdateInterface): Promise<User> {
     const { user_id, email, password } = updateUser;
 
     const checkUser = await this.getUserById(user_id);
@@ -107,7 +107,7 @@ export class UsersService {
     return user;
   }
 
-  async deleteUser(user_id: string) {
+  async deleteUser(user_id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { user_id },
     });
@@ -124,7 +124,7 @@ export class UsersService {
     return user;
   }
 
-  private async hashPassword(password: string) {
+  private async hashPassword(password: string): Promise<string> {
     const saltRounds = this.configService.get<string>('SALT_ROUNDS');
 
     const salt = await bcrypt.genSalt(parseInt(saltRounds));

@@ -16,7 +16,7 @@ export class RolesService {
     return uuid();
   }
 
-  async getRoles() {
+  async getRoles(): Promise<Role[]> {
     const roles = await this.roleRepository.findAll({
       include: [
         {
@@ -38,7 +38,7 @@ export class RolesService {
     return roles;
   }
 
-  async getRoleByValue(value: string) {
+  async getRoleByValue(value: string): Promise<Role> {
     const role = await this.roleRepository.findOne({
       where: { value },
       include: [
@@ -61,7 +61,7 @@ export class RolesService {
     return role;
   }
 
-  async createRole(newRole: RoleInterface) {
+  async createRole(newRole: RoleInterface): Promise<Role> {
     const { value } = newRole;
 
     const checkRole = await this.getRoleByValue(value);
@@ -78,7 +78,10 @@ export class RolesService {
     return role;
   }
 
-  async updateRole(data: { value: string; updateRole: RoleInterface }) {
+  async updateRole(data: {
+    value: string;
+    updateRole: RoleInterface;
+  }): Promise<Role | string> {
     const { value } = data;
 
     const checkRole = await this.getRoleByValue(value);
@@ -107,7 +110,7 @@ export class RolesService {
     return role;
   }
 
-  async deleteRole(value: string) {
+  async deleteRole(value: string): Promise<Role> {
     const checkRole = await this.getRoleByValue(value);
 
     if (!checkRole) {
@@ -122,7 +125,7 @@ export class RolesService {
     return checkRole;
   }
 
-  async createUserRole(data: UserRoleInterface) {
+  async createUserRole(data: UserRoleInterface): Promise<string | UserRole> {
     try {
       const { user_id, role_id } = data;
 
@@ -145,7 +148,7 @@ export class RolesService {
     }
   }
 
-  async deleteUserRole(data: UserRoleInterface) {
+  async deleteUserRole(data: UserRoleInterface): Promise<UserRole> {
     const { user_id, role_id } = data;
 
     const userRole = await this.usersRolesRepository.findOne({

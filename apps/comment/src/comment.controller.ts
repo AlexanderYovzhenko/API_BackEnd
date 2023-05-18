@@ -1,6 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { SharedService } from '@app/shared';
+import { Comment } from './entities';
 import {
   Ctx,
   MessagePattern,
@@ -21,7 +22,7 @@ export class CommentController {
   async addComment(
     @Ctx() context: RmqContext,
     @Payload() comment: ICreateComment,
-  ) {
+  ): Promise<Comment | string> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.commentService.addComment(comment);
@@ -31,7 +32,7 @@ export class CommentController {
   async getAllCommentFilm(
     @Ctx() context: RmqContext,
     @Payload() film_id: string,
-  ) {
+  ): Promise<Comment[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.commentService.getAllCommentFilm(film_id);
@@ -41,7 +42,7 @@ export class CommentController {
   async getOneComment(
     @Ctx() context: RmqContext,
     @Payload() comment_id: string,
-  ) {
+  ): Promise<Comment> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.commentService.getOneComment(comment_id);
@@ -51,7 +52,7 @@ export class CommentController {
   async updateComment(
     @Ctx() context: RmqContext,
     @Payload() data: { comment_id: string; updateComment: IUpdateComment },
-  ) {
+  ): Promise<Comment> {
     this.sharedService.acknowledgeMessage(context);
 
     const { comment_id, updateComment } = data;
@@ -63,7 +64,7 @@ export class CommentController {
   async deleteComment(
     @Ctx() context: RmqContext,
     @Payload() comment_id: string,
-  ) {
+  ): Promise<Comment> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.commentService.deleteComment(comment_id);

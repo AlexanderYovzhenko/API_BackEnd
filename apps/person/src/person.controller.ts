@@ -8,6 +8,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ICreatePerson, IShortPerson } from './interface/person.interface';
+import { Person } from './entities';
 
 @Controller()
 export class PersonController {
@@ -18,7 +19,10 @@ export class PersonController {
   ) {}
 
   @MessagePattern({ cmd: 'get_person' })
-  async getPerson(@Ctx() context: RmqContext, @Payload() person_id: string) {
+  async getPerson(
+    @Ctx() context: RmqContext,
+    @Payload() person_id: string,
+  ): Promise<Person> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.getPerson(person_id);
@@ -28,7 +32,7 @@ export class PersonController {
   async getAllPersons(
     @Ctx() context: RmqContext,
     @Payload() queryLimit: { limit: string },
-  ) {
+  ): Promise<Person[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.getAllPersons(queryLimit);
@@ -38,7 +42,7 @@ export class PersonController {
   async getPersonsFromFilm(
     @Ctx() context: RmqContext,
     @Payload() film_id: string,
-  ) {
+  ): Promise<Person[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.getPersonsFromFilm(film_id);
@@ -49,7 +53,7 @@ export class PersonController {
     @Ctx() context: RmqContext,
     @Payload()
     person: IShortPerson,
-  ) {
+  ): Promise<Person[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.getPersonsByName(person);
@@ -60,7 +64,7 @@ export class PersonController {
     @Ctx() context: RmqContext,
     @Payload()
     person: IShortPerson,
-  ) {
+  ): Promise<Person> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.getFilmsByPerson(person);
@@ -70,7 +74,7 @@ export class PersonController {
   async addPersonsFromFilm(
     @Ctx() context: RmqContext,
     @Payload() data: { persons: ICreatePerson[]; film_id: string },
-  ) {
+  ): Promise<Person[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.personService.addPersonsFromFilm(

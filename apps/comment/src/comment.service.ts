@@ -18,7 +18,7 @@ export class CommentService {
     return uuid();
   }
 
-  async addComment(comment: ICreateComment) {
+  async addComment(comment: ICreateComment): Promise<Comment | string> {
     const { user_id } = comment;
 
     if (!this.checkUUID(user_id)) {
@@ -62,7 +62,7 @@ export class CommentService {
     return newComment;
   }
 
-  async getAllCommentFilm(film_id: string) {
+  async getAllCommentFilm(film_id: string): Promise<Comment[]> {
     const comments = await this.commentRepository.findAll({
       where: {
         film_id,
@@ -165,7 +165,7 @@ export class CommentService {
     return comments.filter((comment: any) => comment.parent_id === null);
   }
 
-  async getOneComment(comment_id: string) {
+  async getOneComment(comment_id: string): Promise<Comment> {
     const comment = await this.commentRepository.findOne({
       where: {
         comment_id,
@@ -254,7 +254,10 @@ export class CommentService {
     return comment;
   }
 
-  async updateComment(comment_id: string, updateComment: IUpdateComment) {
+  async updateComment(
+    comment_id: string,
+    updateComment: IUpdateComment,
+  ): Promise<Comment> {
     await this.commentRepository.update(
       { ...updateComment },
       { where: { comment_id } },
@@ -265,7 +268,7 @@ export class CommentService {
     return comment;
   }
 
-  async deleteComment(comment_id: string) {
+  async deleteComment(comment_id: string): Promise<Comment> {
     const checkComment = await this.getOneComment(comment_id);
 
     if (!checkComment) {
@@ -280,7 +283,7 @@ export class CommentService {
     return checkComment;
   }
 
-  private checkUUID(uuid: string) {
+  private checkUUID(uuid: string): boolean {
     return validator.isUUID(uuid);
   }
 }

@@ -70,6 +70,7 @@ import {
 } from './schemas';
 import { RequestWithUser } from './interface/request.interface';
 import { ConfigService } from '@nestjs/config';
+import { Profile, Role, User, UserRole } from '@app/shared';
 
 @ApiBearerAuth()
 @Controller()
@@ -367,7 +368,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('users')
-  async getUsers() {
+  async getUsers(): Promise<User[]> {
     const users = await firstValueFrom(
       this.usersService.send(
         {
@@ -385,7 +386,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.OK, schema: schemaUser })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, schema: schemaError })
   @Get('users/:email')
-  async getUser(@Param('email') email: string) {
+  async getUser(@Param('email') email: string): Promise<User> {
     const user = await firstValueFrom(
       this.usersService.send(
         {
@@ -418,7 +419,7 @@ export class ApiController {
   async updateUser(
     @Param('user_id') user_id: string,
     @Body() updateUser: CreateUserDto,
-  ) {
+  ): Promise<User> {
     const isUUID = this.checkUUID(user_id);
 
     if (!isUUID) {
@@ -456,7 +457,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('users/:user_id')
-  async deleteUser(@Param('user_id') user_id: string) {
+  async deleteUser(@Param('user_id') user_id: string): Promise<void> {
     const isUUID = this.checkUUID(user_id);
 
     if (!isUUID) {
@@ -490,7 +491,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('profiles')
-  async createProfile(@Body() newProfile: CreateProfileDto) {
+  async createProfile(@Body() newProfile: CreateProfileDto): Promise<Profile> {
     const isUUID = this.checkUUID(newProfile.user_id);
 
     if (!isUUID) {
@@ -553,7 +554,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('profiles/:user_id')
-  async getProfileById(@Param('user_id') user_id: string) {
+  async getProfileById(@Param('user_id') user_id: string): Promise<Profile> {
     const isUUID = this.checkUUID(user_id);
 
     if (!isUUID) {
@@ -591,7 +592,7 @@ export class ApiController {
   async updateProfile(
     @Param('user_id') user_id: string,
     @Body() profileInfo: UpdateProfileDto,
-  ) {
+  ): Promise<Profile> {
     const isUUID = this.checkUUID(user_id);
 
     if (!isUUID) {
@@ -629,7 +630,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('profiles/:user_id')
-  async deleteProfile(@Param('user_id') user_id: string) {
+  async deleteProfile(@Param('user_id') user_id: string): Promise<void> {
     const isUUID = this.checkUUID(user_id);
 
     if (!isUUID) {
@@ -665,7 +666,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('roles')
-  async addRole(@Body() newRole: CreateRoleDto) {
+  async addRole(@Body() newRole: CreateRoleDto): Promise<Role> {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
@@ -713,7 +714,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Get('roles/:value')
-  async getRoleByValue(@Param('value') value: string) {
+  async getRoleByValue(@Param('value') value: string): Promise<Role> {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
@@ -746,7 +747,7 @@ export class ApiController {
   async updateRole(
     @Body() updateRole: CreateRoleDto,
     @Param('value') value: string,
-  ) {
+  ): Promise<Role> {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
@@ -781,7 +782,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('roles/:value')
-  async deleteRole(@Param('value') value: string) {
+  async deleteRole(@Param('value') value: string): Promise<void> {
     const role = await firstValueFrom(
       this.rolesService.send(
         {
@@ -809,7 +810,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @Post('user/role')
-  async addRoleToUser(@Body() userRole: CreateUserRoleDto) {
+  async addRoleToUser(@Body() userRole: CreateUserRoleDto): Promise<UserRole> {
     const roleToUser = await firstValueFrom(
       this.rolesService.send(
         {
@@ -841,7 +842,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('user/role')
-  async deleteRoleToUser(@Body() userRole: CreateUserRoleDto) {
+  async deleteRoleToUser(@Body() userRole: CreateUserRoleDto): Promise<void> {
     const roleToUser = await firstValueFrom(
       this.rolesService.send(
         {
@@ -988,7 +989,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.FORBIDDEN, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('films/:film_id')
-  async deleteFilm(@Param('film_id') film_id: string) {
+  async deleteFilm(@Param('film_id') film_id: string): Promise<void> {
     const isUUID = this.checkUUID(film_id);
 
     if (!isUUID) {
@@ -1009,7 +1010,7 @@ export class ApiController {
       throw new NotFoundException('film not found');
     }
 
-    return deleteFilm;
+    return;
   }
 
   @ApiTags('Film')
@@ -1493,7 +1494,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('comments/:comment_id')
-  async deleteComment(@Param('comment_id') comment_id: string) {
+  async deleteComment(@Param('comment_id') comment_id: string): Promise<void> {
     const isUUID = this.checkUUID(comment_id);
 
     if (!isUUID) {
@@ -1513,6 +1514,6 @@ export class ApiController {
       throw new NotFoundException('comment not found');
     }
 
-    return comment;
+    return;
   }
 }

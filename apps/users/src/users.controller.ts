@@ -6,7 +6,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { UsersService } from './users.service';
-import { SharedService } from '@app/shared';
+import { SharedService, User } from '@app/shared';
 import { UserInterface, UserUpdateInterface } from './interface/user.interface';
 
 @Controller()
@@ -18,14 +18,17 @@ export class UsersController {
   ) {}
 
   @MessagePattern({ cmd: 'create_user' })
-  async createUser(@Ctx() context: RmqContext, @Payload() user: UserInterface) {
+  async createUser(
+    @Ctx() context: RmqContext,
+    @Payload() user: UserInterface,
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.usersService.createUser(user);
   }
 
   @MessagePattern({ cmd: 'get_all_users' })
-  async getUsers(@Ctx() context: RmqContext) {
+  async getUsers(@Ctx() context: RmqContext): Promise<User[]> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.usersService.getUsers();
@@ -36,7 +39,7 @@ export class UsersController {
     @Ctx() context: RmqContext,
     @Payload()
     email: string,
-  ) {
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.usersService.getUserByEmail(email);
@@ -47,7 +50,7 @@ export class UsersController {
     @Ctx() context: RmqContext,
     @Payload()
     updateUser: UserUpdateInterface,
-  ) {
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.usersService.updateUser(updateUser);
@@ -58,7 +61,7 @@ export class UsersController {
     @Ctx() context: RmqContext,
     @Payload()
     user_id: string,
-  ) {
+  ): Promise<User> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.usersService.deleteUser(user_id);

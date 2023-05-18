@@ -53,7 +53,7 @@ export class FilmService {
 
   // FILMS  -------------------------------------------------------------
 
-  async getFilm(film_id: string) {
+  async getFilm(film_id: string): Promise<Film> {
     const film = await this.filmRepository.findOne({
       where: { film_id },
       include: [
@@ -107,7 +107,7 @@ export class FilmService {
     return film;
   }
 
-  async getAllFilms(queryLimit: { limit: string }) {
+  async getAllFilms(queryLimit: { limit: string }): Promise<Film[]> {
     const { limit } = queryLimit;
 
     const films = await this.filmRepository.findAll({
@@ -159,7 +159,7 @@ export class FilmService {
     return films;
   }
 
-  async getFilmsById(filmsId: { films: string[] }) {
+  async getFilmsById(filmsId: { films: string[] }): Promise<Film[]> {
     const { films } = filmsId;
 
     const filmsById = await this.filmRepository.findAll({
@@ -211,7 +211,7 @@ export class FilmService {
     return filmsById;
   }
 
-  async getFilmsByName(queryName: { name: string }) {
+  async getFilmsByName(queryName: { name: string }): Promise<Film[]> {
     const { name } = queryName;
     const lowerName = name.toLowerCase();
 
@@ -274,7 +274,7 @@ export class FilmService {
     return filmsByName;
   }
 
-  async getFilteredFilms(query: IQueryParamsFilter) {
+  async getFilteredFilms(query: IQueryParamsFilter): Promise<Film[]> {
     const {
       genres,
       countries,
@@ -455,7 +455,7 @@ export class FilmService {
     return result.slice(0, limitFilm);
   }
 
-  async addFilm(film: ICreateFilm) {
+  async addFilm(film: ICreateFilm): Promise<Film> {
     const checkFilm = await this.filmRepository.findOne({
       where: { name_ru: film.name_ru, year: film.year },
     });
@@ -591,7 +591,11 @@ export class FilmService {
     return newFilm;
   }
 
-  async updateFilm(film_id: string, name_ru: string, name_en: string) {
+  async updateFilm(
+    film_id: string,
+    name_ru: string,
+    name_en: string,
+  ): Promise<Film> {
     await this.filmRepository.update(
       { name_ru, name_en },
       { where: { film_id } },
@@ -602,7 +606,7 @@ export class FilmService {
     return updateFilm;
   }
 
-  async deleteFilm(film_id: string) {
+  async deleteFilm(film_id: string): Promise<Film> {
     const checkFilm = await this.getFilm(film_id);
 
     if (!checkFilm) {
@@ -619,13 +623,13 @@ export class FilmService {
 
   // COUNTRIES  -------------------------------------------------------------
 
-  async getAllCountries() {
+  async getAllCountries(): Promise<Country[]> {
     const countries = await this.countryRepository.findAll();
 
     return countries;
   }
 
-  async getCountriesByName(country: string) {
+  async getCountriesByName(country: string): Promise<Country[]> {
     const countries = await this.countryRepository.findAll({
       where: {
         [Op.or]: [
@@ -644,7 +648,7 @@ export class FilmService {
 
   // GENRES  -------------------------------------------------------------
 
-  async getGenre(genre_id: string) {
+  async getGenre(genre_id: string): Promise<Genre> {
     const genre = await this.genreRepository.findOne({
       where: { genre_id },
       include: {
@@ -662,7 +666,7 @@ export class FilmService {
     return genre;
   }
 
-  async getAllGenres(queryLimit: { limit: string }) {
+  async getAllGenres(queryLimit: { limit: string }): Promise<Genre[]> {
     const { limit } = queryLimit;
 
     const genres = await this.genreRepository.findAll({
@@ -672,7 +676,7 @@ export class FilmService {
     return genres;
   }
 
-  async updateGenre(data: IUpdateGenre) {
+  async updateGenre(data: IUpdateGenre): Promise<Genre> {
     const { genre_id, genre_ru, genre_en } = data;
 
     await this.genreRepository.update(
