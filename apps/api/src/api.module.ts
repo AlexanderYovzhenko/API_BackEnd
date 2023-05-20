@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { APP_FILTER } from '@nestjs/core';
@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter, SharedModule } from '@app/shared';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { VkStrategy } from './strategies/vk.strategy';
+import { CorsMiddleware } from './middlewares/cors.middleware';
 
 @Module({
   imports: [
@@ -45,4 +46,8 @@ import { VkStrategy } from './strategies/vk.strategy';
     },
   ],
 })
-export class ApiModule {}
+export class ApiModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorsMiddleware).forRoutes('*');
+  }
+}
