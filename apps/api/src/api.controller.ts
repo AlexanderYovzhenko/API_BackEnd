@@ -362,15 +362,15 @@ export class ApiController {
       });
     }
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
     res.cookie('userData', JSON.stringify({ email: tokens.email }), {
       maxAge: 30 * 60 * 1000,
     });
     res.cookie('accessToken', tokens.accessToken, {
       maxAge: 30 * 60 * 1000,
+    });
+    res.cookie('refreshToken', tokens.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
     });
 
     return res.json({ email: tokens.email, accessToken: tokens.accessToken });
@@ -383,28 +383,32 @@ export class ApiController {
   @HttpCode(HttpStatus.OK)
   @Delete('logout')
   async logOut(@Req() req: Request, @Res() res: Response) {
-    if (!req.hasOwnProperty('cookies')) {
-      throw new BadRequestException('cookies not found');
-    }
+    try {
+      if (!req.hasOwnProperty('cookies')) {
+        throw new BadRequestException('cookies not found');
+      }
 
-    if (!req.cookies.hasOwnProperty('refreshToken')) {
+      if (!req.cookies.hasOwnProperty('refreshToken')) {
+        throw new BadRequestException('refresh token not found');
+      }
+
+      const { refreshToken } = req.cookies;
+
+      const result = await firstValueFrom(
+        this.authService.send(
+          {
+            cmd: 'logout',
+          },
+
+          refreshToken,
+        ),
+      );
+
+      res.clearCookie('refreshToken');
+      return res.json(result);
+    } catch (error) {
       throw new BadRequestException('refresh token not found');
     }
-
-    const { refreshToken } = req.cookies;
-
-    const result = await firstValueFrom(
-      this.authService.send(
-        {
-          cmd: 'logout',
-        },
-
-        refreshToken,
-      ),
-    );
-
-    res.clearCookie('refreshToken');
-    return res.json(result);
   }
 
   // USER ENDPOINTS -------------------------------------------------------------
