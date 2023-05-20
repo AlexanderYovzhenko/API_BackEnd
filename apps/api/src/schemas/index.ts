@@ -6,6 +6,7 @@ export * from './film';
 export * from './role';
 export * from './profile';
 export * from './user';
+export * from './refresh';
 export * from './login';
 export * from './login_google_vk';
 export * from './error';

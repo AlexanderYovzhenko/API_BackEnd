@@ -64,6 +64,7 @@ import {
   schemaLoginGoogleVK,
   schemaPerson,
   schemaProfile,
+  schemaRefresh,
   schemaRole,
   schemaUser,
   schemaUserRole,
@@ -284,7 +285,7 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'refresh access token' })
-  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLogin })
+  @ApiResponse({ status: HttpStatus.CREATED, schema: schemaRefresh })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('refresh')
