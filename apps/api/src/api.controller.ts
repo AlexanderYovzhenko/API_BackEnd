@@ -338,7 +338,7 @@ export class ApiController {
       throw new BadRequestException('cookies not found');
     }
 
-    if (!req.cookies.hasOwnProperty('refreshToken')) {
+    if (!req.cookies.refreshToken) {
       throw new UnauthorizedException({
         message: 'user unauthorized',
       });
@@ -383,32 +383,28 @@ export class ApiController {
   @HttpCode(HttpStatus.OK)
   @Delete('logout')
   async logOut(@Req() req: Request, @Res() res: Response) {
-    try {
-      if (!req.hasOwnProperty('cookies')) {
-        throw new BadRequestException('cookies not found');
-      }
+    if (!req.hasOwnProperty('cookies')) {
+      throw new BadRequestException('cookies not found');
+    }
 
-      if (!req.cookies.hasOwnProperty('refreshToken')) {
-        throw new BadRequestException('refresh token not found');
-      }
-
-      const { refreshToken } = req.cookies;
-
-      const result = await firstValueFrom(
-        this.authService.send(
-          {
-            cmd: 'logout',
-          },
-
-          refreshToken,
-        ),
-      );
-
-      res.clearCookie('refreshToken');
-      return res.json(result);
-    } catch (error) {
+    if (!req.cookies.refreshToken) {
       throw new BadRequestException('refresh token not found');
     }
+
+    const { refreshToken } = req.cookies;
+
+    const result = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'logout',
+        },
+
+        refreshToken,
+      ),
+    );
+
+    res.clearCookie('refreshToken');
+    return res.json(result);
   }
 
   // USER ENDPOINTS -------------------------------------------------------------
