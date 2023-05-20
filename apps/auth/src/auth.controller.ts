@@ -1,7 +1,11 @@
 import { Controller, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SharedService } from '@app/shared';
-import { AuthInterface, TokenInterface } from './interface/auth.interface';
+import {
+  AuthInterface,
+  TokenAuthInterface,
+  TokenInterface,
+} from './interface/auth.interface';
 import {
   Ctx,
   MessagePattern,
@@ -21,7 +25,7 @@ export class AuthController {
   async signUp(
     @Ctx() context: RmqContext,
     @Payload() userData: AuthInterface,
-  ): Promise<string> {
+  ): Promise<string | null> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.signUp(userData);
@@ -31,7 +35,7 @@ export class AuthController {
   async logIn(
     @Ctx() context: RmqContext,
     @Payload() userData: AuthInterface,
-  ): Promise<TokenInterface> {
+  ): Promise<TokenInterface | null> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.logIn(userData);
@@ -41,7 +45,7 @@ export class AuthController {
   async refresh(
     @Ctx() context: RmqContext,
     @Payload() refreshToken: string,
-  ): Promise<TokenInterface> {
+  ): Promise<Omit<TokenAuthInterface, 'password'>> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.refresh(refreshToken);
@@ -61,7 +65,7 @@ export class AuthController {
   async googleAuth(
     @Ctx() context: RmqContext,
     @Payload() email: string,
-  ): Promise<TokenInterface> {
+  ): Promise<TokenAuthInterface | Omit<TokenAuthInterface, 'password' | null>> {
     this.sharedService.acknowledgeMessage(context);
 
     return await this.authService.googleAuth(email);
@@ -71,7 +75,7 @@ export class AuthController {
   async vkAuth(
     @Ctx() context: RmqContext,
     @Payload() code: string,
-  ): Promise<TokenInterface> {
+  ): Promise<TokenAuthInterface | Omit<TokenAuthInterface, 'password' | null>> {
     this.sharedService.acknowledgeMessage(context);
 
     return this.authService.vkAuth(code);

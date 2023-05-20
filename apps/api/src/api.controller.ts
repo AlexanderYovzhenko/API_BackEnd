@@ -222,6 +222,7 @@ export class ApiController {
       return;
     }
 
+    res.header('UserData', JSON.stringify({ email: tokens.email }));
     res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
     return;
@@ -275,6 +276,7 @@ export class ApiController {
       return;
     }
 
+    res.header('UserData', JSON.stringify({ email: tokens.email }));
     res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
     return;
@@ -320,7 +322,7 @@ export class ApiController {
       httpOnly: true,
     });
 
-    return res.json({ accessToken: tokens.accessToken });
+    return res.json({ email: tokens.email, accessToken: tokens.accessToken });
   }
 
   @ApiTags('Auth')

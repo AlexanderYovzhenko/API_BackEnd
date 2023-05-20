@@ -28,7 +28,7 @@ export class AuthService {
     return uuid();
   }
 
-  async signUp(user: AuthInterface): Promise<string> {
+  async signUp(user: AuthInterface): Promise<string | null> {
     const { email, password } = user;
 
     const checkUser = await this.userRepository.findOne({
@@ -44,7 +44,7 @@ export class AuthService {
     return hashPassword;
   }
 
-  async logIn(user: AuthInterface): Promise<TokenInterface> {
+  async logIn(user: AuthInterface): Promise<TokenInterface | null> {
     try {
       const validatedUser = await this.validateUser(user);
 
@@ -86,7 +86,7 @@ export class AuthService {
     }
   }
 
-  async refresh(token: string): Promise<TokenInterface> {
+  async refresh(token: string): Promise<Omit<TokenAuthInterface, 'password'>> {
     try {
       const jwtSecretRefreshKey = await this.configService.get(
         'JWT_SECRET_REFRESH_KEY',
@@ -125,6 +125,7 @@ export class AuthService {
       );
 
       return {
+        email: user.email,
         ...accessToken,
         ...refreshToken,
       };
@@ -142,7 +143,9 @@ export class AuthService {
     return result;
   }
 
-  async googleAuth(email: string): Promise<TokenInterface> {
+  async googleAuth(
+    email: string,
+  ): Promise<TokenAuthInterface | Omit<TokenAuthInterface, 'password' | null>> {
     try {
       return await this.addUserGoogleVk(email);
     } catch (error) {
@@ -150,7 +153,9 @@ export class AuthService {
     }
   }
 
-  async vkAuth(code: string): Promise<TokenInterface> {
+  async vkAuth(
+    code: string,
+  ): Promise<TokenAuthInterface | Omit<TokenAuthInterface, 'password' | null>> {
     try {
       const email = await this.getVkUserData(code);
 
@@ -185,7 +190,7 @@ export class AuthService {
 
   private async addUserGoogleVk(
     email: string,
-  ): Promise<TokenAuthInterface | TokenInterface> {
+  ): Promise<TokenAuthInterface | Omit<TokenAuthInterface, 'password'>> {
     const password = this.generateUUID();
 
     const checkUser = await this.userRepository.findOrCreate({
@@ -244,6 +249,7 @@ export class AuthService {
     }
 
     return {
+      email,
       ...accessToken,
       ...refreshToken,
     };
