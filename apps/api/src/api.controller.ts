@@ -62,6 +62,7 @@ import {
   schemaGenre,
   schemaLogin,
   schemaLoginGoogleVK,
+  schemaLoginGoogleVKWithoutPassword,
   schemaPerson,
   schemaProfile,
   schemaRefresh,
@@ -167,7 +168,10 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'google login' })
-  @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: schemaLoginGoogleVKWithoutPassword,
+  })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogleVK })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @UseGuards(NestAuth('google'))
@@ -263,7 +267,10 @@ export class ApiController {
 
   @ApiTags('Auth')
   @ApiOperation({ summary: 'vk login' })
-  @ApiResponse({ status: HttpStatus.OK, schema: schemaLogin })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: schemaLoginGoogleVKWithoutPassword,
+  })
   @ApiResponse({ status: HttpStatus.CREATED, schema: schemaLoginGoogleVK })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @Get('vk/login/callback')

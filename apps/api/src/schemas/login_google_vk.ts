@@ -9,4 +9,15 @@ const schemaLoginGoogleVK = {
   },
 };
 
-export { schemaLoginGoogleVK };
+const schemaLoginGoogleVKWithoutPassword = {
+  type: 'object',
+  properties: {
+    userData: {
+      type: 'object',
+      properties: { email: { type: 'string' } },
+    },
+    accessToken: { type: 'string' },
+  },
+};
+
+export { schemaLoginGoogleVK, schemaLoginGoogleVKWithoutPassword };
