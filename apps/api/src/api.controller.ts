@@ -176,6 +176,9 @@ export class ApiController {
     const CLIENT_URL = this.configService.get('CLIENT_URL');
 
     if (!req.hasOwnProperty('user')) {
+      res.cookie('error', 'user not found', {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header('Error', 'user not found');
       res.redirect(CLIENT_URL);
       return;
@@ -184,6 +187,9 @@ export class ApiController {
     const { user } = req;
 
     if (!user.hasOwnProperty('email')) {
+      res.cookie('error', 'email not found', {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header('Error', 'email not found');
       res.redirect(CLIENT_URL);
       return;
@@ -201,6 +207,9 @@ export class ApiController {
     );
 
     if (!tokens) {
+      res.cookie('error', 'email not found', {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header('Error', 'email not found');
       res.redirect(CLIENT_URL);
       return;
@@ -214,6 +223,16 @@ export class ApiController {
     if (tokens.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
+      res.cookie(
+        'userData',
+        JSON.stringify({ email: tokens.email, password: tokens.password }),
+        {
+          maxAge: 30 * 60 * 1000,
+        },
+      );
+      res.cookie('accessToken', tokens.accessToken, {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header(
         'UserData',
         JSON.stringify({ email: tokens.email, password: tokens.password }),
@@ -223,6 +242,12 @@ export class ApiController {
       return;
     }
 
+    res.cookie('userData', JSON.stringify({ email: tokens.email }), {
+      maxAge: 30 * 60 * 1000,
+    });
+    res.cookie('accessToken', tokens.accessToken, {
+      maxAge: 30 * 60 * 1000,
+    });
     res.header('UserData', JSON.stringify({ email: tokens.email }));
     res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
@@ -255,6 +280,9 @@ export class ApiController {
     );
 
     if (!tokens) {
+      res.cookie('error', 'email not found', {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header('Error', 'email not found');
       res.redirect(CLIENT_URL);
       return;
@@ -268,6 +296,16 @@ export class ApiController {
     if (tokens.hasOwnProperty('password')) {
       res.status(HttpStatus.CREATED);
 
+      res.cookie(
+        'userData',
+        JSON.stringify({ email: tokens.email, password: tokens.password }),
+        {
+          maxAge: 30 * 60 * 1000,
+        },
+      );
+      res.cookie('accessToken', tokens.accessToken, {
+        maxAge: 30 * 60 * 1000,
+      });
       res.header(
         'UserData',
         JSON.stringify({ email: tokens.email, password: tokens.password }),
@@ -277,6 +315,12 @@ export class ApiController {
       return;
     }
 
+    res.cookie('userData', JSON.stringify({ email: tokens.email }), {
+      maxAge: 30 * 60 * 1000,
+    });
+    res.cookie('accessToken', tokens.accessToken, {
+      maxAge: 30 * 60 * 1000,
+    });
     res.header('UserData', JSON.stringify({ email: tokens.email }));
     res.header('AccessToken', tokens.accessToken);
     res.redirect(CLIENT_URL);
@@ -321,6 +365,12 @@ export class ApiController {
     res.cookie('refreshToken', tokens.refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+    });
+    res.cookie('userData', JSON.stringify({ email: tokens.email }), {
+      maxAge: 30 * 60 * 1000,
+    });
+    res.cookie('accessToken', tokens.accessToken, {
+      maxAge: 30 * 60 * 1000,
     });
 
     return res.json({ email: tokens.email, accessToken: tokens.accessToken });
