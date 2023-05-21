@@ -41,7 +41,7 @@ describe('AuthService', () => {
               return tokensStub().accessToken;
             },
             verify(): any {
-              return { id: authStub().user_id, email: authStub().email };
+              return { user_id: authStub().user_id, email: authStub().email };
             },
           },
         },
@@ -125,6 +125,16 @@ describe('AuthService', () => {
 
     it('should be return null', async () => {
       expect(await authService.vkAuth('12345')).toEqual(null);
+    });
+  });
+
+  describe('isAuth', () => {
+    it('should be defined', async () => {
+      expect(await authService.isAuth(tokensStub().refreshToken)).toBeDefined();
+    });
+
+    it('should be return true', async () => {
+      expect(await authService.isAuth(tokensStub().refreshToken)).toEqual(true);
     });
   });
 });

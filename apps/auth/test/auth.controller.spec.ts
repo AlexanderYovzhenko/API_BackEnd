@@ -155,4 +155,24 @@ describe('AuthController', () => {
       expect(result).toEqual(tokensStub());
     });
   });
+
+  describe('isAuth', () => {
+    it('should be defined', async () => {
+      return expect(
+        await authController.isAuth(
+          context as RmqContext,
+          tokensStub().refreshToken,
+        ),
+      ).toBeDefined();
+    });
+
+    it('should return true', async () => {
+      const result = await authController.isAuth(
+        context as RmqContext,
+        tokensStub().refreshToken,
+      );
+
+      expect(result).toEqual(true);
+    });
+  });
 });

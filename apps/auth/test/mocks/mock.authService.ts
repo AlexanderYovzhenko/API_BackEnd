@@ -7,4 +7,5 @@ export const mockAuthService = {
   logOut: jest.fn().mockResolvedValue(Promise.resolve(1)),
   googleAuth: jest.fn().mockResolvedValue(Promise.resolve(tokensStub())),
   vkAuth: jest.fn().mockResolvedValue(Promise.resolve(tokensStub())),
+  isAuth: jest.fn().mockResolvedValue(Promise.resolve(true)),
 };
