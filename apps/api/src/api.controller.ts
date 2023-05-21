@@ -54,6 +54,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './guards/roles_auth_decorator';
 import { RolesOrSelfUserGuard } from './guards/roles_or_self_user.guard';
 import {
+  schemaCheckIsAuth,
   schemaComment,
   schemaCountry,
   schemaCreateUser,
@@ -340,7 +341,7 @@ export class ApiController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, schema: schemaError })
   @Post('refresh')
-  async Refresh(@Req() req: Request, @Res() res: Response) {
+  async refresh(@Req() req: Request, @Res() res: Response) {
     if (!req.hasOwnProperty('cookies')) {
       throw new BadRequestException('cookies not found');
     }
@@ -412,6 +413,35 @@ export class ApiController {
 
     res.clearCookie('refreshToken');
     return res.json(result);
+  }
+
+  @ApiTags('Auth')
+  @ApiOperation({ summary: 'check is auth user' })
+  @ApiResponse({ status: HttpStatus.OK, schema: schemaCheckIsAuth })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, schema: schemaError })
+  @Get('isauth')
+  async isAuth(@Req() req: Request) {
+    if (!req.hasOwnProperty('cookies')) {
+      throw new BadRequestException('cookies not found');
+    }
+
+    if (!req.cookies.refreshToken) {
+      return false;
+    }
+
+    const { refreshToken } = req.cookies;
+
+    const checkAuth = await firstValueFrom(
+      this.authService.send(
+        {
+          cmd: 'isauth',
+        },
+
+        refreshToken,
+      ),
+    );
+
+    return checkAuth;
   }
 
   // USER ENDPOINTS -------------------------------------------------------------

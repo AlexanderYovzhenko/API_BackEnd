@@ -96,11 +96,15 @@ export class AuthService {
         secret: jwtSecretRefreshKey,
       });
 
+      if (!checkUserData) {
+        return null;
+      }
+
       const checkToken = await this.tokenRepository.findOne({
-        where: { token },
+        include: [{ model: User, where: { user_id: checkUserData.user_id } }],
       });
 
-      if (!checkUserData || !checkToken) {
+      if (!checkToken) {
         return null;
       }
 
@@ -135,12 +139,56 @@ export class AuthService {
   }
 
   async logOut(token: string): Promise<number> {
+    const jwtSecretRefreshKey = await this.configService.get(
+      'JWT_SECRET_REFRESH_KEY',
+    );
+
+    const checkUserData = this.jwtService.verify(token, {
+      secret: jwtSecretRefreshKey,
+    });
+
+    if (!checkUserData) {
+      return 0;
+    }
+
+    const checkToken = await this.tokenRepository.findOne({
+      include: [{ model: User, where: { user_id: checkUserData.user_id } }],
+    });
+
     const result = await this.tokenRepository.destroy({
-      where: { token },
+      where: { token_id: checkToken.token_id },
       force: true,
     });
 
     return result;
+  }
+
+  async isAuth(token: string): Promise<boolean> {
+    try {
+      const jwtSecretRefreshKey = await this.configService.get(
+        'JWT_SECRET_REFRESH_KEY',
+      );
+
+      const checkUserData = this.jwtService.verify(token, {
+        secret: jwtSecretRefreshKey,
+      });
+
+      if (!checkUserData) {
+        return false;
+      }
+
+      const checkToken = await this.tokenRepository.findOne({
+        include: [{ model: User, where: { user_id: checkUserData.user_id } }],
+      });
+
+      if (!checkToken) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   async googleAuth(

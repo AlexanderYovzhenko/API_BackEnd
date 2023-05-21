@@ -8,5 +8,6 @@ export * from './profile';
 export * from './user';
 export * from './refresh';
 export * from './login';
+export * from './check_is_auth';
 export * from './login_google_vk';
 export * from './error';

@@ -80,4 +80,14 @@ export class AuthController {
 
     return this.authService.vkAuth(code);
   }
+
+  @MessagePattern({ cmd: 'isauth' })
+  async isAuth(
+    @Ctx() context: RmqContext,
+    @Payload() refreshToken: string,
+  ): Promise<boolean> {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.isAuth(refreshToken);
+  }
 }
