@@ -10,7 +10,7 @@
 
 ## Description
 
-Application on NestJS(Postgres, Sequelize, RabbitMQ, Docker) for films with registration and authorization 
+An application built with NestJS and microservices (PostgreSQL, Sequelize, RabbitMQ, Docker) for movies, including registration and authentication
 
 </br>
 
