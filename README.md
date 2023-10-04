@@ -1,4 +1,3 @@
-
  <h1 align="center">API_BackEnd</h1>
 
 <p align="center">
@@ -15,12 +14,14 @@ An application built with NestJS and microservices (PostgreSQL, Sequelize, Rabbi
 </br>
 
 ## Documentation for endpoints
+
 <h3>Home <a href="http://localhost:4000/" target="blank">localhost:4000</a> - home page, check if the server is running</h3>
 <h3>Docs <a href="http://localhost:4000/api/docs" target="blank">localhost:4000/api/docs</a> - detailed documentation</h3>
 
 </br>
 
 ## PgAdmin and RabbitMQ managers
+
 <h3>PgAdmin <a href="http://localhost:15432/" target="blank">localhost:15432</a> - Postgres Admin</h3>
 <h3>RabbitMQ <a href="http://localhost:15672/" target="blank">localhost:15672</a> - rabbitMQ manager</h3>
 
@@ -29,7 +30,7 @@ An application built with NestJS and microservices (PostgreSQL, Sequelize, Rabbi
 ## Downloading
 
 ```bash
-git clone https://github.com/GoldenManBel/API_BackEnd.git
+git clone https://github.com/AlexanderYovzhenko/API_BackEnd.git
 ```
 
 ## Running application in docker
@@ -96,5 +97,6 @@ npm run lint
 }
 ```
 
-## Scheme tables 
-  ![scheme tables](https://github.com/GoldenManBel/API_BackEnd/blob/master/diagram/Scheme_Tables.jpg)
+## Scheme tables
+
+![scheme tables](https://github.com/AlexanderYovzhenko/API_BackEnd/blob/master/diagram/Scheme_Tables.jpg)
